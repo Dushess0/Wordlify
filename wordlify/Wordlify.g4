@@ -31,9 +31,9 @@ NNEG_INT : INT_PART ;
 
 OPT_WSS_WITH_NLS : (OPT_WSS NL OPT_WSS)+ ;
 WSS : (' ' | '\t')+ ;
-NL : ('#' CHARS)? '\n' ;
+NL : ('#' OPT_CHARS)? '\n' ;
 
 fragment OPT_WSS : (' ' | '\t')* ;
 fragment INT_PART : [1-9] [0-9]* | '0' ;
-fragment CHARS : ([A-Za-z] | [0-9] | OTHER_CHAR)* ;
+fragment OPT_CHARS : ([A-Za-z] | [0-9] | OTHER_CHAR)* ;
 fragment OTHER_CHAR : '!' | '#' | '$' | '%' | '&' | '\'' | '(' | ')' | '*' | '+' | ',' | '-' | '.' | '/' | ':' | ';' | '<' | '=' | '>' | '?' | '@' | '[' | ']' | '^' | '_' | '`' | '{' | '|' | '}' | '~' | ' ' | '\t' ;

@@ -43,7 +43,7 @@
 <opt_wss_with_nl> ::= <opt_wss> <nl> <opt_wss>
 
 <nl_or_ws_or_none> ::= <nl> | <ws> | ""
-<nl> ::= # <chars> "\n" | "\n" 
+<nl> ::= # <opt_chars> "\n" | "\n" 
 
 <opt_wss> ::= <wss> | ""
 <wss> ::= <wss> <ws> | <ws>
@@ -51,7 +51,7 @@
 <ws> ::= " " | "\t"
 <opt_sc> ::= ; | ""
 
-<chars> ::= <chars> <char> | ""
+<opt_chars> ::= <opt_chars> <char> | ""
 <char> ::= <letter> | <digit> | <other_char> | " | \
 
 <letter> ::= [A-Z] | [a-z]
