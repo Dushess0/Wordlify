@@ -62,6 +62,12 @@
 <str_args> ::= <str_or_id> <next_str_args> 
 <next_str_args> ::= <next_str_args> <opt_wss_with_opt_nls> , <opt_wss_with_opt_nls> <str_or_id> | "" 
 
+<sum>::= <digits>|<nneq_float>|<ar_op> "+" <digits>|<nneq_float>|<ar_op>
+<diff>::=<digits>|<nneq_float>|<ar_op> "-" <digits>|<nneq_float>|<ar_op>
+<div>::=<digits>|<nneq_float>|<ar_op> "/" <digits>|<nneq_float>|<ar_op>
+<mult>::=<digits>|<nneq_float>|<ar_op>"*" <digits>|<nneq_float>|<ar_op>
+<ar_op>::=<sum>|<diff>|<div>|<mult>
+
 <nneg_int_or_id> ::= <nneg_int> | <id> 
 <nneg_num_or_id> ::= <nneg_int> | <nneg_float> | <id>
 <num> ::= <int> | <float>
