@@ -13,8 +13,8 @@
               else <min_one_ws_or_nl> if <min_one_ws_or_nl> <cond> <min_one_ws_or_nl> then <min_one_ws_or_nl> <atom_instrs_with_sc> <opt_wss_with_opt_nls> 
 <opt_else> ::= else <min_one_ws_or_nl> <atom_instrs_without_sc> <min_one_ws_or_nl> |
            else <min_one_ws_or_nl> <atom_instrs_with_sc> <opt_wss_with_opt_nls> | "" 
-<cond> ::= <bool_fn> 
-
+<cond> ::= <bool_fn> | <bool> | <comparison>
+<comparison> ::= <value> <comparable_char> <value>
 <atom_instrs_without_sc> ::= <atom_instrs_line_with_opt_sc> <opt_wss_with_nls> <atom_instrs_without_sc> | <atom_instrs_line_without_sc> 
 <atom_instrs_with_sc> ::= <atom_instrs_line_with_opt_sc> <opt_wss_with_nls> <atom_instrs_with_sc> | <atom_instrs_line_with_sc> 
 
@@ -27,7 +27,7 @@
 <atom_instr> ::= <print> | <rename> | <remove> | <move> | <copy> | <download> | <write> | <wait> | <execute> | <exit> | <assign_begin> <value> 
 
 <assign_begin> ::= <id> <opt_wss_with_opt_nls> = <opt_wss_with_opt_nls> 
-<value> ::= <return_fn> | <str> 
+<value> ::= <return_fn> | <str> | <number> | <bool>
 
 <bool_fn> ::= <exist> 
 <return_fn> ::= <exist> | <read> | <time> | <get_files> | <date_modified> | <size> | <file> | <folder> | <args> 
@@ -59,7 +59,10 @@
 
 <nneg_int_or_id> ::= <nneg_int> | <id> 
 <nneg_num_or_id> ::= <nneg_int> | <nneg_float> | <id>
-
+<float> :: = <nneg_float> | "-"<ws><nneg_float><nl_or_ws>
+<int> ::= <nneg_int> | "-"<ws><nneg_int><nl_or_ws>
+<number> ::= <int> | <float>
+<bool> ::= "true" | "false"
 <nneg_float> ::= <nneg_int> . <digits>
 <nneg_int> ::= [1-9] <opt_digits> | 0
 <digits> ::= <digits> [0-9] | [0-9]
@@ -96,4 +99,6 @@
 
 <letter> ::= [A-Z] | [a-z]
 <digit> ::= [0-9]
-<other_char> ::= ! | # | $ | % | & | ' | ( | ) | * | + | , | - | . | / | : | ; | < | = | > | ? | @ | [ | ] | ^ | _ | ` | { | "|" | } | ~ | " " | \t
+<comparable_char> ::= "!=" | "<" | ">" | "=="
+<logical_operators> ::= "and"| "or" |"not"
+<other_char> ::= ! | # | $ | % | & | ' | ( | ) | * | + | , | - | . | / | : | ;  | ? | @ | [ | ] | ^ | _ | ` | { | "|" | } | ~ | " " | \t
