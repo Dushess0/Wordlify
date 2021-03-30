@@ -99,6 +99,6 @@
 
 <letter> ::= [A-Z] | [a-z]
 <digit> ::= [0-9]
-<comparable_char> ::= "!=" | "<" | ">" | "=="
+<comparable_char> ::= "!=" | "<" | ">" | "==" | "<=" | ">="
 <logical_operators> ::= "and"| "or" |"not"
 <other_char> ::= ! | # | $ | % | & | ' | ( | ) | * | + | , | - | . | / | : | ;  | ? | @ | [ | ] | ^ | _ | ` | { | "|" | } | ~ | " " | \t
