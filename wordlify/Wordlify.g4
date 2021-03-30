@@ -6,8 +6,9 @@ instrs : instrs_line (OPT_WSS_WITH_NLS instrs_line)* ;
 instrs_line : (instrs_line_without_last_instr (' ' | '\t')*)? instr ((' ' | '\t')* ';')? ;
 instrs_line_without_last_instr : ( instr (' ' | '\t')* ';' (' ' | '\t')* )* instr (' ' | '\t')* ';' ;
 
-instr : rename | remove | move | copy | download | write | wait_instr | execute | exit ;
+instr : print | rename | remove | move | copy | download | write | wait_instr | execute | exit ;
 
+print : 'print' WSS str_or_id ;
 rename : 'rename' WSS str_or_id WSS str_or_id;
 remove : 'remove' WSS str_or_id;
 move : 'move' WSS str_or_id WSS str_or_id;
