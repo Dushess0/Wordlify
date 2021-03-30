@@ -7,20 +7,34 @@
 
 <instr_with_opt_sc> ::= <instr_with_sc> | <instr>
 <instr_with_sc> ::= <instr> <opt_wss> ;
-<instr> ::= <print> | <rename> | <remove> | <move> | <copy> | <download> | <write> | <wait> | <execute> | <exit>
+<instr> ::= <print> | <rename> | <remove> | <move> | <copy> | <download> | <write> | <wait> | <execute> | <exit> | <assign_begin> <value> 
 
+<assign_begin> ::= <id> <opt_wss> = <opt_wss> 
+<value> ::= <return_fn> | <str> 
+
+<return_fn> ::= <exist> | <read> | <time> | <get_files> | <date_modified> | <size> | <file> | <folder> | <args> 
+
+<exist> ::= exist <one_str_arg> 
 <print> ::= print <one_str_arg> 
 <rename> ::= rename <two_str_args> 
 <remove> ::= remove <one_str_arg> 
 <move> ::= move <two_str_args> 
 <copy> ::= copy <two_str_args> 
 <download> ::= download <two_str_args> 
+<read> ::= read <one_str_arg> 
 <write> ::= write <two_str_args> 
 <wait> ::= wait <opt_wss_with_opt_nls> ( <opt_wss_with_opt_nls> <nneg_num_or_id> <opt_wss_with_opt_nls> ) 
 <execute> ::= execute <opt_wss_with_opt_nls> ( <opt_wss_with_opt_nls> <str_args> <opt_wss_with_opt_nls> ) 
+<time> ::= time 
+<get_files> ::= getFiles <one_str_arg> 
+<date_modified> ::= dateModified <one_str_arg> 
+<size> ::= size <one_str_arg> 
+<file> ::= file 
+<folder> ::= folder 
+<args> ::= args 
 <exit> ::= exit <opt_wss_with_opt_nls> ( <opt_wss_with_opt_nls> <nneg_int_or_id> <opt_wss_with_opt_nls> ) 
 
-<one_arg> ::= <opt_wss_with_opt_nls> ( <opt_wss_with_opt_nls> <str_or_id> <opt_wss_with_opt_nls> ) 
+<one_str_arg> ::= <opt_wss_with_opt_nls> ( <opt_wss_with_opt_nls> <str_or_id> <opt_wss_with_opt_nls> ) 
 <two_str_args> ::= <opt_wss_with_opt_nls> ( <opt_wss_with_opt_nls> <str_or_id> <opt_wss_with_opt_nls> , <opt_wss_with_opt_nls> <str_or_id> <opt_wss_with_opt_nls> ) 
 <str_args> ::= <str_or_id> <next_str_args> 
 <next_str_args> ::= <next_str_args> <opt_wss_with_opt_nls> , <opt_wss_with_opt_nls> <str_or_id> | "" 
@@ -55,7 +69,7 @@
 <opt_wss> ::= <wss> | ""
 <wss> ::= <wss> <ws> | <ws>
 
-<ws> ::= " " | "\t"
+<ws> ::= " " | \t
 <opt_sc> ::= ; | ""
 
 <opt_chars> ::= <opt_chars> <char> | ""
