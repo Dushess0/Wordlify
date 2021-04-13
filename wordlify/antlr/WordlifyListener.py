@@ -17,39 +17,120 @@ class WordlifyListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by WordlifyParser#instrs.
-    def enterInstrs(self, ctx:WordlifyParser.InstrsContext):
+    # Enter a parse tree produced by WordlifyParser#if_instr.
+    def enterIf_instr(self, ctx:WordlifyParser.If_instrContext):
         pass
 
-    # Exit a parse tree produced by WordlifyParser#instrs.
-    def exitInstrs(self, ctx:WordlifyParser.InstrsContext):
-        pass
-
-
-    # Enter a parse tree produced by WordlifyParser#instrs_line.
-    def enterInstrs_line(self, ctx:WordlifyParser.Instrs_lineContext):
-        pass
-
-    # Exit a parse tree produced by WordlifyParser#instrs_line.
-    def exitInstrs_line(self, ctx:WordlifyParser.Instrs_lineContext):
+    # Exit a parse tree produced by WordlifyParser#if_instr.
+    def exitIf_instr(self, ctx:WordlifyParser.If_instrContext):
         pass
 
 
-    # Enter a parse tree produced by WordlifyParser#instrs_line_without_last_instr.
-    def enterInstrs_line_without_last_instr(self, ctx:WordlifyParser.Instrs_line_without_last_instrContext):
+    # Enter a parse tree produced by WordlifyParser#if_cond.
+    def enterIf_cond(self, ctx:WordlifyParser.If_condContext):
         pass
 
-    # Exit a parse tree produced by WordlifyParser#instrs_line_without_last_instr.
-    def exitInstrs_line_without_last_instr(self, ctx:WordlifyParser.Instrs_line_without_last_instrContext):
+    # Exit a parse tree produced by WordlifyParser#if_cond.
+    def exitIf_cond(self, ctx:WordlifyParser.If_condContext):
         pass
 
 
-    # Enter a parse tree produced by WordlifyParser#instr.
-    def enterInstr(self, ctx:WordlifyParser.InstrContext):
+    # Enter a parse tree produced by WordlifyParser#then.
+    def enterThen(self, ctx:WordlifyParser.ThenContext):
         pass
 
-    # Exit a parse tree produced by WordlifyParser#instr.
-    def exitInstr(self, ctx:WordlifyParser.InstrContext):
+    # Exit a parse tree produced by WordlifyParser#then.
+    def exitThen(self, ctx:WordlifyParser.ThenContext):
+        pass
+
+
+    # Enter a parse tree produced by WordlifyParser#else_if.
+    def enterElse_if(self, ctx:WordlifyParser.Else_ifContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#else_if.
+    def exitElse_if(self, ctx:WordlifyParser.Else_ifContext):
+        pass
+
+
+    # Enter a parse tree produced by WordlifyParser#else_block.
+    def enterElse_block(self, ctx:WordlifyParser.Else_blockContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#else_block.
+    def exitElse_block(self, ctx:WordlifyParser.Else_blockContext):
+        pass
+
+
+    # Enter a parse tree produced by WordlifyParser#cond.
+    def enterCond(self, ctx:WordlifyParser.CondContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#cond.
+    def exitCond(self, ctx:WordlifyParser.CondContext):
+        pass
+
+
+    # Enter a parse tree produced by WordlifyParser#comparison.
+    def enterComparison(self, ctx:WordlifyParser.ComparisonContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#comparison.
+    def exitComparison(self, ctx:WordlifyParser.ComparisonContext):
+        pass
+
+
+    # Enter a parse tree produced by WordlifyParser#atom_instr.
+    def enterAtom_instr(self, ctx:WordlifyParser.Atom_instrContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#atom_instr.
+    def exitAtom_instr(self, ctx:WordlifyParser.Atom_instrContext):
+        pass
+
+
+    # Enter a parse tree produced by WordlifyParser#bool_fn.
+    def enterBool_fn(self, ctx:WordlifyParser.Bool_fnContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#bool_fn.
+    def exitBool_fn(self, ctx:WordlifyParser.Bool_fnContext):
+        pass
+
+
+    # Enter a parse tree produced by WordlifyParser#return_fn.
+    def enterReturn_fn(self, ctx:WordlifyParser.Return_fnContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#return_fn.
+    def exitReturn_fn(self, ctx:WordlifyParser.Return_fnContext):
+        pass
+
+
+    # Enter a parse tree produced by WordlifyParser#assign.
+    def enterAssign(self, ctx:WordlifyParser.AssignContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#assign.
+    def exitAssign(self, ctx:WordlifyParser.AssignContext):
+        pass
+
+
+    # Enter a parse tree produced by WordlifyParser#value.
+    def enterValue(self, ctx:WordlifyParser.ValueContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#value.
+    def exitValue(self, ctx:WordlifyParser.ValueContext):
+        pass
+
+
+    # Enter a parse tree produced by WordlifyParser#exist.
+    def enterExist(self, ctx:WordlifyParser.ExistContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#exist.
+    def exitExist(self, ctx:WordlifyParser.ExistContext):
         pass
 
 
@@ -116,6 +197,15 @@ class WordlifyListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by WordlifyParser#read.
+    def enterRead(self, ctx:WordlifyParser.ReadContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#read.
+    def exitRead(self, ctx:WordlifyParser.ReadContext):
+        pass
+
+
     # Enter a parse tree produced by WordlifyParser#wait_instr.
     def enterWait_instr(self, ctx:WordlifyParser.Wait_instrContext):
         pass
@@ -134,39 +224,39 @@ class WordlifyListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by WordlifyParser#get_files.
+    def enterGet_files(self, ctx:WordlifyParser.Get_filesContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#get_files.
+    def exitGet_files(self, ctx:WordlifyParser.Get_filesContext):
+        pass
+
+
+    # Enter a parse tree produced by WordlifyParser#date_modified.
+    def enterDate_modified(self, ctx:WordlifyParser.Date_modifiedContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#date_modified.
+    def exitDate_modified(self, ctx:WordlifyParser.Date_modifiedContext):
+        pass
+
+
+    # Enter a parse tree produced by WordlifyParser#size.
+    def enterSize(self, ctx:WordlifyParser.SizeContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#size.
+    def exitSize(self, ctx:WordlifyParser.SizeContext):
+        pass
+
+
     # Enter a parse tree produced by WordlifyParser#exit.
     def enterExit(self, ctx:WordlifyParser.ExitContext):
         pass
 
     # Exit a parse tree produced by WordlifyParser#exit.
     def exitExit(self, ctx:WordlifyParser.ExitContext):
-        pass
-
-
-    # Enter a parse tree produced by WordlifyParser#nneg_num_or_id.
-    def enterNneg_num_or_id(self, ctx:WordlifyParser.Nneg_num_or_idContext):
-        pass
-
-    # Exit a parse tree produced by WordlifyParser#nneg_num_or_id.
-    def exitNneg_num_or_id(self, ctx:WordlifyParser.Nneg_num_or_idContext):
-        pass
-
-
-    # Enter a parse tree produced by WordlifyParser#nneg_int_or_id.
-    def enterNneg_int_or_id(self, ctx:WordlifyParser.Nneg_int_or_idContext):
-        pass
-
-    # Exit a parse tree produced by WordlifyParser#nneg_int_or_id.
-    def exitNneg_int_or_id(self, ctx:WordlifyParser.Nneg_int_or_idContext):
-        pass
-
-
-    # Enter a parse tree produced by WordlifyParser#str_or_id.
-    def enterStr_or_id(self, ctx:WordlifyParser.Str_or_idContext):
-        pass
-
-    # Exit a parse tree produced by WordlifyParser#str_or_id.
-    def exitStr_or_id(self, ctx:WordlifyParser.Str_or_idContext):
         pass
 
 

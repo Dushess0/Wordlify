@@ -46,7 +46,7 @@ class TestWlParser(unittest.TestCase):
         print("\n-----------------------------\n")
 
     def test_program(self):
-        testString = "   print(wdnkf);exit(12) # wef\n  #wefo"
+        testString = "   print(wdnkf);exit(12) # wef wefo"
         print(testString)
         parser = self.setup(testString)
         tree = parser.program()               
@@ -69,7 +69,7 @@ class TestWlParser(unittest.TestCase):
         print("-----------------------------")
         
     def test2(self):
-        testString = "if a == 5 then\n    print(b);print(c) end"
+        testString = "if a == 5 then\n    a=4;print(c) else end #weffwe"
         print(testString)
         parser = self.setup(testString)
         tree = parser.program()               
