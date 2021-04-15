@@ -8,8 +8,9 @@
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
+            "preLaunchTask": "build",
             "program": "${file}",
             "console": "integratedTerminal"
-        }
-    ]
+        },
+    ],
 }

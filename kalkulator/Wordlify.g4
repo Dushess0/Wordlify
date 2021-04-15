@@ -1,9 +1,13 @@
 grammar Wordlify;
-prog:  (expr NEWLINE)* ;
-expr:  expr ('*'|'/') expr
-    |  expr ('+'|'-') expr
-    |  INT
-    |  '(' expr ')'
-    ;
-NEWLINE : [\r\n]+;
-INT     : [0-9]+;
+startRule: (ASSIGNEMENT|DOWNLOAD|COPY)+;
+
+ID: [A-Za-z]+[0-9]*;
+WHITESPACE: [ \r\n\t]+ -> channel (HIDDEN);
+EQUAL: WHITESPACE '=' WHITESPACE;
+NEWLINE: [\n];
+ASSIGNEMENT: ID EQUAL (INTEGER|STRING) NEWLINE?;
+INTEGER: [0-9]+;
+STRING: '"'.*?'"';
+DOWNLOAD: 'download' WHITESPACE (ID|STRING) (ID|STRING)? NEWLINE?;
+COPY: 'copy' WHITESPACE (ID|STRING) (ID|STRING) NEWLINE?;
+REMOVE: 'remove' WHITESPACE (ID|STRING) NEWLINE?;

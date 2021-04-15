@@ -1,0 +1,110 @@
+<program> ::= <opt_wss_with_opt_nls> <instrs> <opt_wss_with_opt_nls> 
+<instrs> ::= <instrs_block> <instrs> | <last_instrs_block>
+
+<last_instrs_block> ::= <last_atom_instrs> | <last_if>
+<instrs_block> ::= <atom_instrs> | <if> 
+
+<last_atom_instrs> ::= <atom_instrs_without_sc> | <atom_instrs_with_sc>
+<last_if> ::= <if_part> <opt_else_ifs> <opt_else> end
+
+<atom_instrs> ::= <atom_instrs_without_sc> <opt_wss_with_nls> | <atom_instrs_with_sc> <opt_wss_with_opt_nls> 
+<if> ::= <if_part> <opt_else_ifs> <opt_else> end <min_one_ws_or_nl>
+
+<opt_else_ifs> ::= <opt_else_ifs> <else_if> | "" 
+
+<if_part> ::= if <min_one_ws_or_nl> <cond> <min_one_ws_or_nl> then <min_one_ws_or_nl> <atom_instrs_without_sc> <min_one_ws_or_nl> |
+              if <min_one_ws_or_nl> <cond> <min_one_ws_or_nl> then <min_one_ws_or_nl> <atom_instrs_with_sc> <opt_wss_with_opt_nls> 
+<else_if> ::= else <min_one_ws_or_nl> if <min_one_ws_or_nl> <cond> <min_one_ws_or_nl> then <min_one_ws_or_nl> <atom_instrs_without_sc> <min_one_ws_or_nl> |
+              else <min_one_ws_or_nl> if <min_one_ws_or_nl> <cond> <min_one_ws_or_nl> then <min_one_ws_or_nl> <atom_instrs_with_sc> <opt_wss_with_opt_nls> 
+<opt_else> ::= else <min_one_ws_or_nl> <atom_instrs_without_sc> <min_one_ws_or_nl> |
+           else <min_one_ws_or_nl> <atom_instrs_with_sc> <opt_wss_with_opt_nls> | "" 
+           
+<cond> ::= <bool_fn> | <bool> | <comparison>
+<comparison> ::= <value> <cmp_oper> <value>
+<atom_instrs_without_sc> ::= <atom_instrs_line_with_opt_sc> <opt_wss_with_nls> <atom_instrs_without_sc> | <atom_instrs_line_without_sc> 
+<atom_instrs_with_sc> ::= <atom_instrs_line_with_opt_sc> <opt_wss_with_nls> <atom_instrs_with_sc> | <atom_instrs_line_with_sc> 
+
+<atom_instrs_line_with_opt_sc> ::= <atom_instrs_line_without_sc> <opt_wss> ; | <atom_instrs_line_without_sc>
+<atom_instrs_line_without_sc> ::= <atom_instrs_line_without_last_instr> <opt_wss> <atom_instr> | <atom_instr> 
+<atom_instrs_line_without_last_instr> ::= <atom_instrs_line_without_last_instr> <opt_wss> <atom_instr_with_sc> | <atom_instr_with_sc> 
+
+<atom_instr_with_sc> ::= <atom_instr> <opt_wss> ; 
+<atom_instr> ::= <print> | <rename> | <remove> | <move> | <copy> | <download> | <write> | <wait> | <execute> | <exit> | <assign_begin> <value> 
+
+<assign_begin> ::= <id> <opt_wss_with_opt_nls> = <opt_wss_with_opt_nls> 
+<value> ::= <return_fn> | <str> | <num> | <bool>
+
+<bool_fn> ::= <exist> 
+<return_fn> ::= <exist> | <read> | <time> | <get_files> | <date_modified> | <size> | <file> | <folder> | <args> 
+
+<exist> ::= exist <one_str_arg> 
+<print> ::= print <one_str_arg> 
+<rename> ::= rename <two_str_args> 
+<remove> ::= remove <one_str_arg> 
+<move> ::= move <two_str_args> 
+<copy> ::= copy <two_str_args> 
+<download> ::= download <two_str_args> 
+<read> ::= read <one_str_arg> 
+<write> ::= write <two_str_args> 
+<wait> ::= wait <opt_wss_with_opt_nls> ( <opt_wss_with_opt_nls> <nneg_num_or_id> <opt_wss_with_opt_nls> ) 
+<execute> ::= execute <opt_wss_with_opt_nls> ( <opt_wss_with_opt_nls> <str_args> <opt_wss_with_opt_nls> ) 
+<time> ::= time 
+<get_files> ::= getFiles <one_str_arg> 
+<date_modified> ::= dateModified <one_str_arg> 
+<size> ::= size <one_str_arg> 
+<file> ::= file 
+<folder> ::= folder 
+<args> ::= args 
+<exit> ::= exit <opt_wss_with_opt_nls> ( <opt_wss_with_opt_nls> <nneg_int_or_id> <opt_wss_with_opt_nls> ) 
+
+<one_str_arg> ::= <opt_wss_with_opt_nls> ( <opt_wss_with_opt_nls> <str_or_id> <opt_wss_with_opt_nls> ) 
+<two_str_args> ::= <opt_wss_with_opt_nls> ( <opt_wss_with_opt_nls> <str_or_id> <opt_wss_with_opt_nls> , <opt_wss_with_opt_nls> <str_or_id> <opt_wss_with_opt_nls> ) 
+<str_args> ::= <str_or_id> <next_str_args> 
+<next_str_args> ::= <next_str_args> <opt_wss_with_opt_nls> , <opt_wss_with_opt_nls> <str_or_id> | "" 
+
+<nneg_int_or_id> ::= <nneg_int> | <id> 
+<nneg_num_or_id> ::= <nneg_int> | <nneg_float> | <id>
+<num> ::= <int> | <float>
+<float> :: = <nneg_float> | "-" <nneg_float>
+<int> ::= <nneg_int> | "-" <nneg_int>
+
+<bool> ::= "true" | "false"
+<nneg_float> ::= <nneg_int> . <digits>
+<nneg_int> ::= [1-9] <opt_digits> | 0
+<digits> ::= <digits> [0-9] | [0-9]
+<opt_digits> ::= <opt_digits> [0-9] | ""
+
+<wss_str_or_id_repeated> ::= <wss_str_or_id_repeated> <wss> <str_or_id> | <wss> <str_or_id>
+<str_or_id> ::= <str> | <id>
+<str> ::= " <str_chars> "
+<id> ::= <letter> <id_chars> | <letter>
+
+<id_chars> ::= <id_chars> <id_char> | <id_char>
+<id_char> ::= <letter> | <digit> | _
+
+<str_chars> ::= <str_chars> <str_char> | <str_char> | ""
+<str_char> ::= <letter> | <digit> | <other_char> | \" | \\ | \n | \r
+
+<opt_wss_with_opt_nls> ::= <opt_wss_with_opt_nls> <nl_or_ws_or_none> | <nl_or_ws_or_none>
+<opt_wss_with_nls> ::= <opt_wss_with_nls> <opt_wss_with_nl> | <opt_wss_with_nl>
+
+<min_one_ws_or_nl> ::= <min_one_ws_or_nl> <nl_or_ws> | <nl_or_ws> 
+<opt_wss_with_nl> ::= <opt_wss> <nl> <opt_wss>
+
+<nl_or_ws> ::= <nl> | <ws> 
+<nl_or_ws_or_none> ::= <nl> | <ws> | ""
+<nl> ::= # <opt_chars> "\n" | "\n" 
+
+<opt_wss> ::= <wss> | ""
+<wss> ::= <wss> <ws> | <ws>
+
+<ws> ::= " " | \t
+
+<opt_chars> ::= <opt_chars> <char> | ""
+<char> ::= <letter> | <digit> | <other_char> | " | \
+
+<letter> ::= [A-Z] | [a-z]
+<digit> ::= [0-9]
+<cmp_oper> ::= "!=" | "<" | ">" | "==" | "<=" | ">="
+<logical_oper> ::= "and"| "or" |"not"
+<other_char> ::= ! | # | $ | % | & | ' | ( | ) | * | + | , | - | . | / | : | ;  | ? | @ | [ | ] | ^ | _ | ` | { | "|" | } | ~ | " " | \t
