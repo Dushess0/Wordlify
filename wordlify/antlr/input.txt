@@ -1,1 +1,5 @@
-print("Wojtek");   print("Cos")
+if a == b then
+    if b == a then
+        a=5
+    end
+else if a > 2 then end

@@ -260,5 +260,14 @@ class WordlifyListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by WordlifyParser#str_or_id.
+    def enterStr_or_id(self, ctx:WordlifyParser.Str_or_idContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#str_or_id.
+    def exitStr_or_id(self, ctx:WordlifyParser.Str_or_idContext):
+        pass
+
+
 
 del WordlifyParser

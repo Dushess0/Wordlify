@@ -7,7 +7,7 @@ from WordlifyListener import WordlifyListener
 class MyWlListener(WordlifyListener):
     def __init__(self, output):
         self.output = output
-        self.vars = {"a": "int"}
+        self.vars = {}
 
     # Enter a parse tree produced by WordlifyParser#program.
     def enterProgram(self, ctx:WordlifyParser.ProgramContext):
@@ -141,13 +141,7 @@ class MyWlListener(WordlifyListener):
 
     # Exit a parse tree produced by WordlifyParser#print_instr.
     def exitPrint_instr(self, ctx:WordlifyParser.Print_instrContext):
-        if ctx.STR() != None:
-            ctx.parentCtx.text = "print(" + ctx.STR().getText() + ")"
-        else:
-            if "a" in vars: # ctx.ID().getText()
-                ctx.parentCtx.text = "print(" + ctx.ID().getText() + ")"
-            else:
-                print("ERROR: " + ctx.ID().getSymbol().line + ":" + ctx.ID().getSymbol().column)
+        ctx.parentCtx.text = "print({})".format(ctx.str_or_id().getText())
 
     # Enter a parse tree produced by WordlifyParser#rename.
     def enterRename(self, ctx:WordlifyParser.RenameContext):
@@ -155,8 +149,7 @@ class MyWlListener(WordlifyListener):
 
     # Exit a parse tree produced by WordlifyParser#rename.
     def exitRename(self, ctx:WordlifyParser.RenameContext):
-        pass
-
+        ctx.parentCtx.text = "os.rename({}, {})".format(ctx.str_or_id()[0].getText(), ctx.str_or_id()[1].getText())
 
     # Enter a parse tree produced by WordlifyParser#remove.
     def enterRemove(self, ctx:WordlifyParser.RemoveContext):
@@ -265,4 +258,13 @@ class MyWlListener(WordlifyListener):
     def exitExit(self, ctx:WordlifyParser.ExitContext):
         pass
 
+    # Enter a parse tree produced by WordlifyParser#str_or_id.
+    def enterStr_or_id(self, ctx:WordlifyParser.Str_or_idContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#str_or_id.
+    def exitStr_or_id(self, ctx:WordlifyParser.Str_or_idContext):
+        if ctx.ID() != None:
+            if ctx.ID().getText() not in self.vars:
+                raise Exception("Line {}, column {}: variable {} doesn't exist".format(ctx.ID().getSymbol().line, ctx.ID().getSymbol().column, ctx.ID().getText()))
 del WordlifyParser

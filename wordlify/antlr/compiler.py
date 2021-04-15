@@ -20,9 +20,11 @@ def main(argv):
         
         wlListener = MyWlListener(output)
         walker = ParseTreeWalker()
-        walker.walk(wlListener, tree)
-            
-        output.close()      
+        try:
+            walker.walk(wlListener, tree)
+        except Exception as e:
+            print(e)  
+        output.close()   
 
 if __name__ == '__main__':
     main(sys.argv)
