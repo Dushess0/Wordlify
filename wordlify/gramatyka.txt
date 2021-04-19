@@ -20,7 +20,7 @@
 <execute> ::= execute <opt_wss_with_opt_nls> ( <opt_wss_with_opt_nls> <str_args> <opt_wss_with_opt_nls> ) 
 <exit> ::= exit <opt_wss_with_opt_nls> ( <opt_wss_with_opt_nls> <nneg_int_or_id> <opt_wss_with_opt_nls> ) 
 
-<one_arg> ::= <opt_wss_with_opt_nls> ( <opt_wss_with_opt_nls> <str_or_id> <opt_wss_with_opt_nls> ) 
+<one_str_arg> ::= <opt_wss_with_opt_nls> ( <opt_wss_with_opt_nls> <str_or_id> <opt_wss_with_opt_nls> ) 
 <two_str_args> ::= <opt_wss_with_opt_nls> ( <opt_wss_with_opt_nls> <str_or_id> <opt_wss_with_opt_nls> , <opt_wss_with_opt_nls> <str_or_id> <opt_wss_with_opt_nls> ) 
 <str_args> ::= <str_or_id> <next_str_args> 
 <next_str_args> ::= <next_str_args> <opt_wss_with_opt_nls> , <opt_wss_with_opt_nls> <str_or_id> | "" 

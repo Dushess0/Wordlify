@@ -1,0 +1,2 @@
+print("kn")
+print("uiko")
