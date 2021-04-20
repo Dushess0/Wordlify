@@ -5,8 +5,11 @@ from WordlifyListener import WordlifyListener
 
 # This class defines a complete listener for a parse tree produced by WordlifyParser.
 class MyWlListener(WordlifyListener):
-    def __init__(self, output):
+    def __init__(self, output, src_lines):
         self.output = output
+        self.src_lines = src_lines
+        self.imports = []
+        self.out_str = ""
         self.vars = {}
 
     # Enter a parse tree produced by WordlifyParser#program.
@@ -15,8 +18,12 @@ class MyWlListener(WordlifyListener):
 
     # Exit a parse tree produced by WordlifyParser#program.
     def exitProgram(self, ctx:WordlifyParser.ProgramContext):
-        pass
-
+        if len(self.imports) != 0:
+            for line in self.imports:
+                self.output.write(line + "\n")
+            self.output.write("\n")
+        
+        self.output.write(self.out_str)
 
     # Enter a parse tree produced by WordlifyParser#if_instr.
     def enterIf_instr(self, ctx:WordlifyParser.If_instrContext):
@@ -87,8 +94,7 @@ class MyWlListener(WordlifyListener):
 
     # Exit a parse tree produced by WordlifyParser#atom_instr.
     def exitAtom_instr(self, ctx:WordlifyParser.Atom_instrContext):
-        self.output.write(ctx.text + "\n")
-
+        self.out_str += ctx.text + "\n"
 
     # Enter a parse tree produced by WordlifyParser#bool_fn.
     def enterBool_fn(self, ctx:WordlifyParser.Bool_fnContext):
@@ -149,6 +155,10 @@ class MyWlListener(WordlifyListener):
 
     # Exit a parse tree produced by WordlifyParser#rename.
     def exitRename(self, ctx:WordlifyParser.RenameContext):
+        imp = "import os"
+        if imp not in self.imports:
+            self.imports.append(imp)
+
         ctx.parentCtx.text = "os.rename({}, {})".format(ctx.str_or_id()[0].getText(), ctx.str_or_id()[1].getText())
 
     # Enter a parse tree produced by WordlifyParser#remove.
@@ -157,8 +167,19 @@ class MyWlListener(WordlifyListener):
 
     # Exit a parse tree produced by WordlifyParser#remove.
     def exitRemove(self, ctx:WordlifyParser.RemoveContext):
-        pass
+        imps = ["import shutil", "import os"]
+        for imp in imps:
+            if imp not in self.imports:
+                self.imports.append(imp)
 
+        ctx.parentCtx.text = """try:
+    os.remove({0})
+except OSError:
+    try:
+        shutil.rmtree({0})
+    except OSError as e:
+        print("Error: %s - No such file or directory" % e.filename)
+        quit()""".format(ctx.str_or_id().getText()) # TODO może być brak uprawnień
 
     # Enter a parse tree produced by WordlifyParser#move.
     def enterMove(self, ctx:WordlifyParser.MoveContext):
@@ -166,7 +187,78 @@ class MyWlListener(WordlifyListener):
 
     # Exit a parse tree produced by WordlifyParser#move.
     def exitMove(self, ctx:WordlifyParser.MoveContext):
-        pass
+        imps = ["import shutil", "import os"] 
+        for imp in imps:
+            if imp not in self.imports:
+                self.imports.append(imp) 
+        
+        ctx.parentCtx.text = """file_in_dir_path = "%s/%s" % ({1}, {0}.split("/")[-1])
+if not os.path.exists({0}):
+    print("Error: %s doesn't exist" % {0})
+    quit()
+elif not os.path.isdir({1}):
+    dir_parts = {1}
+    if os.name == "nt": # Windows
+        if {1}[-1] == "/":
+            dir_parts = {1}[:-1]
+            
+        dir_parts = dir_parts.split("/")
+        next_paths = []
+        
+        if dir_parts == [""]:
+            print("Error: destination directory cannot be empty")
+            quit()
+        elif "" in dir_parts:
+            print("Error: invalid path")
+            quit()
+        else:
+            for i in range(0, len(dir_parts)):
+                path = dir_parts[0]
+                for j in range(1, i+1):
+                    path += "/" + dir_parts[j]
+                next_paths.append(path)
+    else:
+        if {1} != "/" and {1}[-1] == "/":
+            dir_parts = {1}[:-1]
+            
+        dir_parts = dir_parts.split("/")
+        next_paths = []
+        
+        if dir_parts == [""]:
+            print("Error: destination directory cannot be empty")
+            quit()
+        elif dir_parts[0] == "": # e.g. /wef/we
+            for i in range(0, len(dir_parts)):
+                path = dir_parts[0]
+                for j in range(1, i+1):
+                    path += "/" + dir_parts[j]
+                next_paths.append(path)
+            next_paths[0] = "/"
+        elif "" in dir_parts:
+            print("Error: invalid path")
+            quit()
+        else:
+            for i in range(0, len(dir_parts)):
+                path = dir_parts[0]
+                for j in range(1, i+1):
+                    path += "/" + dir_parts[j]
+                next_paths.append(path)
+    
+    for part in next_paths:
+        if os.path.isfile(part):
+            print("Error: %s is a file - cannot create a directory there" % part)
+            quit()
+        elif not os.path.exists(part):
+            os.mkdir(part)
+    shutil.move({0}, {1})
+elif os.path.exists(file_in_dir_path):
+    try:
+        os.remove(file_in_dir_path)
+    except OSError:
+        shutil.rmtree(file_in_dir_path)
+    shutil.move({0}, {1})
+else:
+    shutil.move({0}, {1})""".format(ctx.str_or_id()[0].getText(), ctx.str_or_id()[1].getText()) # TODO może być brak uprawnień
 
 
     # Enter a parse tree produced by WordlifyParser#copy.
@@ -175,7 +267,81 @@ class MyWlListener(WordlifyListener):
 
     # Exit a parse tree produced by WordlifyParser#copy.
     def exitCopy(self, ctx:WordlifyParser.CopyContext):
-        pass
+        imps = ["import shutil", "import os"] 
+        for imp in imps:
+            if imp not in self.imports:
+                self.imports.append(imp)
+
+        ctx.parentCtx.text = """file_in_dir_path = "%s/%s" % ({1}, {0}.split("/")[-1])
+if not os.path.exists({0}):
+    print("Error: %s doesn't exist" % {0})
+    quit()
+elif not os.path.isdir({1}):
+    dir_parts = {1}
+    if os.name == "nt": # Windows
+        if {1}[-1] == "/":
+            dir_parts = {1}[:-1]
+            
+        dir_parts = dir_parts.split("/")
+        next_paths = []
+        
+        if dir_parts == [""]:
+            print("Error: destination directory cannot be empty")
+            quit()
+        elif "" in dir_parts:
+            print("Error: invalid path")
+            quit()
+        else:
+            for i in range(0, len(dir_parts)):
+                path = dir_parts[0]
+                for j in range(1, i+1):
+                    path += "/" + dir_parts[j]
+                next_paths.append(path)
+    else:
+        if {1} != "/" and {1}[-1] == "/":
+            dir_parts = {1}[:-1]
+            
+        dir_parts = dir_parts.split("/")
+        next_paths = []
+        
+        if dir_parts == [""]:
+            print("Error: destination directory cannot be empty")
+            quit()
+        elif dir_parts[0] == "": # e.g. /wef/we
+            for i in range(0, len(dir_parts)):
+                path = dir_parts[0]
+                for j in range(1, i+1):
+                    path += "/" + dir_parts[j]
+                next_paths.append(path)
+            next_paths[0] = "/"
+        elif "" in dir_parts:
+            print("Error: invalid path")
+            quit()
+        else:
+            for i in range(0, len(dir_parts)):
+                path = dir_parts[0]
+                for j in range(1, i+1):
+                    path += "/" + dir_parts[j]
+                next_paths.append(path)
+    
+    for part in next_paths:
+        if os.path.isfile(part):
+            print("Error: %s is a file - cannot create a directory there" % part)
+            quit()
+        elif not os.path.exists(part):
+            os.mkdir(part)
+    if os.path.isfile({0}):
+        shutil.copy2({0}, {1})
+    else:
+        shutil.copytree({0}, {1} + {0}) # TODO
+elif os.path.exists(file_in_dir_path):
+    try:
+        os.remove(file_in_dir_path)
+    except OSError:
+        shutil.rmtree(file_in_dir_path)
+    shutil.move({0}, {1})
+else:
+    shutil.move({0}, {1})""".format(ctx.str_or_id()[0].getText(), ctx.str_or_id()[1].getText())
 
 
     # Enter a parse tree produced by WordlifyParser#download.
@@ -266,5 +432,6 @@ class MyWlListener(WordlifyListener):
     def exitStr_or_id(self, ctx:WordlifyParser.Str_or_idContext):
         if ctx.ID() != None:
             if ctx.ID().getText() not in self.vars:
-                raise Exception("Line {}, column {}: variable {} doesn't exist".format(ctx.ID().getSymbol().line, ctx.ID().getSymbol().column, ctx.ID().getText()))
+                line_nr = ctx.ID().getSymbol().line
+                raise Exception("Line {}, column {}: variable {} doesn't exist:\n    {}".format(line_nr, ctx.ID().getSymbol().column, ctx.ID().getText(), self.src_lines[line_nr-1].lstrip()))
 del WordlifyParser

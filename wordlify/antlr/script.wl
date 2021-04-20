@@ -1,2 +1,2 @@
 print("kn"); print("uiko")
-print(a);
+move("pk", "a/b/c/")
