@@ -1,20 +1,18 @@
 import shutil
 import os
 
-print("kn")
-print("uiko")
 file_in_dir_path = "%s/%s" % ("a/b/c/", "pk".split("/")[-1])
 if not os.path.exists("pk"):
     print("Error: %s doesn't exist" % "pk")
     quit()
 elif not os.path.isdir("a/b/c/"):
-    dir_parts = "a/b/c/"
+    dir_tmp = "a/b/c/"
+    next_paths = []
     if os.name == "nt": # Windows
         if "a/b/c/"[-1] == "/":
-            dir_parts = "a/b/c/"[:-1]
+            dir_tmp = "a/b/c/"[:-1]
             
-        dir_parts = dir_parts.split("/")
-        next_paths = []
+        dir_parts = dir_tmp.split("/")
         
         if dir_parts == [""]:
             print("Error: destination directory cannot be empty")
@@ -30,10 +28,9 @@ elif not os.path.isdir("a/b/c/"):
                 next_paths.append(path)
     else:
         if "a/b/c/" != "/" and "a/b/c/"[-1] == "/":
-            dir_parts = "a/b/c/"[:-1]
+            dir_tmp = "a/b/c/"[:-1]
             
-        dir_parts = dir_parts.split("/")
-        next_paths = []
+        dir_parts = dir_tmp.split("/")
         
         if dir_parts == [""]:
             print("Error: destination directory cannot be empty")
@@ -61,12 +58,21 @@ elif not os.path.isdir("a/b/c/"):
             quit()
         elif not os.path.exists(part):
             os.mkdir(part)
-    shutil.move("pk", "a/b/c/")
+    if os.path.isfile("pk"):
+        shutil.copy2("pk", dir_tmp)
+    else:
+        shutil.copytree("pk", dir_tmp + "/" + "pk")
 elif os.path.exists(file_in_dir_path):
     try:
         os.remove(file_in_dir_path)
     except OSError:
         shutil.rmtree(file_in_dir_path)
-    shutil.move("pk", "a/b/c/")
+    if os.path.isfile("pk"):
+        shutil.copy2("pk", dir_tmp)
+    else:
+        shutil.copytree("pk", dir_tmp + "/" + "pk")
 else:
-    shutil.move("pk", "a/b/c/")
+    if os.path.isfile("pk"):
+        shutil.copy2("pk", dir_tmp)
+    else:
+        shutil.copytree("pk", dir_tmp + "/" + "pk")

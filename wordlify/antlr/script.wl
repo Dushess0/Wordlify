@@ -1,2 +1,1 @@
-print("kn"); print("uiko")
-move("pk", "a/b/c/")
+copy("pk", "a/b/c/")

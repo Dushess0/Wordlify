@@ -12,6 +12,11 @@ class MyWlListener(WordlifyListener):
         self.out_str = ""
         self.vars = {}
 
+    def add_imps(self, imps):
+        for imp in imps:
+            if imp not in self.imports:
+                self.imports.append(imp)
+
     # Enter a parse tree produced by WordlifyParser#program.
     def enterProgram(self, ctx:WordlifyParser.ProgramContext):
         pass
@@ -155,9 +160,7 @@ class MyWlListener(WordlifyListener):
 
     # Exit a parse tree produced by WordlifyParser#rename.
     def exitRename(self, ctx:WordlifyParser.RenameContext):
-        imp = "import os"
-        if imp not in self.imports:
-            self.imports.append(imp)
+        self.add_imps(["import os"])
 
         ctx.parentCtx.text = "os.rename({}, {})".format(ctx.str_or_id()[0].getText(), ctx.str_or_id()[1].getText())
 
@@ -167,10 +170,7 @@ class MyWlListener(WordlifyListener):
 
     # Exit a parse tree produced by WordlifyParser#remove.
     def exitRemove(self, ctx:WordlifyParser.RemoveContext):
-        imps = ["import shutil", "import os"]
-        for imp in imps:
-            if imp not in self.imports:
-                self.imports.append(imp)
+        self.add_imps(["import shutil", "import os"])
 
         ctx.parentCtx.text = """try:
     os.remove({0})
@@ -187,11 +187,9 @@ except OSError:
 
     # Exit a parse tree produced by WordlifyParser#move.
     def exitMove(self, ctx:WordlifyParser.MoveContext):
-        imps = ["import shutil", "import os"] 
-        for imp in imps:
-            if imp not in self.imports:
-                self.imports.append(imp) 
-        
+        self.add_imps(["import shutil", "import os"])
+
+        # TODO variables might be already in use
         ctx.parentCtx.text = """file_in_dir_path = "%s/%s" % ({1}, {0}.split("/")[-1])
 if not os.path.exists({0}):
     print("Error: %s doesn't exist" % {0})
@@ -267,23 +265,20 @@ else:
 
     # Exit a parse tree produced by WordlifyParser#copy.
     def exitCopy(self, ctx:WordlifyParser.CopyContext):
-        imps = ["import shutil", "import os"] 
-        for imp in imps:
-            if imp not in self.imports:
-                self.imports.append(imp)
+        self.add_imps(["import shutil", "import os"])
 
         ctx.parentCtx.text = """file_in_dir_path = "%s/%s" % ({1}, {0}.split("/")[-1])
 if not os.path.exists({0}):
     print("Error: %s doesn't exist" % {0})
     quit()
 elif not os.path.isdir({1}):
-    dir_parts = {1}
+    dir_tmp = {1}
+    next_paths = []
     if os.name == "nt": # Windows
         if {1}[-1] == "/":
-            dir_parts = {1}[:-1]
+            dir_tmp = {1}[:-1]
             
-        dir_parts = dir_parts.split("/")
-        next_paths = []
+        dir_parts = dir_tmp.split("/")
         
         if dir_parts == [""]:
             print("Error: destination directory cannot be empty")
@@ -299,10 +294,9 @@ elif not os.path.isdir({1}):
                 next_paths.append(path)
     else:
         if {1} != "/" and {1}[-1] == "/":
-            dir_parts = {1}[:-1]
+            dir_tmp = {1}[:-1]
             
-        dir_parts = dir_parts.split("/")
-        next_paths = []
+        dir_parts = dir_tmp.split("/")
         
         if dir_parts == [""]:
             print("Error: destination directory cannot be empty")
@@ -331,17 +325,23 @@ elif not os.path.isdir({1}):
         elif not os.path.exists(part):
             os.mkdir(part)
     if os.path.isfile({0}):
-        shutil.copy2({0}, {1})
+        shutil.copy2({0}, dir_tmp)
     else:
-        shutil.copytree({0}, {1} + {0}) # TODO
+        shutil.copytree({0}, dir_tmp + "/" + {0})
 elif os.path.exists(file_in_dir_path):
     try:
         os.remove(file_in_dir_path)
     except OSError:
         shutil.rmtree(file_in_dir_path)
-    shutil.move({0}, {1})
+    if os.path.isfile({0}):
+        shutil.copy2({0}, dir_tmp)
+    else:
+        shutil.copytree({0}, dir_tmp + "/" + {0})
 else:
-    shutil.move({0}, {1})""".format(ctx.str_or_id()[0].getText(), ctx.str_or_id()[1].getText())
+    if os.path.isfile({0}):
+        shutil.copy2({0}, dir_tmp)
+    else:
+        shutil.copytree({0}, dir_tmp + "/" + {0})""".format(ctx.str_or_id()[0].getText(), ctx.str_or_id()[1].getText())
 
 
     # Enter a parse tree produced by WordlifyParser#download.
@@ -350,8 +350,8 @@ else:
 
     # Exit a parse tree produced by WordlifyParser#download.
     def exitDownload(self, ctx:WordlifyParser.DownloadContext):
-        pass
-
+        self.add_imps(["import urllib.request"]) # TODO same checking as in "move", also permissions
+        ctx.parentCtx.text = "urllib.request.urlretrieve({}, {})".format(ctx.str_or_id()[0].getText(), ctx.str_or_id()[1].getText())
 
     # Enter a parse tree produced by WordlifyParser#write.
     def enterWrite(self, ctx:WordlifyParser.WriteContext):
