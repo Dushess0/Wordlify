@@ -11,6 +11,7 @@ class MyWlListener(WordlifyListener):
         self.imports = []
         self.out_str = ""
         self.vars = {}
+        self.var_nr = 0
 
     def add_imps(self, imps):
         for imp in imps:
@@ -177,13 +178,14 @@ class MyWlListener(WordlifyListener):
 except OSError:
     try:
         shutil.rmtree({0})
-    except PermissionError as e:
-        print("Error: %s - Permission denied to delete" % e.filename)
+    except PermissionError as v{1}:
+        print("Error: %s - Permission denied to delete" % v{1}.filename)
         quit()
-    except OSError as e:
-        print("Error: %s - No such file or directory" % e.filename)
-        quit()""".format(ctx.str_or_id().getText()) 
-
+    except OSError as v{1}:
+        print("Error: %s - No such file or directory" % v{1}.filename)
+        quit()""".format(ctx.str_or_id().getText(), self.var_nr) 
+        # don't delete v{1} because it doesn't exist
+    
     # Enter a parse tree produced by WordlifyParser#move.
     def enterMove(self, ctx:WordlifyParser.MoveContext):
         pass
@@ -192,82 +194,76 @@ except OSError:
     def exitMove(self, ctx:WordlifyParser.MoveContext):
         self.add_imps(["import shutil", "import os"])
 
-
-        if self.vars["file_in_dir_path"]:
-            new_var= "file_in_dir_path" + random.randint(0,200)
-        else:
-            new_var="file_in_dir_path"
-        self.vars[new_var]=""
-        ctx.parentCtx.text = """{2} = "%s/%s" % ({1}, {0}.split("/")[-1])
+        ctx.parentCtx.text = """v{2} = "%s/%s" % ({1}, {0}.split("/")[-1])
 if not os.path.exists({0}):
     print("Error: %s doesn't exist" % {0})
     quit()
 elif not os.path.isdir({1}):
-    dir_parts = {1}
+    v{3} = {1}
+    v{4} = []
     if os.name == "nt": # Windows
         if {1}[-1] == "/":
-            dir_parts = {1}[:-1]
+            v{3} = {1}[:-1]
             
-        dir_parts = dir_parts.split("/")
-        next_paths = []
+        v{3} = v{3}.split("/")
         
-        if dir_parts == [""]:
+        if v{3} == [""]:
             print("Error: destination directory cannot be empty")
             quit()
-        elif "" in dir_parts:
+        elif "" in v{3}:
             print("Error: invalid path")
             quit()
         else:
-            for i in range(0, len(dir_parts)):
-                path = dir_parts[0]
-                for j in range(1, i+1):
-                    path += "/" + dir_parts[j]
-                next_paths.append(path)
+            for v{6} in range(0, len(v{3})):
+                v{5} = v{3}[0]
+                for v{7} in range(1, v{6}+1):
+                    v{5} += "/" + v{3}[v{7}]
+                v{4}.append(v{5})
     else:
         if {1} != "/" and {1}[-1] == "/":
-            dir_parts = {1}[:-1]
+            v{3} = {1}[:-1]
             
-        dir_parts = dir_parts.split("/")
-        next_paths = []
+        v{3} = v{3}.split("/")
         
-        if dir_parts == [""]:
+        if v{3} == [""]:
             print("Error: destination directory cannot be empty")
             quit()
-        elif dir_parts[0] == "": # e.g. /wef/we
-            for i in range(0, len(dir_parts)):
-                path = dir_parts[0]
-                for j in range(1, i+1):
-                    path += "/" + dir_parts[j]
-                next_paths.append(path)
-            next_paths[0] = "/"
-        elif "" in dir_parts:
+        elif v{3}[0] == "": # e.g. /wef/we
+            for v{6} in range(0, len(v{3})):
+                v{5} = v{3}[0]
+                for v{7} in range(1, v{6}+1):
+                    v{5} += "/" + v{3}[v{7}]
+                v{4}.append(v{5})
+            v{4}[0] = "/"
+        elif "" in v{3}:
             print("Error: invalid path")
             quit()
         else:
-            for i in range(0, len(dir_parts)):
-                path = dir_parts[0]
-                for j in range(1, i+1):
-                    path += "/" + dir_parts[j]
-                next_paths.append(path)
+            for v{6} in range(0, len(v{3})):
+                v{5} = v{3}[0]
+                for v{7} in range(1, v{6}+1):
+                    v{5} += "/" + v{3}[v{7}]
+                v{4}.append(v{5})
     
-    for part in next_paths:
-        if os.path.isfile(part):
-            print("Error: %s is a file - cannot create a directory there" % part)
+    for v{8} in v{4}:
+        if os.path.isfile(v{8}):
+            print("Error: %s is a file - cannot create a directory there" % v{8})
             quit()
-        elif not os.path.exists(part):
-            os.mkdir(part)
+        elif not os.path.exists(v{8}):
+            os.mkdir(v{8})
     shutil.move({0}, {1})
-elif os.path.exists({2}):
+elif os.path.exists(v{2}):
     try:
-        os.remove({2})
-    except OSError:
-        shutil.rmtree({2})
-    except PermissionError as e:
-        print("Error: %s - Permission denied to delete" {2})
+        os.remove(v{2})
+    except PermissionError as v{9}:
+        print("Error: %s - Permission denied to delete" % v{9}.filename)
         quit()
+    except OSError:
+        shutil.rmtree(v{2})
     shutil.move({0}, {1})
 else:
-    shutil.move({0}, {1})""".format(ctx.str_or_id()[0].getText(), ctx.str_or_id()[1].getText(),self.vars[new_var]) # TODO może być brak uprawnień
+    shutil.move({0}, {1})
+del v{2}, v{3}, v{4}, v{5}, v{6}, v{7}, v{8}, v{9}""".format(ctx.str_or_id()[0].getText(), ctx.str_or_id()[1].getText(), self.var_nr, self.var_nr+1, self.var_nr+2, self.var_nr+3, self.var_nr+4, self.var_nr+5, self.var_nr+6) # TODO może być brak uprawnień
 
 
     # Enter a parse tree produced by WordlifyParser#copy.
@@ -278,84 +274,85 @@ else:
     def exitCopy(self, ctx:WordlifyParser.CopyContext):
         self.add_imps(["import shutil", "import os"])
 
-        ctx.parentCtx.text = """file_in_dir_path = "%s/%s" % ({1}, {0}.split("/")[-1])
+        ctx.parentCtx.text = """v{2} = "%s/%s" % ({1}, {0}.split("/")[-1])
 if not os.path.exists({0}):
     print("Error: %s doesn't exist" % {0})
     quit()
 elif not os.path.isdir({1}):
-    dir_tmp = {1}
-    next_paths = []
+    v{3} = {1}
+    v{4} = []
     if os.name == "nt": # Windows
         if {1}[-1] == "/":
-            dir_tmp = {1}[:-1]
+            v{3} = {1}[:-1]
             
-        dir_parts = dir_tmp.split("/")
+        v{5} = v{3}.split("/")
         
-        if dir_parts == [""]:
+        if v{5} == [""]:
             print("Error: destination directory cannot be empty")
             quit()
-        elif "" in dir_parts:
+        elif "" in v{5}:
             print("Error: invalid path")
             quit()
         else:
-            for i in range(0, len(dir_parts)):
-                path = dir_parts[0]
-                for j in range(1, i+1):
-                    path += "/" + dir_parts[j]
-                next_paths.append(path)
+            for v{6} in range(0, len(v{5})):
+                v{8} = v{5}[0]
+                for v{7} in range(1, v{6}+1):
+                    v{8} += "/" + v{5}[v{7}]
+                v{4}.append(v{8})
     else:
         if {1} != "/" and {1}[-1] == "/":
-            dir_tmp = {1}[:-1]
+            v{3} = {1}[:-1]
             
-        dir_parts = dir_tmp.split("/")
+        v{5} = v{3}.split("/")
         
-        if dir_parts == [""]:
+        if v{5} == [""]:
             print("Error: destination directory cannot be empty")
             quit()
-        elif dir_parts[0] == "": # e.g. /wef/we
-            for i in range(0, len(dir_parts)):
-                path = dir_parts[0]
-                for j in range(1, i+1):
-                    path += "/" + dir_parts[j]
-                next_paths.append(path)
-            next_paths[0] = "/"
-        elif "" in dir_parts:
+        elif v{5}[0] == "": # e.g. /wef/we
+            for v{6} in range(0, len(v{5})):
+                v{8} = v{5}[0]
+                for v{7} in range(1, v{6}+1):
+                    v{8} += "/" + v{5}[v{7}]
+                v{4}.append(v{8})
+            v{4}[0] = "/"
+        elif "" in v{5}:
             print("Error: invalid path")
             quit()
         else:
-            for i in range(0, len(dir_parts)):
-                path = dir_parts[0]
-                for j in range(1, i+1):
-                    path += "/" + dir_parts[j]
-                next_paths.append(path)
+            for v{6} in range(0, len(v{5})):
+                v{8} = v{5}[0]
+                for v{7} in range(1, v{6}+1):
+                    v{8} += "/" + v{5}[v{7}]
+                v{4}.append(v{8})
     
-    for part in next_paths:
-        if os.path.isfile(part):
-            print("Error: %s is a file - cannot create a directory there" % part)
+    for v{9} in v{4}:
+        if os.path.isfile(v{9}):
+            print("Error: %s is a file - cannot create a directory there" % v{9})
             quit()
-        elif not os.path.exists(part):
-            os.mkdir(part)
+        elif not os.path.exists(v{9}):
+            os.mkdir(v{9})
     if os.path.isfile({0}):
-        shutil.copy2({0}, dir_tmp)
+        shutil.copy2({0}, v{3})
     else:
-        shutil.copytree({0}, dir_tmp + "/" + {0})
-elif os.path.exists(file_in_dir_path):
+        shutil.copytree({0}, v{3} + "/" + {0})
+elif os.path.exists(v{2}):
     try:
-        os.remove(file_in_dir_path)
-    except OSError:
-        shutil.rmtree(file_in_dir_path)
-    except PermissionError as e:
+        os.remove(v{2})
+    except PermissionError:
         print("Error: - Permission denied to delete")
         quit()
+    except OSError:
+        shutil.rmtree(v{2})
     if os.path.isfile({0}):
-        shutil.copy2({0}, dir_tmp)
+        shutil.copy2({0}, v{3})
     else:
-        shutil.copytree({0}, dir_tmp + "/" + {0})
+        shutil.copytree({0}, v{3} + "/" + {0})
 else:
     if os.path.isfile({0}):
-        shutil.copy2({0}, dir_tmp)
+        shutil.copy2({0}, v{3})
     else:
-        shutil.copytree({0}, dir_tmp + "/" + {0})""".format(ctx.str_or_id()[0].getText(), ctx.str_or_id()[1].getText())
+        shutil.copytree({0}, v{3} + "/" + {0})
+del v{2}, v{3}, v{4}, v{5}, v{6}, v{7}, v{8}, v{9}""".format(ctx.str_or_id()[0].getText(), ctx.str_or_id()[1].getText(), self.var_nr, self.var_nr+1, self.var_nr+2, self.var_nr+3, self.var_nr+4, self.var_nr+5, self.var_nr+6, self.var_nr+7)
 
 
     # Enter a parse tree produced by WordlifyParser#download.
@@ -465,4 +462,12 @@ except OSError as e:
             if ctx.ID().getText() not in self.vars:
                 line_nr = ctx.ID().getSymbol().line
                 raise Exception("Line {}, column {}: variable {} doesn't exist:\n    {}".format(line_nr, ctx.ID().getSymbol().column, ctx.ID().getText(), self.src_lines[line_nr-1].lstrip()))
+
+    # Enter a parse tree produced by WordlifyParser#value_or_id.
+    def enterValue_or_id(self, ctx:WordlifyParser.Value_or_idContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#value_or_id.
+    def exitValue_or_id(self, ctx:WordlifyParser.Value_or_idContext):
+        pass
 del WordlifyParser
