@@ -38,10 +38,11 @@ execute : EXECUTE (WS | NL)* '(' (WS | NL)* (str_or_id (WS | NL)* ',' (WS | NL)*
 get_files : GET_FILES (WS | NL)* '(' (WS | NL)* str_or_id (WS | NL)* ')' ;
 date_modified : DATE_MODIFIED (WS | NL)* '(' (WS | NL)* str_or_id (WS | NL)* ')' ;
 size : SIZE (WS | NL)* '(' (WS | NL)* str_or_id (WS | NL)* ')' ;
-exit : EXIT (WS | NL)* '(' (WS | NL)* (NUM | ID) (WS | NL)* ')' ;
+exit : EXIT (WS | NL)* '(' (WS | NL)* (value_or_id) (WS | NL)* ')' ;
 
 str_or_id : STR | ID ;
 num_or_id: NUM |ID;
+value_or_id: NUM|STR|ID;
 /* Lexer rules: */
 IF : 'if' ;
 THEN : 'then' ;

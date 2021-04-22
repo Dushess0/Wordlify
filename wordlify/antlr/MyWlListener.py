@@ -453,7 +453,7 @@ except OSError as e:
 
     # Exit a parse tree produced by WordlifyParser#exit.
     def exitExit(self, ctx:WordlifyParser.ExitContext):
-        pass
+        ctx.parentCtx.text = """quit({0})""".format(ctx.value_or_id().getText()) 
 
     # Enter a parse tree produced by WordlifyParser#str_or_id.
     def enterStr_or_id(self, ctx:WordlifyParser.Str_or_idContext):
