@@ -67,6 +67,9 @@ elif os.path.exists(file_in_dir_path):
         os.remove(file_in_dir_path)
     except OSError:
         shutil.rmtree(file_in_dir_path)
+    except PermissionError as e:
+        print("Error: - Permission denied to delete")
+        quit()
     if os.path.isfile("pk"):
         shutil.copy2("pk", dir_tmp)
     else:

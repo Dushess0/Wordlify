@@ -2,7 +2,7 @@ import sys
 from antlr4 import *
 from WordlifyParser import WordlifyParser
 from WordlifyListener import WordlifyListener
-
+import random
 # This class defines a complete listener for a parse tree produced by WordlifyParser.
 class MyWlListener(WordlifyListener):
     def __init__(self, output, src_lines):
@@ -177,9 +177,12 @@ class MyWlListener(WordlifyListener):
 except OSError:
     try:
         shutil.rmtree({0})
+    except PermissionError as e:
+        print("Error: %s - Permission denied to delete" % e.filename)
+        quit()
     except OSError as e:
         print("Error: %s - No such file or directory" % e.filename)
-        quit()""".format(ctx.str_or_id().getText()) # TODO może być brak uprawnień
+        quit()""".format(ctx.str_or_id().getText()) 
 
     # Enter a parse tree produced by WordlifyParser#move.
     def enterMove(self, ctx:WordlifyParser.MoveContext):
@@ -189,8 +192,13 @@ except OSError:
     def exitMove(self, ctx:WordlifyParser.MoveContext):
         self.add_imps(["import shutil", "import os"])
 
-        # TODO variables might be already in use
-        ctx.parentCtx.text = """file_in_dir_path = "%s/%s" % ({1}, {0}.split("/")[-1])
+
+        if self.vars["file_in_dir_path"]:
+            new_var= "file_in_dir_path" + random.randint(0,200)
+        else:
+            new_var="file_in_dir_path"
+        self.vars[new_var]=""
+        ctx.parentCtx.text = """{2} = "%s/%s" % ({1}, {0}.split("/")[-1])
 if not os.path.exists({0}):
     print("Error: %s doesn't exist" % {0})
     quit()
@@ -249,14 +257,17 @@ elif not os.path.isdir({1}):
         elif not os.path.exists(part):
             os.mkdir(part)
     shutil.move({0}, {1})
-elif os.path.exists(file_in_dir_path):
+elif os.path.exists({2}):
     try:
-        os.remove(file_in_dir_path)
+        os.remove({2})
     except OSError:
-        shutil.rmtree(file_in_dir_path)
+        shutil.rmtree({2})
+    except PermissionError as e:
+        print("Error: %s - Permission denied to delete" {2})
+        quit()
     shutil.move({0}, {1})
 else:
-    shutil.move({0}, {1})""".format(ctx.str_or_id()[0].getText(), ctx.str_or_id()[1].getText()) # TODO może być brak uprawnień
+    shutil.move({0}, {1})""".format(ctx.str_or_id()[0].getText(), ctx.str_or_id()[1].getText(),self.vars[new_var]) # TODO może być brak uprawnień
 
 
     # Enter a parse tree produced by WordlifyParser#copy.
@@ -333,6 +344,9 @@ elif os.path.exists(file_in_dir_path):
         os.remove(file_in_dir_path)
     except OSError:
         shutil.rmtree(file_in_dir_path)
+    except PermissionError as e:
+        print("Error: - Permission denied to delete")
+        quit()
     if os.path.isfile({0}):
         shutil.copy2({0}, dir_tmp)
     else:
