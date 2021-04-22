@@ -18,7 +18,10 @@ def main(argv):
 
         output = open(argv[1][:-2] + "py", "w")
         
-        wlListener = MyWlListener(output)
+        with open(argv[1], "r") as text_file:
+            src_lines = text_file.readlines()
+            wlListener = MyWlListener(output, src_lines)
+
         walker = ParseTreeWalker()
         try:
             walker.walk(wlListener, tree)

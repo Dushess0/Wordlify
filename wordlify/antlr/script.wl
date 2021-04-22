@@ -1,2 +1,1 @@
-print("kn"); print("uiko")
-print(a);
+copy("pk", "a/b/c/")
