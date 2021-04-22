@@ -373,7 +373,13 @@ else:
 
     # Exit a parse tree produced by WordlifyParser#write.
     def exitWrite(self, ctx:WordlifyParser.WriteContext):
-        pass
+        ctx.parentCtx.text = """try:
+    f = open({0}, "w")
+    f.write({1})
+except PermissionError as e:
+        print("Error: %s - Permission denied to write to file" % e.filename)
+        quit()""".format(ctx.str_or_id()[0].getText(), ctx.str_or_id()[1].getText()) 
+        
 
 
     # Enter a parse tree produced by WordlifyParser#read.
@@ -383,6 +389,7 @@ else:
     # Exit a parse tree produced by WordlifyParser#read.
     def exitRead(self, ctx:WordlifyParser.ReadContext):
         pass
+        
 
 
     # Enter a parse tree produced by WordlifyParser#wait_instr.
@@ -400,7 +407,16 @@ else:
 
     # Exit a parse tree produced by WordlifyParser#execute.
     def exitExecute(self, ctx:WordlifyParser.ExecuteContext):
-        pass
+        self.add_imps(["import os"])
+        ctx.parentCtx.text = """try:
+    os.system({0})
+except PermissionError as e:
+        print("Error: %s - Permission denied to execute command {0})
+        quit()
+except OSError as e:
+        print("Error: %s - System error occured when executing {0})
+        quit()""".format(ctx.str_or_id()[0].getText()) 
+        
 
 
     # Enter a parse tree produced by WordlifyParser#get_files.

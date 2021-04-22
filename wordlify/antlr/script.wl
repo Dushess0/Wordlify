@@ -1,1 +1,1 @@
-copy("pk", "a/b/c/")
+execute("echo Hello World")
