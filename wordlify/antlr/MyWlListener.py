@@ -398,7 +398,8 @@ except PermissionError as e:
 
     # Exit a parse tree produced by WordlifyParser#wait_instr.
     def exitWait_instr(self, ctx:WordlifyParser.Wait_instrContext):
-        pass
+        self.add_imps(["import time"])
+        ctx.parentCtx.text = """time.sleep({0})""".format(ctx.num_or_id().getText()) 
 
 
     # Enter a parse tree produced by WordlifyParser#execute.

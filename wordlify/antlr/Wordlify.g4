@@ -33,7 +33,7 @@ copy : COPY (WS | NL)* '(' (WS | NL)* str_or_id (WS | NL)* ',' (WS | NL)* str_or
 download : DOWNLOAD (WS | NL)* '(' (WS | NL)* str_or_id (WS | NL)* ',' (WS | NL)* str_or_id (WS | NL)* ')';
 write : WRITE (WS | NL)* '(' (WS | NL)* str_or_id (WS | NL)* ',' (WS | NL)* str_or_id (WS | NL)* ')';
 read : READ (WS | NL)* '(' (WS | NL)* str_or_id (WS | NL)* ')' ;
-wait_instr : WAIT (WS | NL)* '(' (WS | NL)* str_or_id (WS | NL)* ')' ;
+wait_instr : WAIT (WS | NL)* '(' (WS | NL)* num_or_id (WS | NL)* ')' ;
 execute : EXECUTE (WS | NL)* '(' (WS | NL)* (str_or_id (WS | NL)* ',' (WS | NL)*)* str_or_id (WS | NL)* ')' ;
 get_files : GET_FILES (WS | NL)* '(' (WS | NL)* str_or_id (WS | NL)* ')' ;
 date_modified : DATE_MODIFIED (WS | NL)* '(' (WS | NL)* str_or_id (WS | NL)* ')' ;
@@ -41,7 +41,7 @@ size : SIZE (WS | NL)* '(' (WS | NL)* str_or_id (WS | NL)* ')' ;
 exit : EXIT (WS | NL)* '(' (WS | NL)* (NUM | ID) (WS | NL)* ')' ;
 
 str_or_id : STR | ID ;
-
+num_or_id: NUM |ID;
 /* Lexer rules: */
 IF : 'if' ;
 THEN : 'then' ;

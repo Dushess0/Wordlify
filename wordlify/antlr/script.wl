@@ -1,1 +1,1 @@
-execute("echo Hello World")
+wait(5)
