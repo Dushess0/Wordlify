@@ -1,1 +1,3 @@
-exit(5)
+if 5 ==  6 then
+move("wed", "a")
+end
