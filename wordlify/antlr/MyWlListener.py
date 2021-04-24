@@ -52,6 +52,7 @@ class MyWlListener(WordlifyListener):
     # Enter a parse tree produced by WordlifyParser#then.
     def enterThen(self, ctx:WordlifyParser.ThenContext):
         ctx.lines = []
+        ctx.localVars = []
 
     # Exit a parse tree produced by WordlifyParser#then.
     def exitThen(self, ctx:WordlifyParser.ThenContext):
@@ -62,6 +63,8 @@ class MyWlListener(WordlifyListener):
                 line = " "*self.indent + line
                 ctx.parentCtx.lines.append(line)
         self.indent -= 4
+        for localVar in ctx.localVars:
+            del self.vars[localVar]
 
     # Enter a parse tree produced by WordlifyParser#else_if.
     def enterElse_if(self, ctx:WordlifyParser.Else_ifContext):
@@ -138,9 +141,17 @@ class MyWlListener(WordlifyListener):
 
     # Exit a parse tree produced by WordlifyParser#assign.
     def exitAssign(self, ctx:WordlifyParser.AssignContext):
+        if ctx.ID().getText()[0] == "v":
+            try:
+                nr = ctx.ID().getText()[1:]
+                self.var_nr = nr+1
+            except ValueError:
+                pass
+
         # TODO return_fn:
         ctx.parentCtx.lines = ["{} = {}".format(ctx.ID().getText(), ctx.value().getText())]
-        self.vars[ctx.ID().getText()] = (ctx.value().type, ctx.value().getText())
+        self.vars[ctx.ID().getText()] = (ctx.value().type)
+        ctx.parentCtx.localVars.append(ctx.ID().getText())
 
     # Enter a parse tree produced by WordlifyParser#value.
     def enterValue(self, ctx:WordlifyParser.ValueContext):
@@ -302,85 +313,86 @@ class MyWlListener(WordlifyListener):
     def exitCopy(self, ctx:WordlifyParser.CopyContext):
         self.add_imps(["import shutil", "import os"])
 
-        ctx.parentCtx.text = """v{2} = "%s/%s" % ({1}, {0}.split("/")[-1])
-if not os.path.exists({0}):
-    print("Error: %s doesn't exist" % {0})
-    quit()
-elif not os.path.isdir({1}):
-    v{3} = {1}
-    v{4} = []
-    if os.name == "nt": # Windows
-        if {1}[-1] == "/":
-            v{3} = {1}[:-1]
-            
-        v{5} = v{3}.split("/")
-        
-        if v{5} == [""]:
-            print("Error: destination directory cannot be empty")
-            quit()
-        elif "" in v{5}:
-            print("Error: invalid path")
-            quit()
-        else:
-            for v{6} in range(0, len(v{5})):
-                v{8} = v{5}[0]
-                for v{7} in range(1, v{6}+1):
-                    v{8} += "/" + v{5}[v{7}]
-                v{4}.append(v{8})
-    else:
-        if {1} != "/" and {1}[-1] == "/":
-            v{3} = {1}[:-1]
-            
-        v{5} = v{3}.split("/")
-        
-        if v{5} == [""]:
-            print("Error: destination directory cannot be empty")
-            quit()
-        elif v{5}[0] == "": # e.g. /wef/we
-            for v{6} in range(0, len(v{5})):
-                v{8} = v{5}[0]
-                for v{7} in range(1, v{6}+1):
-                    v{8} += "/" + v{5}[v{7}]
-                v{4}.append(v{8})
-            v{4}[0] = "/"
-        elif "" in v{5}:
-            print("Error: invalid path")
-            quit()
-        else:
-            for v{6} in range(0, len(v{5})):
-                v{8} = v{5}[0]
-                for v{7} in range(1, v{6}+1):
-                    v{8} += "/" + v{5}[v{7}]
-                v{4}.append(v{8})
-    
-    for v{9} in v{4}:
-        if os.path.isfile(v{9}):
-            print("Error: %s is a file - cannot create a directory there" % v{9})
-            quit()
-        elif not os.path.exists(v{9}):
-            os.mkdir(v{9})
-    if os.path.isfile({0}):
-        shutil.copy2({0}, v{3})
-    else:
-        shutil.copytree({0}, v{3} + "/" + {0})
-elif os.path.exists(v{2}):
-    try:
-        os.remove(v{2})
-    except PermissionError:
-        print("Error: - Permission denied to delete")
-        quit()
-    except OSError:
-        shutil.rmtree(v{2})
-    if os.path.isfile({0}):
-        shutil.copy2({0}, v{3})
-    else:
-        shutil.copytree({0}, v{3} + "/" + {0})
-else:
-    if os.path.isfile({0}):
-        shutil.copy2({0}, v{3})
-    else:
-        shutil.copytree({0}, v{3} + "/" + {0})
-del v{2}, v{3}, v{4}, v{5}, v{6}, v{7}, v{8}, v{9}""".format(ctx.str_or_id()[0].getText(), ctx.str_or_id()[1].getText(), self.var_nr, self.var_nr+1, self.var_nr+2, self.var_nr+3, self.var_nr+4, self.var_nr+5, self.var_nr+6, self.var_nr+7)
+        ctx.parentCtx.lines = [
+'v{} = "%s/%s" % ({}, {}.split("/")[-1])'.format(self.var_nr, ctx.str_or_id()[1].getText(), ctx.str_or_id()[0].getText()),
+'if not os.path.exists({}):'.format(ctx.str_or_id()[0].getText()),
+'    print("Error: %s doesn\'t exist" % {})'.format(ctx.str_or_id()[0].getText()),
+'    quit()',
+'elif not os.path.isdir({}):'.format(ctx.str_or_id()[1].getText()),
+'    v{} = {}'.format(self.var_nr+1, ctx.str_or_id()[1].getText()),
+'    v{} = []'.format(self.var_nr+2),
+'    if os.name == "nt": # Windows',
+'        if {}[-1] == "/":'.format(ctx.str_or_id()[1].getText()),
+'            v{} = {}[:-1]'.format(self.var_nr+1, ctx.str_or_id()[1].getText()),
+'',
+'        v{} = v{}.split("/")'.format(self.var_nr+3, self.var_nr+1),
+'',
+'        if v{} == [""]:'.format(self.var_nr+3),
+'            print("Error: destination directory cannot be empty")',
+'            quit()',
+'        elif "" in v{}:'.format(self.var_nr+3),
+'            print("Error: invalid path")',
+'            quit()',
+'        else:',
+'            for v{} in range(0, len(v{})):'.format(self.var_nr+4, self.var_nr+3),
+'                v{} = v{}[0]'.format(self.var_nr+6, self.var_nr+3),
+'                for v{} in range(1, v{}+1):'.format(self.var_nr+5, self.var_nr+4),
+'                    v{} += "/" + v{}[v{}]'.format(self.var_nr+6, self.var_nr+3, self.var_nr+5),
+'                v{}.append(v{})'.format(self.var_nr+2, self.var_nr+6),
+'    else:',
+'        if {0} != "/" and {0}[-1] == "/":'.format(ctx.str_or_id()[1].getText()),
+'            v{} = {}[:-1]'.format(self.var_nr+1, ctx.str_or_id()[1].getText()),
+'',
+'        v{} = v{}.split("/")'.format(self.var_nr+3, self.var_nr+1),
+'',
+'        if v{} == [""]:'.format(self.var_nr+3),
+'            print("Error: destination directory cannot be empty")',
+'            quit()',
+'        elif v{}[0] == "": # e.g. /wef/we'.format(self.var_nr+3),
+'            for v{} in range(0, len(v{})):'.format(self.var_nr+4, self.var_nr+3),
+'                v{} = v{}[0]'.format(self.var_nr+6, self.var_nr+3),
+'                for v{} in range(1, v{}+1):'.format(self.var_nr+5, self.var_nr+4),
+'                    v{} += "/" + v{}[v{}]'.format(self.var_nr+6, self.var_nr+3, self.var_nr+5),
+'                v{}.append(v{})'.format(self.var_nr+2, self.var_nr+6),
+'            v{}[0] = "/"'.format(self.var_nr+2),
+'        elif "" in v{}:'.format(self.var_nr+3),
+'            print("Error: invalid path")',
+'            quit()',
+'        else:',
+'            for v{} in range(0, len(v{})):'.format(self.var_nr+4, self.var_nr+3),
+'                v{} = v{}[0]'.format(self.var_nr+6, self.var_nr+3),
+'                for v{} in range(1, v{}+1):'.format(self.var_nr+5, self.var_nr+4),
+'                    v{} += "/" + v{}[v{}]'.format(self.var_nr+6, self.var_nr+3, self.var_nr+5),
+'                v{}.append(v{})'.format(self.var_nr+2, self.var_nr+6),
+'',
+'    for v{} in v{}:'.format(self.var_nr+7, self.var_nr+2),
+'        if os.path.isfile(v{}):'.format(self.var_nr+7),
+'            print("Error: %s is a file - cannot create a directory there" % v{})'.format(self.var_nr+7),
+'            quit()',
+'        elif not os.path.exists(v{}):'.format(self.var_nr+7),
+'            os.mkdir(v{})'.format(self.var_nr+7),
+'    if os.path.isfile({}):'.format(ctx.str_or_id()[0].getText()),
+'        shutil.copy2({}, v{})'.format(ctx.str_or_id()[0].getText(), self.var_nr+1),
+'    else:',
+'        shutil.copytree({0}, v{1} + "/" + {0})'.format(ctx.str_or_id()[0].getText(), self.var_nr+1),
+'elif os.path.exists(v{}):'.format(self.var_nr),
+'    try:',
+'        os.remove(v{})'.format(self.var_nr),
+'    except PermissionError as v{}:'.format(self.var_nr+8),
+'        print("Error: %s - Permission denied to delete" % v{}.filename)'.format(self.var_nr+8),
+'        quit()',
+'    except OSError:',
+'        shutil.rmtree(v{})'.format(self.var_nr),
+'    if os.path.isfile({}):'.format(ctx.str_or_id()[0].getText()),
+'        shutil.copy2({}, v{})'.format(ctx.str_or_id()[0].getText(), self.var_nr+1),
+'    else:',
+'        shutil.copytree({0}, v{1} + "/" + {0})'.format(ctx.str_or_id()[0].getText(), self.var_nr+1),
+'else:',
+'    if os.path.isfile({}):'.format(ctx.str_or_id()[0].getText()),
+'        shutil.copy2({}, v{})'.format(ctx.str_or_id()[0].getText(), self.var_nr+1),
+'    else:',
+'        shutil.copytree({0}, v{1} + "/" + {0})'.format(ctx.str_or_id()[0].getText(), self.var_nr+1),
+'del v{}, v{}, v{}, v{}, v{}, v{}, v{}, v{}'.format(self.var_nr, self.var_nr+1, self.var_nr+2, self.var_nr+3, self.var_nr+4, self.var_nr+5, self.var_nr+6, self.var_nr+7)]
 
 
     # Enter a parse tree produced by WordlifyParser#download.
@@ -390,7 +402,7 @@ del v{2}, v{3}, v{4}, v{5}, v{6}, v{7}, v{8}, v{9}""".format(ctx.str_or_id()[0].
     # Exit a parse tree produced by WordlifyParser#download.
     def exitDownload(self, ctx:WordlifyParser.DownloadContext):
         self.add_imps(["import urllib.request"]) # TODO same checking as in "move", also permissions
-        ctx.parentCtx.text = "urllib.request.urlretrieve({}, {})".format(ctx.str_or_id()[0].getText(), ctx.str_or_id()[1].getText())
+        ctx.parentCtx.lines = ["urllib.request.urlretrieve({}, {})".format(ctx.str_or_id()[0].getText(), ctx.str_or_id()[1].getText())]
 
     # Enter a parse tree produced by WordlifyParser#write.
     def enterWrite(self, ctx:WordlifyParser.WriteContext):
@@ -398,12 +410,13 @@ del v{2}, v{3}, v{4}, v{5}, v{6}, v{7}, v{8}, v{9}""".format(ctx.str_or_id()[0].
 
     # Exit a parse tree produced by WordlifyParser#write.
     def exitWrite(self, ctx:WordlifyParser.WriteContext):
-        ctx.parentCtx.text = """try:
-    f = open({0}, "w")
-    f.write({1})
-except PermissionError as e:
-        print("Error: %s - Permission denied to write to file" % e.filename)
-        quit()""".format(ctx.str_or_id()[0].getText(), ctx.str_or_id()[1].getText()) 
+        ctx.parentCtx.lines = [
+'try:',
+'    f = open({0}, "w")'.format(ctx.str_or_id()[0].getText()),
+'    f.write({1})'.format(ctx.str_or_id()[1].getText()),
+'except PermissionError as v{}:'.format(self.var_nr),
+'        print("Error: %s - Permission denied to write to file" % v{}.filename)'.format(self.var_nr),
+'        quit()']
         
 
 
@@ -424,7 +437,7 @@ except PermissionError as e:
     # Exit a parse tree produced by WordlifyParser#wait_instr.
     def exitWait_instr(self, ctx:WordlifyParser.Wait_instrContext):
         self.add_imps(["import time"])
-        ctx.parentCtx.text = """time.sleep({0})""".format(ctx.num_or_id().getText()) 
+        ctx.parentCtx.lines = ['time.sleep({0})'.format(ctx.num_or_id().getText())]
 
 
     # Enter a parse tree produced by WordlifyParser#execute.
@@ -434,17 +447,16 @@ except PermissionError as e:
     # Exit a parse tree produced by WordlifyParser#execute.
     def exitExecute(self, ctx:WordlifyParser.ExecuteContext):
         self.add_imps(["import os"])
-        ctx.parentCtx.text = """try:
-    os.system({0})
-except PermissionError as e:
-        print("Error: %s - Permission denied to execute command {0})
-        quit()
-except OSError as e:
-        print("Error: %s - System error occured when executing {0})
-        quit()""".format(ctx.str_or_id()[0].getText()) 
+        ctx.parentCtx.lines = [
+'try:',
+'    os.system({0})'.format(ctx.str_or_id()[0].getText()),
+'except PermissionError:',
+'        print("Error: %s - Permission denied to execute command {0})'.format(ctx.str_or_id()[0].getText()) ,
+'        quit()',
+'except OSError:',
+'        print("Error: %s - System error occured when executing {0})'.format(ctx.str_or_id()[0].getText()) ,
+'        quit()']
         
-
-
     # Enter a parse tree produced by WordlifyParser#get_files.
     def enterGet_files(self, ctx:WordlifyParser.Get_filesContext):
         pass
@@ -478,7 +490,7 @@ except OSError as e:
 
     # Exit a parse tree produced by WordlifyParser#exit.
     def exitExit(self, ctx:WordlifyParser.ExitContext):
-        ctx.parentCtx.text = """quit({0})""".format(ctx.value_or_id().getText()) 
+        ctx.parentCtx.lines = ['quit({0})'.format(ctx.value_or_id().getText())]
 
     # Enter a parse tree produced by WordlifyParser#str_or_id.
     def enterStr_or_id(self, ctx:WordlifyParser.Str_or_idContext):
