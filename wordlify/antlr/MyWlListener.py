@@ -21,6 +21,7 @@ class MyWlListener(WordlifyListener):
     # Enter a parse tree produced by WordlifyParser#program.
     def enterProgram(self, ctx:WordlifyParser.ProgramContext):
         ctx.lines = []
+        ctx.localVars = []
 
     # Exit a parse tree produced by WordlifyParser#program.
     def exitProgram(self, ctx:WordlifyParser.ProgramContext):
@@ -47,20 +48,19 @@ class MyWlListener(WordlifyListener):
     # Exit a parse tree produced by WordlifyParser#if_cond.
     def exitIf_cond(self, ctx:WordlifyParser.If_condContext):
         ctx.parentCtx.lines[0] += ctx.cond().text + ":"
-        self.indent += 4
 
     # Enter a parse tree produced by WordlifyParser#then.
     def enterThen(self, ctx:WordlifyParser.ThenContext):
         ctx.lines = []
         ctx.localVars = []
+        self.indent += 4
 
     # Exit a parse tree produced by WordlifyParser#then.
     def exitThen(self, ctx:WordlifyParser.ThenContext):
         if ctx.lines == []:
-            ctx.parentCtx.lines += " "*self.indent + "pass"
+            ctx.parentCtx.lines.append(" "*self.indent + "pass")
         else:
             for line in ctx.lines:
-                line = " "*self.indent + line
                 ctx.parentCtx.lines.append(line)
         self.indent -= 4
         for localVar in ctx.localVars:
@@ -68,21 +68,36 @@ class MyWlListener(WordlifyListener):
 
     # Enter a parse tree produced by WordlifyParser#else_if.
     def enterElse_if(self, ctx:WordlifyParser.Else_ifContext):
-        pass
+        ctx.lines = [" "*self.indent + "elif "]
+        ctx.localVars = []
 
     # Exit a parse tree produced by WordlifyParser#else_if.
     def exitElse_if(self, ctx:WordlifyParser.Else_ifContext):
-        pass
-
+        if ctx.lines == []:
+            ctx.parentCtx.lines.append(" "*self.indent + "pass")
+        else:
+            for line in ctx.lines:
+                ctx.parentCtx.lines.append(line)
+        for localVar in ctx.localVars:
+            del self.vars[localVar]
 
     # Enter a parse tree produced by WordlifyParser#else_block.
     def enterElse_block(self, ctx:WordlifyParser.Else_blockContext):
-        pass
+        ctx.lines = []
+        ctx.localVars = []
+        self.indent += 4
 
     # Exit a parse tree produced by WordlifyParser#else_block.
     def exitElse_block(self, ctx:WordlifyParser.Else_blockContext):
-        pass
-
+        ctx.parentCtx.lines.append(" "*(self.indent-4) + "else:")
+        if ctx.lines == []:
+            ctx.parentCtx.lines.append(" "*self.indent + "pass")
+        else:
+            for line in ctx.lines:
+                ctx.parentCtx.lines.append(line)
+        self.indent -= 4
+        for localVar in ctx.localVars:
+            del self.vars[localVar]
 
     # Enter a parse tree produced by WordlifyParser#cond.
     def enterCond(self, ctx:WordlifyParser.CondContext):
@@ -115,7 +130,8 @@ class MyWlListener(WordlifyListener):
 
     # Exit a parse tree produced by WordlifyParser#atom_instr.
     def exitAtom_instr(self, ctx:WordlifyParser.Atom_instrContext):
-        ctx.parentCtx.lines += ctx.lines
+        for line in ctx.lines:
+            ctx.parentCtx.lines.append(" "*self.indent + line)
 
     # Enter a parse tree produced by WordlifyParser#bool_fn.
     def enterBool_fn(self, ctx:WordlifyParser.Bool_fnContext):
@@ -150,8 +166,8 @@ class MyWlListener(WordlifyListener):
 
         # TODO return_fn:
         ctx.parentCtx.lines = ["{} = {}".format(ctx.ID().getText(), ctx.value().getText())]
-        self.vars[ctx.ID().getText()] = (ctx.value().type)
-        ctx.parentCtx.localVars.append(ctx.ID().getText())
+        self.vars[ctx.ID().getText()] = ctx.value().type
+        ctx.parentCtx.parentCtx.localVars.append(ctx.ID().getText())
 
     # Enter a parse tree produced by WordlifyParser#value.
     def enterValue(self, ctx:WordlifyParser.ValueContext):
@@ -170,7 +186,7 @@ class MyWlListener(WordlifyListener):
                 line = self.src_lines[line_nr-1].lstrip()
                 col_nr = ctx.ID().getSymbol().column
                 raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, id, line))
-            ctx.type = self.vars[id][0]
+            ctx.type = self.vars[id]
         # TODO return_fn
 
     # Enter a parse tree produced by WordlifyParser#exist.
@@ -199,7 +215,11 @@ class MyWlListener(WordlifyListener):
         self.add_imps(["import os"])
 
         # TODO
-        ctx.parentCtx.lines = ["os.rename({}, {})".format(ctx.str_or_id()[0].getText(), ctx.str_or_id()[1].getText())]
+        ctx.parentCtx.lines = [
+'try:',
+'    os.rename({}, {})'.format(ctx.str_or_id()[0].getText(), ctx.str_or_id()[1].getText()),
+'catch Exception as v{}:'.format(self.var_nr),
+'    print(str(v{}))'.format(self.var_nr)]
 
     # Enter a parse tree produced by WordlifyParser#remove.
     def enterRemove(self, ctx:WordlifyParser.RemoveContext):
@@ -212,6 +232,9 @@ class MyWlListener(WordlifyListener):
         ctx.parentCtx.lines = [
 'try:',
 '    os.remove({})'.format(ctx.str_or_id().getText()),
+'except PermissionError as v{}:'.format(self.var_nr),
+'    print("Error: %s - Permission denied to delete" % v{}.filename)'.format(self.var_nr),
+'    quit()',
 'except OSError:',
 '    try:',
 '        shutil.rmtree({})'.format(ctx.str_or_id().getText()),
@@ -402,7 +425,11 @@ class MyWlListener(WordlifyListener):
     # Exit a parse tree produced by WordlifyParser#download.
     def exitDownload(self, ctx:WordlifyParser.DownloadContext):
         self.add_imps(["import urllib.request"]) # TODO same checking as in "move", also permissions
-        ctx.parentCtx.lines = ["urllib.request.urlretrieve({}, {})".format(ctx.str_or_id()[0].getText(), ctx.str_or_id()[1].getText())]
+        ctx.parentCtx.lines = [
+'try:',
+'    urllib.request.urlretrieve({}, {})'.format(ctx.str_or_id()[0].getText(), ctx.str_or_id()[1].getText()),
+'except Exception as v{}:'.format(self.var_nr),
+'    print(str(v{}))'.format(self.var_nr)]
 
     # Enter a parse tree produced by WordlifyParser#write.
     def enterWrite(self, ctx:WordlifyParser.WriteContext):
@@ -412,11 +439,11 @@ class MyWlListener(WordlifyListener):
     def exitWrite(self, ctx:WordlifyParser.WriteContext):
         ctx.parentCtx.lines = [
 'try:',
-'    f = open({0}, "w")'.format(ctx.str_or_id()[0].getText()),
-'    f.write({1})'.format(ctx.str_or_id()[1].getText()),
+'    f = open({}, "w")'.format(ctx.str_or_id()[0].getText()),
+'    f.write({})'.format(ctx.str_or_id()[1].getText()),
 'except PermissionError as v{}:'.format(self.var_nr),
-'        print("Error: %s - Permission denied to write to file" % v{}.filename)'.format(self.var_nr),
-'        quit()']
+'    print("Error: %s - Permission denied to write to file" % v{}.filename)'.format(self.var_nr),
+'    quit()']
         
 
 
@@ -437,7 +464,7 @@ class MyWlListener(WordlifyListener):
     # Exit a parse tree produced by WordlifyParser#wait_instr.
     def exitWait_instr(self, ctx:WordlifyParser.Wait_instrContext):
         self.add_imps(["import time"])
-        ctx.parentCtx.lines = ['time.sleep({0})'.format(ctx.num_or_id().getText())]
+        ctx.parentCtx.lines = ['time.sleep({})'.format(ctx.num_or_id().getText())]
 
 
     # Enter a parse tree produced by WordlifyParser#execute.
@@ -451,11 +478,11 @@ class MyWlListener(WordlifyListener):
 'try:',
 '    os.system({0})'.format(ctx.str_or_id()[0].getText()),
 'except PermissionError:',
-'        print("Error: %s - Permission denied to execute command {0})'.format(ctx.str_or_id()[0].getText()) ,
-'        quit()',
+'    print("Error: %s - Permission denied to execute command {0})'.format(ctx.str_or_id()[0].getText()) ,
+'    quit()',
 'except OSError:',
-'        print("Error: %s - System error occured when executing {0})'.format(ctx.str_or_id()[0].getText()) ,
-'        quit()']
+'    print("Error: %s - System error occured when executing {0})'.format(ctx.str_or_id()[0].getText()) ,
+'    quit()']
         
     # Enter a parse tree produced by WordlifyParser#get_files.
     def enterGet_files(self, ctx:WordlifyParser.Get_filesContext):
@@ -506,7 +533,7 @@ class MyWlListener(WordlifyListener):
             if id not in self.vars:
                 raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, id, line))
             # ID is in self.vars:
-            type = self.vars[id][0]
+            type = self.vars[id]
             if type != "str":
                 raise Exception("Line {}, column {}: variable '{}' has type '{}', but 'str' expected:\n    {}".format(line_nr, col_nr, id, type, line))
 
@@ -524,7 +551,7 @@ class MyWlListener(WordlifyListener):
             if id not in self.vars:
                 raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, id, line))
             # ID is in self.vars:
-            type = self.vars[id][0]
+            type = self.vars[id]
             if type != "num":
                 raise Exception("Line {}, column {}: variable '{}' has type '{}', but 'num' expected:\n    {}".format(line_nr, col_nr, id, type, line))
 
@@ -542,7 +569,7 @@ class MyWlListener(WordlifyListener):
             if id not in self.vars:
                 raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, id, line))
             # ID is in self.vars:
-            type = self.vars[id][0]
+            type = self.vars[id]
             if type != "str" and type != "num":
                 raise Exception("Line {}, column {}: variable '{}' has type '{}', but 'str' or 'num' expected:\n    {}".format(line_nr, col_nr, id, type, line))
 

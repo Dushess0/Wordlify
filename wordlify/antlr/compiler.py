@@ -16,6 +16,8 @@ def main(argv):
         parser = WordlifyParser(stream)
         tree = parser.program()
 
+        # with open(argv[1][:-2] + "py", "r") as out_content:
+        #     out_lines = out_content.read()
         output = open(argv[1][:-2] + "py", "w")
         
         with open(argv[1], "r") as text_file:
@@ -27,7 +29,8 @@ def main(argv):
         # try:
         #     walker.walk(wlListener, tree)
         # except Exception as e:
-        #     print(e)  
+        #     print(e)
+        #     output.write(out_lines)
         output.close()   
 
 if __name__ == '__main__':

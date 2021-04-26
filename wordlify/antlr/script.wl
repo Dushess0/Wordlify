@@ -1,3 +1,1 @@
-if 5 ==  6 then
-move("wed", "a")
-end
+download("https://github.com/Dushess0/Wordlify/archive/refs/heads/master.zip", "q.a")
