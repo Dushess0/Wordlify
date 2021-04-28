@@ -17,6 +17,24 @@ class WordlifyListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by WordlifyParser#block.
+    def enterBlock(self, ctx:WordlifyParser.BlockContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#block.
+    def exitBlock(self, ctx:WordlifyParser.BlockContext):
+        pass
+
+
+    # Enter a parse tree produced by WordlifyParser#fn_def.
+    def enterFn_def(self, ctx:WordlifyParser.Fn_defContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#fn_def.
+    def exitFn_def(self, ctx:WordlifyParser.Fn_defContext):
+        pass
+
+
     # Enter a parse tree produced by WordlifyParser#if_instr.
     def enterIf_instr(self, ctx:WordlifyParser.If_instrContext):
         pass
@@ -122,6 +140,15 @@ class WordlifyListener(ParseTreeListener):
 
     # Exit a parse tree produced by WordlifyParser#value.
     def exitValue(self, ctx:WordlifyParser.ValueContext):
+        pass
+
+
+    # Enter a parse tree produced by WordlifyParser#fn_call.
+    def enterFn_call(self, ctx:WordlifyParser.Fn_callContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#fn_call.
+    def exitFn_call(self, ctx:WordlifyParser.Fn_callContext):
         pass
 
 

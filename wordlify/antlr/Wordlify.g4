@@ -2,9 +2,16 @@ grammar Wordlify;
 
 /* Parser rules */
 program : (WS | NL)*
-          ( (atom_instr (WS | NL)* ';' (WS | NL)* | atom_instr (WS* NL WS*)+ | if_instr (WS | NL)+)*
-          (atom_instr (WS | NL)* ';'? | if_instr) )?
+          ( (atom_instr (WS | NL)* ';' (WS | NL)* | atom_instr (WS* NL WS*)+ | block (WS | NL)+)*
+          (atom_instr (WS | NL)* ';'? | block) )?
           (WS | NL)* END_COMMENT? EOF ;
+
+block : if_instr | fn_def ;
+
+fn_def : FN (WS | NL)+ ID (WS | NL)* '(' (WS | NL)* ( ID (WS | NL)* (',' (WS | NL)* ID (WS | NL)*)* )? ')' (WS | NL)* BEGIN (WS | NL)+
+         ( (atom_instr (WS | NL)* ';' (WS | NL)* | atom_instr (WS* NL WS*)+ | if_instr (WS | NL)+)*
+         (atom_instr (WS | NL)* ';'? | if_instr) (WS | NL)+ )?
+         END ;
 
 if_instr : if_cond then else_if* else_block? END ;
 if_cond : IF (WS | NL)+ cond (WS | NL)+ ;
@@ -17,13 +24,14 @@ else_block : ELSE (WS | NL)+ ( (atom_instr (WS | NL)* ';' (WS | NL)* | atom_inst
 cond : bool_fn | BOOL | comparison ;
 comparison : value (WS | NL)* CMP_OP (WS | NL)* value ;
 
-atom_instr : print_instr | rename | remove | move | copy | download | write | wait_instr | execute | exit | assign | TIME | FILE | FOLDER | ARGS ;
+atom_instr : fn_call | exist | print_instr | rename | remove | move | copy | download | write | read | wait_instr | execute | get_files | date_modified | size | exit | assign | TIME | FILE | FOLDER | ARGS ;
 bool_fn : exist ;
 return_fn : exist | read | TIME | get_files | date_modified | size | FILE | FOLDER | ARGS ;
 
 assign : ID (WS | NL)* '=' (WS | NL)* value ;
 value : return_fn | STR | NUM | ID ;
 
+fn_call : ID (WS | NL)* '(' (WS | NL)* ( value_or_id (WS | NL)* (',' (WS | NL)* value_or_id (WS | NL)*)* )? ')' ;
 exist : EXIST (WS | NL)* '(' (WS | NL)* str_or_id (WS | NL)* ')' ;
 print_instr : PRINT (WS | NL)* '(' (WS | NL)* str_or_id (WS | NL)* ')' ;
 rename : RENAME (WS | NL)* '(' (WS | NL)* str_or_id (WS | NL)* ',' (WS | NL)* str_or_id (WS | NL)* ')';
@@ -43,10 +51,13 @@ exit : EXIT (WS | NL)* '(' (WS | NL)* (value_or_id) (WS | NL)* ')' ;
 str_or_id : STR | ID ;
 num_or_id: NUM |ID;
 value_or_id: NUM|STR|ID;
+
 /* Lexer rules: */
+FN : 'fn' ;
 IF : 'if' ;
 THEN : 'then' ;
 ELSE : 'else' ;
+BEGIN : 'begin' ;
 END : 'end' ;
 
 EXIST : 'exist' ;

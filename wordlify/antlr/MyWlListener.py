@@ -9,6 +9,7 @@ class MyWlListener(WordlifyListener):
         self.output = output
         self.src_lines = src_lines
         self.imports = []
+        self.functions = []
         self.vars = {}
         self.var_nr = 0
         self.indent = 0
@@ -30,8 +31,30 @@ class MyWlListener(WordlifyListener):
                 self.output.write(line + "\n")
             self.output.write("\n")
         
+        if len(self.functions) != 0:
+            for fn in self.functions:
+                self.output.write(fn + "\n")
+            self.output.write("\n")
+
         for line in ctx.lines:
             self.output.write(line + "\n")
+
+    # Enter a parse tree produced by WordlifyParser#block.
+    def enterBlock(self, ctx:WordlifyParser.BlockContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#block.
+    def exitBlock(self, ctx:WordlifyParser.BlockContext):
+        pass
+
+
+    # Enter a parse tree produced by WordlifyParser#fn_def.
+    def enterFn_def(self, ctx:WordlifyParser.Fn_defContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#fn_def.
+    def exitFn_def(self, ctx:WordlifyParser.Fn_defContext):
+        pass
 
     # Enter a parse tree produced by WordlifyParser#if_instr.
     def enterIf_instr(self, ctx:WordlifyParser.If_instrContext):
@@ -39,7 +62,7 @@ class MyWlListener(WordlifyListener):
 
     # Exit a parse tree produced by WordlifyParser#if_instr.
     def exitIf_instr(self, ctx:WordlifyParser.If_instrContext):
-        ctx.parentCtx.lines += ctx.lines
+        ctx.parentCtx.parentCtx.lines += ctx.lines
 
     # Enter a parse tree produced by WordlifyParser#if_cond.
     def enterIf_cond(self, ctx:WordlifyParser.If_condContext):
@@ -188,6 +211,15 @@ class MyWlListener(WordlifyListener):
                 raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, id, line))
             ctx.type = self.vars[id]
         # TODO return_fn
+
+    # Enter a parse tree produced by WordlifyParser#fn_call.
+    def enterFn_call(self, ctx:WordlifyParser.Fn_callContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#fn_call.
+    def exitFn_call(self, ctx:WordlifyParser.Fn_callContext):
+        pass
+
 
     # Enter a parse tree produced by WordlifyParser#exist.
     def enterExist(self, ctx:WordlifyParser.ExistContext):
