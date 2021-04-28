@@ -17,21 +17,21 @@ class WordlifyListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by WordlifyParser#block.
-    def enterBlock(self, ctx:WordlifyParser.BlockContext):
-        pass
-
-    # Exit a parse tree produced by WordlifyParser#block.
-    def exitBlock(self, ctx:WordlifyParser.BlockContext):
-        pass
-
-
     # Enter a parse tree produced by WordlifyParser#fn_def.
     def enterFn_def(self, ctx:WordlifyParser.Fn_defContext):
         pass
 
     # Exit a parse tree produced by WordlifyParser#fn_def.
     def exitFn_def(self, ctx:WordlifyParser.Fn_defContext):
+        pass
+
+
+    # Enter a parse tree produced by WordlifyParser#block_instr.
+    def enterBlock_instr(self, ctx:WordlifyParser.Block_instrContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#block_instr.
+    def exitBlock_instr(self, ctx:WordlifyParser.Block_instrContext):
         pass
 
 

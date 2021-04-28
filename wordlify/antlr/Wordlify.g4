@@ -2,16 +2,16 @@ grammar Wordlify;
 
 /* Parser rules */
 program : (WS | NL)*
-          ( (atom_instr (WS | NL)* ';' (WS | NL)* | atom_instr (WS* NL WS*)+ | block (WS | NL)+)*
-          (atom_instr (WS | NL)* ';'? | block) )?
+          ( (atom_instr (WS | NL)* ';' (WS | NL)* | atom_instr (WS* NL WS*)+ | (block_instr | fn_def) (WS | NL)+)*
+          (atom_instr (WS | NL)* ';'? | (block_instr | fn_def)) )?
           (WS | NL)* END_COMMENT? EOF ;
 
-block : if_instr | fn_def ;
-
 fn_def : FN (WS | NL)+ ID (WS | NL)* '(' (WS | NL)* ( ID (WS | NL)* (',' (WS | NL)* ID (WS | NL)*)* )? ')' (WS | NL)* BEGIN (WS | NL)+
-         ( (atom_instr (WS | NL)* ';' (WS | NL)* | atom_instr (WS* NL WS*)+ | if_instr (WS | NL)+)*
-         (atom_instr (WS | NL)* ';'? | if_instr) (WS | NL)+ )?
+         ( (atom_instr (WS | NL)* ';' (WS | NL)* | atom_instr (WS* NL WS*)+ | block_instr (WS | NL)+)*
+         (atom_instr (WS | NL)* ';'? | block_instr) (WS | NL)+ )?
          END ;
+
+block_instr : if_instr ;
 
 if_instr : if_cond then else_if* else_block? END ;
 if_cond : IF (WS | NL)+ cond (WS | NL)+ ;

@@ -32,29 +32,43 @@ class MyWlListener(WordlifyListener):
             self.output.write("\n")
         
         if len(self.functions) != 0:
-            for fn in self.functions:
-                self.output.write(fn + "\n")
+            for line in self.functions:
+                self.output.write(line + "\n")
             self.output.write("\n")
 
         for line in ctx.lines:
             self.output.write(line + "\n")
 
-    # Enter a parse tree produced by WordlifyParser#block.
-    def enterBlock(self, ctx:WordlifyParser.BlockContext):
-        pass
-
-    # Exit a parse tree produced by WordlifyParser#block.
-    def exitBlock(self, ctx:WordlifyParser.BlockContext):
-        pass
-
-
     # Enter a parse tree produced by WordlifyParser#fn_def.
     def enterFn_def(self, ctx:WordlifyParser.Fn_defContext):
-        pass
+        ctx.lines = []
+        header = "def {}(".format(ctx.ID()[0].getText())
+
+        if len(ctx.ID()) > 1:
+            header += ctx.ID()[1].getText()
+
+            for i in range(2, len(ctx.ID())):
+                header += ", {}".format(ctx.ID()[i])
+            header += "):"
+        
+        ctx.lines.append(header)
 
     # Exit a parse tree produced by WordlifyParser#fn_def.
     def exitFn_def(self, ctx:WordlifyParser.Fn_defContext):
+        if len(ctx.lines) == 1:
+            ctx.lines.append("    pass")
+        ctx.lines.append("")
+
+        self.functions += ctx.lines
+
+    # Enter a parse tree produced by WordlifyParser#block_instr.
+    def enterBlock_instr(self, ctx:WordlifyParser.Block_instrContext):
         pass
+
+    # Exit a parse tree produced by WordlifyParser#block_instr.
+    def exitBlock_instr(self, ctx:WordlifyParser.Block_instrContext):
+        pass
+
 
     # Enter a parse tree produced by WordlifyParser#if_instr.
     def enterIf_instr(self, ctx:WordlifyParser.If_instrContext):
