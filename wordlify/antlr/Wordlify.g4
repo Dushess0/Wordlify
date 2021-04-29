@@ -33,7 +33,7 @@ value : return_fn | STR | NUM | ID ;
 
 fn_call : ID (WS | NL)* '(' (WS | NL)* ( value_or_id (WS | NL)* (',' (WS | NL)* value_or_id (WS | NL)*)* )? ')' ;
 exist : EXIST (WS | NL)* '(' (WS | NL)* str_or_id (WS | NL)* ')' ;
-print_instr : PRINT (WS | NL)* '(' (WS | NL)* str_or_id (WS | NL)* ')' ;
+print_instr : PRINT (WS | NL)* '(' (WS | NL)* value_or_id (WS | NL)* ')' ;
 rename : RENAME (WS | NL)* '(' (WS | NL)* str_or_id (WS | NL)* ',' (WS | NL)* str_or_id (WS | NL)* ')';
 remove : REMOVE (WS | NL)* '(' (WS | NL)* str_or_id (WS | NL)* ')' ;
 move : MOVE (WS | NL)* '(' (WS | NL)* str_or_id (WS | NL)* ',' (WS | NL)* str_or_id (WS | NL)* ')';

@@ -376,7 +376,7 @@ def serializedATN():
         buf.write("\u0263\3\2\2\2\u0266\u026a\7\4\2\2\u0267\u0269\t\2\2\2")
         buf.write("\u0268\u0267\3\2\2\2\u0269\u026c\3\2\2\2\u026a\u0268\3")
         buf.write("\2\2\2\u026a\u026b\3\2\2\2\u026b\u026d\3\2\2\2\u026c\u026a")
-        buf.write("\3\2\2\2\u026d\u0271\5@!\2\u026e\u0270\t\2\2\2\u026f\u026e")
+        buf.write("\3\2\2\2\u026d\u0271\5D#\2\u026e\u0270\t\2\2\2\u026f\u026e")
         buf.write("\3\2\2\2\u0270\u0273\3\2\2\2\u0271\u026f\3\2\2\2\u0271")
         buf.write("\u0272\3\2\2\2\u0272\u0274\3\2\2\2\u0273\u0271\3\2\2\2")
         buf.write("\u0274\u0275\7\6\2\2\u0275%\3\2\2\2\u0276\u027a\7\20\2")
@@ -3247,8 +3247,8 @@ class WordlifyParser ( Parser ):
         def PRINT(self):
             return self.getToken(WordlifyParser.PRINT, 0)
 
-        def str_or_id(self):
-            return self.getTypedRuleContext(WordlifyParser.Str_or_idContext,0)
+        def value_or_id(self):
+            return self.getTypedRuleContext(WordlifyParser.Value_or_idContext,0)
 
 
         def WS(self, i:int=None):
@@ -3319,7 +3319,7 @@ class WordlifyParser ( Parser ):
                 _la = self._input.LA(1)
 
             self.state = 619
-            self.str_or_id()
+            self.value_or_id()
             self.state = 623
             self._errHandler.sync(self)
             _la = self._input.LA(1)

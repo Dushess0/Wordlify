@@ -101,7 +101,8 @@ class MyWlListener(WordlifyListener):
                 ctx.parentCtx.lines.append(line)
         self.indent -= 4
         for localVar in ctx.localVars:
-            del self.vars[localVar]
+            if localVar not in ctx.parentCtx.parentCtx.parentCtx.localVars:
+                del self.vars[localVar]
 
     # Enter a parse tree produced by WordlifyParser#else_if.
     def enterElse_if(self, ctx:WordlifyParser.Else_ifContext):
@@ -116,7 +117,8 @@ class MyWlListener(WordlifyListener):
             for line in ctx.lines:
                 ctx.parentCtx.lines.append(line)
         for localVar in ctx.localVars:
-            del self.vars[localVar]
+            if localVar not in ctx.parentCtx.parentCtx.parentCtx.localVars:
+                del self.vars[localVar]
 
     # Enter a parse tree produced by WordlifyParser#else_block.
     def enterElse_block(self, ctx:WordlifyParser.Else_blockContext):
@@ -134,7 +136,8 @@ class MyWlListener(WordlifyListener):
                 ctx.parentCtx.lines.append(line)
         self.indent -= 4
         for localVar in ctx.localVars:
-            del self.vars[localVar]
+            if localVar not in ctx.parentCtx.parentCtx.parentCtx.localVars:
+                del self.vars[localVar]
 
     # Enter a parse tree produced by WordlifyParser#cond.
     def enterCond(self, ctx:WordlifyParser.CondContext):
@@ -224,6 +227,7 @@ class MyWlListener(WordlifyListener):
                 col_nr = ctx.ID().getSymbol().column
                 raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, id, line))
             ctx.type = self.vars[id]
+        print(self.vars)
         # TODO return_fn
 
     # Enter a parse tree produced by WordlifyParser#fn_call.
@@ -250,7 +254,7 @@ class MyWlListener(WordlifyListener):
 
     # Exit a parse tree produced by WordlifyParser#print_instr.
     def exitPrint_instr(self, ctx:WordlifyParser.Print_instrContext):
-        ctx.parentCtx.lines = ["print({})".format(ctx.str_or_id().getText())]
+        ctx.parentCtx.lines = ["print({})".format(ctx.value_or_id().getText())]
 
     # Enter a parse tree produced by WordlifyParser#rename.
     def enterRename(self, ctx:WordlifyParser.RenameContext):
@@ -264,7 +268,7 @@ class MyWlListener(WordlifyListener):
         ctx.parentCtx.lines = [
 'try:',
 '    os.rename({}, {})'.format(ctx.str_or_id()[0].getText(), ctx.str_or_id()[1].getText()),
-'catch Exception as v{}:'.format(self.var_nr),
+'except Exception as v{}:'.format(self.var_nr),
 '    print(str(v{}))'.format(self.var_nr)]
 
     # Enter a parse tree produced by WordlifyParser#remove.
