@@ -11,8 +11,8 @@ class MyWlListener(WordlifyListener):
         self.functions = []
 
         self.vars = {}
-        for function in functions:
-            self.vars[function] = "function"
+        for name in functions:
+            self.vars[name] = ("function", functions[name])
 
         self.var_nr = 0
         self.indent = 0
@@ -265,8 +265,10 @@ class MyWlListener(WordlifyListener):
         id = ctx.ID().getText()
 
         try:
-            if self.vars[ctx.ID().getText()] != "function":
+            if self.vars[ctx.ID().getText()][0] != "function":
                 raise Exception("Line {}, column {}: '{}' is not a function:\n    {}".format(line_nr, col_nr, id, line))
+            if self.vars[ctx.ID().getText()][1] != len(ctx.value_or_id()):
+                raise Exception("Line {}, column {}: function '{}' expects {} arguments, found {}:\n    {}".format(line_nr, col_nr, id, self.vars[ctx.ID().getText()][1], len(ctx.value_or_id()), line))
         except KeyError:
             raise Exception("Line {}, column {}: '{}' is not a function:\n    {}".format(line_nr, col_nr, id, line))
 

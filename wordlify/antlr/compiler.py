@@ -31,12 +31,12 @@ def main(argv):
             wlListener = MyWlListener(output, src_lines, functions)
 
         walker = ParseTreeWalker()
-        walker.walk(wlListener, tree)
-        # try:
-        #     walker.walk(wlListener, tree)
-        # except Exception as e:
-        #     print(e)
-        #     output.write(out_lines)
+        # walker.walk(wlListener, tree)
+        try:
+            walker.walk(wlListener, tree)
+        except Exception as e:
+            print(e)
+            # output.write(out_lines)
         output.close()   
 
 if __name__ == '__main__':

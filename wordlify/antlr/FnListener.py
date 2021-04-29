@@ -6,7 +6,7 @@ from WordlifyListener import WordlifyListener
 # This class defines a complete listener for a parse tree produced by WordlifyParser.
 class FnListener(WordlifyListener):
     def __init__(self):
-        self.functions = []
+        self.functions = {}
 
     def getFunctions(self):
         return self.functions
@@ -26,7 +26,7 @@ class FnListener(WordlifyListener):
 
     # Exit a parse tree produced by WordlifyParser#fn_def.
     def exitFn_def(self, ctx:WordlifyParser.Fn_defContext):
-        self.functions.append(ctx.ID()[0].getText())
+        self.functions[ctx.ID()[0].getText()] = len(ctx.ID()) - 1
 
 
     # Enter a parse tree produced by WordlifyParser#block_instr.
