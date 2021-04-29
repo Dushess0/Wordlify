@@ -2,15 +2,18 @@ import sys
 from antlr4 import *
 from WordlifyParser import WordlifyParser
 from WordlifyListener import WordlifyListener
-import random
 # This class defines a complete listener for a parse tree produced by WordlifyParser.
 class MyWlListener(WordlifyListener):
-    def __init__(self, output, src_lines):
+    def __init__(self, output, src_lines, functions):
         self.output = output
         self.src_lines = src_lines
         self.imports = []
         self.functions = []
+
         self.vars = {}
+        for function in functions:
+            self.vars[function] = "function"
+
         self.var_nr = 0
         self.indent = 0
 
@@ -34,7 +37,6 @@ class MyWlListener(WordlifyListener):
         if len(self.functions) != 0:
             for line in self.functions:
                 self.output.write(line + "\n")
-            self.output.write("\n")
 
         for line in ctx.lines:
             self.output.write(line + "\n")
@@ -42,13 +44,33 @@ class MyWlListener(WordlifyListener):
     # Enter a parse tree produced by WordlifyParser#fn_def.
     def enterFn_def(self, ctx:WordlifyParser.Fn_defContext):
         ctx.lines = []
+        ctx.localVars = []
+        self.vars[ctx.ID()[0].getText()] = "function"
         header = "def {}(".format(ctx.ID()[0].getText())
 
         if len(ctx.ID()) > 1:
             header += ctx.ID()[1].getText()
+            ctx.localVars.append(ctx.ID()[1].getText())
+            self.vars[ctx.ID()[1].getText()] = "any"
+
+            if ctx.ID()[1].getText()[0] == "v":
+                try:
+                    nr = ctx.ID()[1].getText()[1:]
+                    self.var_nr = nr+1
+                except ValueError:
+                    pass
 
             for i in range(2, len(ctx.ID())):
                 header += ", {}".format(ctx.ID()[i])
+                ctx.localVars.append(ctx.ID()[i].getText())
+                self.vars[ctx.ID()[i].getText()] = "any"
+
+                if ctx.ID()[i].getText()[0] == "v":
+                    try:
+                        nr = ctx.ID()[i].getText()[1:]
+                        self.var_nr = nr+1
+                    except ValueError:
+                        pass
         header += "):"
         self.indent+=4
         ctx.lines.append(header)
@@ -60,6 +82,8 @@ class MyWlListener(WordlifyListener):
         ctx.lines.append("")
         self.indent-=4
         self.functions += ctx.lines
+        for v in ctx.localVars:
+            del self.vars[v]
 
     # Enter a parse tree produced by WordlifyParser#block_instr.
     def enterBlock_instr(self, ctx:WordlifyParser.Block_instrContext):
@@ -232,8 +256,26 @@ class MyWlListener(WordlifyListener):
 
     # Exit a parse tree produced by WordlifyParser#fn_call.
     def exitFn_call(self, ctx:WordlifyParser.Fn_callContext):
-        pass
+        line_nr = ctx.ID().getSymbol().line
+        col_nr = ctx.ID().getSymbol().column
+        line = self.src_lines[line_nr-1].lstrip()
+        id = ctx.ID().getText()
 
+        try:
+            if self.vars[ctx.ID().getText()] != "function":
+                raise Exception("Line {}, column {}: '{}' is not a function:\n    {}".format(line_nr, col_nr, id, line))
+        except KeyError:
+            raise Exception("Line {}, column {}: '{}' is not a function:\n    {}".format(line_nr, col_nr, id, line))
+
+        header = "{}(".format(ctx.ID().getText())
+        if len(ctx.value_or_id()) > 0:
+            header += ctx.value_or_id()[0].getText()
+
+            for i in range(1, len(ctx.value_or_id()) ):
+                header += ", {}".format(ctx.value_or_id()[i])
+
+        header += ")"
+        ctx.parentCtx.lines = [header]
 
     # Enter a parse tree produced by WordlifyParser#exist.
     def enterExist(self, ctx:WordlifyParser.ExistContext):
@@ -580,7 +622,7 @@ class MyWlListener(WordlifyListener):
                 raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, id, line))
             # ID is in self.vars:
             type = self.vars[id]
-            if type != "str":
+            if type != "str" and type != "any":
                 raise Exception("Line {}, column {}: variable '{}' has type '{}', but 'str' expected:\n    {}".format(line_nr, col_nr, id, type, line))
 
     # Enter a parse tree produced by WordlifyParser#num_or_id.
@@ -598,7 +640,7 @@ class MyWlListener(WordlifyListener):
                 raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, id, line))
             # ID is in self.vars:
             type = self.vars[id]
-            if type != "num":
+            if type != "num" and type != "any":
                 raise Exception("Line {}, column {}: variable '{}' has type '{}', but 'num' expected:\n    {}".format(line_nr, col_nr, id, type, line))
 
     # Enter a parse tree produced by WordlifyParser#value_or_id.
@@ -616,7 +658,7 @@ class MyWlListener(WordlifyListener):
                 raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, id, line))
             # ID is in self.vars:
             type = self.vars[id]
-            if type != "str" and type != "num":
+            if type != "str" and type != "num" and type != "any":
                 raise Exception("Line {}, column {}: variable '{}' has type '{}', but 'str' or 'num' expected:\n    {}".format(line_nr, col_nr, id, type, line))
 
 del WordlifyParser

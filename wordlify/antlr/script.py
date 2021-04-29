@@ -1,4 +1,5 @@
-def a(b, c, d):
-    print("C")
+def a(b):
+    print(b)
 
-
+a()
+d = 5

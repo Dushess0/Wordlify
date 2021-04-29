@@ -1,1 +1,5 @@
-fn a (b,c,d) begin print("C") end
+a()
+
+fn a (b) begin print(b) end
+
+d = 5
