@@ -1,4 +1,4 @@
-def a(
-print("C")
+def a(b, c, d):
+    print("C")
 
 

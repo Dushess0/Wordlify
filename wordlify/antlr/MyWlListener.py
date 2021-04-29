@@ -49,8 +49,8 @@ class MyWlListener(WordlifyListener):
 
             for i in range(2, len(ctx.ID())):
                 header += ", {}".format(ctx.ID()[i])
-            header += "):"
-        
+        header += "):"
+        self.indent+=4
         ctx.lines.append(header)
 
     # Exit a parse tree produced by WordlifyParser#fn_def.
@@ -58,7 +58,7 @@ class MyWlListener(WordlifyListener):
         if len(ctx.lines) == 1:
             ctx.lines.append("    pass")
         ctx.lines.append("")
-
+        self.indent-=4
         self.functions += ctx.lines
 
     # Enter a parse tree produced by WordlifyParser#block_instr.

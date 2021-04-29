@@ -1,1 +1,1 @@
-fn a () begin print("C") end
+fn a (b,c,d) begin print("C") end
