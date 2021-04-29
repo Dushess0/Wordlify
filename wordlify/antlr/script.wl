@@ -1,4 +1,4 @@
-a(5)
+a(5, 4)
 
 fn a (b) begin print(b) end
 

@@ -275,7 +275,7 @@ class MyWlListener(WordlifyListener):
             header += ctx.value_or_id()[0].getText()
 
             for i in range(1, len(ctx.value_or_id()) ):
-                header += ", {}".format(ctx.value_or_id()[i])
+                header += ", {}".format(ctx.value_or_id()[i].getText())
 
         header += ")"
         ctx.parentCtx.lines = [header]
