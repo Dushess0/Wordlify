@@ -251,7 +251,6 @@ class MyWlListener(WordlifyListener):
                 col_nr = ctx.ID().getSymbol().column
                 raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, id, line))
             ctx.type = self.vars[id]
-        print(self.vars)
         # TODO return_fn
 
     # Enter a parse tree produced by WordlifyParser#fn_call.
