@@ -5,8 +5,9 @@ from WordlifyListener import WordlifyListener
 
 # This class defines a complete listener for a parse tree produced by WordlifyParser.
 class FnListener(WordlifyListener):
-    def __init__(self):
+    def __init__(self, src_lines):
         self.functions = {}
+        self.src_lines = src_lines
 
     def getFunctions(self):
         return self.functions
@@ -26,8 +27,14 @@ class FnListener(WordlifyListener):
 
     # Exit a parse tree produced by WordlifyParser#fn_def.
     def exitFn_def(self, ctx:WordlifyParser.Fn_defContext):
-        self.functions[ctx.ID()[0].getText()] = len(ctx.ID()) - 1
-
+        if ctx.ID()[0].getText() not in self.functions:
+            self.functions[ctx.ID()[0].getText()] = len(ctx.ID()) - 1
+        else:
+            line_nr = ctx.ID()[0].getSymbol().line
+            line = self.src_lines[line_nr-1].lstrip()
+            col_nr = ctx.ID()[0].getSymbol().column
+            id = ctx.ID()[0].getText()
+            raise Exception("Line {}, column {}: function '{}' already exists:\n    {}".format(line_nr, col_nr, id, line))
 
     # Enter a parse tree produced by WordlifyParser#block_instr.
     def enterBlock_instr(self, ctx:WordlifyParser.Block_instrContext):

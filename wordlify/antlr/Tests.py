@@ -24,61 +24,122 @@ class Tests(unittest.TestCase):
         
         return parser
         
-    def setup2(self, tree, testString):
-        fnListener = FnListener()
-        walker = ParseTreeWalker()
-        walker.walk(fnListener, tree)
-        functions = fnListener.getFunctions()             
-    
-        wlListener = MyWlListener(self.output, testString.splitlines(), functions) 
-        return (walker, wlListener)
+    def test0(self): # should be lexer or parser error
+        testString = 'print "wed"'
+        lines = testString.splitlines()
+
+        parser = self.setup(testString)
+        tree = parser.program() 
+
+        self.error.seek(0)
+        error = self.error.read()
+        if error == "":
+            raise Exception("Should be lexer or parser error, but went through")
 
     def test1(self): # should be no error
         testString = """   print( "dew"
 ) """
+        lines = testString.splitlines()
+
         parser = self.setup(testString)
-        tree = parser.program()  
+        tree = parser.program() 
 
-        (walker, wlListener) = self.setup2(tree, testString)
+        self.error.seek(0)
+        error = self.error.read() 
+        if error != "":
+            raise Exception(error)
 
+        fnListener = FnListener(lines)
+        walker = ParseTreeWalker()
+        
+        walker.walk(fnListener, tree)
+        functions = fnListener.getFunctions()             
+    
+        wlListener = MyWlListener(self.output, lines, functions) 
         walker.walk(wlListener, tree)
+            
         self.output.seek(0) 
-           
-        # let's check that there aren't any symbols in errorListener
-        self.assertEqual(len(self.errorListener.symbol), 0) # lexer or parser error
         self.assertEqual(self.output.read(), 'print("dew")\n')
 
     def test2(self): # should be listener error
         testString = '   print ( wdnkf) ;  print ("oidjf") '
+        lines = testString.splitlines()
+
         parser = self.setup(testString)
-        tree = parser.program()  
+        tree = parser.program() 
 
-        (walker, wlListener) = self.setup2(tree, testString)
+        self.error.seek(0)
+        error = self.error.read() 
+        if error != "":
+            raise Exception(error)
 
+        fnListener = FnListener(testString.splitlines())
+        walker = ParseTreeWalker()
+        
         try:
+            walker.walk(fnListener, tree)
+            functions = fnListener.getFunctions()             
+        
+            wlListener = MyWlListener(self.output, lines, functions) 
             walker.walk(wlListener, tree)
+            raise Exception("Using not defined variable 'wdnkf'")
         except Exception as e:
             if str(e) != """Line 1, column 11: variable 'wdnkf' doesn't exist:
     print ( wdnkf) ;  print ("oidjf") """:
                 raise e
             
-        # let's check that there aren't any symbols in errorListener
-        self.assertEqual(len(self.errorListener.symbol), 0) # lexer or parser error
-
     def test3(self): # should be listener error
         testString = """if a == 5 then
 a=4;print(c) else end #weffwe"""
+        lines = testString.splitlines()
+
         parser = self.setup(testString)
-        tree = parser.program()  
+        tree = parser.program() 
 
-        (walker, wlListener) = self.setup2(tree, testString)
+        self.error.seek(0)
+        error = self.error.read() 
+        if error != "":
+            raise Exception(error)
 
+        fnListener = FnListener(testString.splitlines())
+        walker = ParseTreeWalker()
+        
         try:
+            walker.walk(fnListener, tree)
+            functions = fnListener.getFunctions()             
+        
+            wlListener = MyWlListener(self.output, lines, functions) 
             walker.walk(wlListener, tree)
+            raise Exception("Using not defined variable 'a'")
         except Exception as e:
             if str(e) != """Line 1, column 3: variable 'a' doesn't exist:
     if a == 5 then""":
                 raise e
             
-        # let's check that there aren't any symbols in errorListener
-        self.assertEqual(len(self.errorListener.symbol), 0) # lexer or parser error
+    def test4(self): # should be listener error
+        testString = """fn a(b) begin end
+
+fn a(d, c) begin end"""
+
+        parser = self.setup(testString)
+        tree = parser.program() 
+
+        self.error.seek(0)
+        error = self.error.read() 
+        if error != "":
+            raise Exception(error)
+
+        fnListener = FnListener(testString.splitlines())
+        walker = ParseTreeWalker()
+        
+        try:
+            walker.walk(fnListener, tree)
+            functions = fnListener.getFunctions()             
+        
+            wlListener = MyWlListener(self.output, lines, functions) 
+            walker.walk(wlListener, tree)
+            raise Exception("Function 'a' defined twice")
+        except Exception as e:
+            if str(e) != """Line 3, column 3: function 'a' already exists:
+    fn a(d, c) begin end""":
+                raise e

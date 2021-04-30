@@ -17,26 +17,26 @@ def main(argv):
         parser = WordlifyParser(stream)
         tree = parser.program()
 
-        # with open(argv[1][:-2] + "py", "r") as out_content:
-        #     out_lines = out_content.read()
+        with open(argv[1][:-2] + "py", "r") as out_content:
+            out_lines = out_content.read()
+        
         output = open(argv[1][:-2] + "py", "w")
-
-        fnListener = FnListener()
-        walker = ParseTreeWalker()
-        walker.walk(fnListener, tree)
-        functions = fnListener.getFunctions()
         
         with open(argv[1], "r") as text_file:
             src_lines = text_file.readlines()
-            wlListener = MyWlListener(output, src_lines, functions)
+
+        fnListener = FnListener(src_lines)
 
         walker = ParseTreeWalker()
-        # walker.walk(wlListener, tree)
+
         try:
+            walker.walk(fnListener, tree)
+            functions = fnListener.getFunctions()
+            wlListener = MyWlListener(output, src_lines, functions)
             walker.walk(wlListener, tree)
         except Exception as e:
             print(e)
-            # output.write(out_lines)
+            output.write(out_lines)
         output.close()   
 
 if __name__ == '__main__':
