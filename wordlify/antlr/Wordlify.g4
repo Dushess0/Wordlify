@@ -93,5 +93,5 @@ NL : ('#' OPT_CHARS)? '\n' ;
 END_COMMENT : '#' OPT_CHARS ;
 
 fragment INT_PART : [1-9] [0-9]* | '0' ;
-fragment OPT_CHARS : ([A-Za-z] | [0-9] | OTHER_CHAR)* ;
+fragment OPT_CHARS : ([A-Za-z] | [0-9] | OTHER_CHAR | '"')* ;
 fragment OTHER_CHAR : '!' | '#' | '$' | '%' | '&' | '\'' | '(' | ')' | '*' | '+' | ',' | '-' | '.' | '/' | ':' | ';' | '<' | '=' | '>' | '?' | '@' | '[' | ']' | '^' | '_' | '`' | '{' | '|' | '}' | '~' | ' ' | '\t' ;
