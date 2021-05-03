@@ -45,7 +45,6 @@ class MyWlListener(WordlifyListener):
     def enterFn_def(self, ctx:WordlifyParser.Fn_defContext):
         ctx.lines = []
         ctx.localVars = []
-        self.vars[ctx.ID()[0].getText()] = "function"
         header = "def {}(".format(ctx.ID()[0].getText())
 
         if len(ctx.ID()) > 1:
@@ -313,7 +312,7 @@ class MyWlListener(WordlifyListener):
 '        print("Error: old file cannot be root")',
 '        quit()',
 'else:',
-'    if {} == "/":'.format(ctx.str_or_id()[0].getText())
+'    if {} == "/":'.format(ctx.str_or_id()[0].getText()),
 """        print("Error: old file cannot be '/'")""",
 '        quit()',
 '',
@@ -545,12 +544,79 @@ class MyWlListener(WordlifyListener):
 
     # Exit a parse tree produced by WordlifyParser#download.
     def exitDownload(self, ctx:WordlifyParser.DownloadContext):
-        self.add_imps(["import urllib.request"]) # TODO same checking as in "move", also permissions
+        self.add_imps(["import urllib.request", "from urllib.error import *", "import os"])
         ctx.parentCtx.lines = [
 'try:',
+'    if {} == "":'.format(ctx.str_or_id()[1].getText()),
+'        print("Error: Empty destination file name")',
+'        quit()',
+'',
+'    if os.path.isdir({}):'.format(ctx.str_or_id()[1].getText()),
+"""        print("Error: '%s' is a directory" % {})""".format(ctx.str_or_id()[1].getText()),
+'        quit()',
+'    if "/" in {}: # a (in)valid path'.format(ctx.str_or_id()[1].getText()),
+'        v{} = []'.format(self.var_nr+4),
+'        v{} = {}'.format(self.var_nr, ctx.str_or_id()[1].getText()),
+'        if v{}[-2:] == "//":'.format(self.var_nr),
+'            print("Error: invalid path")',
+'            quit()',
+'        if os.name == "nt":',
+"""            if v{}[-1] == "/": # trim unnecessary last '/'""".format(self.var_nr),
+'                v{0} = v{0}[:-1]'.format(self.var_nr),
+'                {0} = {0}[:-1]'.format(ctx.str_or_id()[1].getText()),
+'            v{0} = v{0}.split("/")'.format(self.var_nr),
+'            del v{}[-1]'.format(self.var_nr),
+'',
+'            if "" in v{}:'.format(self.var_nr),
+'                print("Error: invalid path")',
+'                quit()',
+'            else:',
+'                for v{} in range(0, len(v{})):'.format(self.var_nr+1, self.var_nr),
+'                    v{} = v{}[0]'.format(self.var_nr+2, self.var_nr),
+'                    for v{} in range(1, v{}+1):'.format(self.var_nr+3, self.var_nr+1),
+'                        v{} += "/" + v{}[v{}]'.format(self.var_nr+2, self.var_nr, self.var_nr+3),
+'                    v{}.append(v{})'.format(self.var_nr+4, self.var_nr+2),
+'        else:',
+'            if v{0} != "/" and v{0}[-1] == "/": # trim unnecessary last "/"'.format(self.var_nr),
+'                v{0} = v{0}[:-1]'.format(self.var_nr),
+'                {0} = {0}[:-1]'.format(ctx.str_or_id()[1].getText()),
+'            v{0} = v{0}.split("/")'.format(self.var_nr),
+'            del v{}[-1]'.format(self.var_nr),
+'',
+'            if v{}[0] == "":  # if is absolute path'.format(self.var_nr),
+'                for v{} in range(0, len(v{})):'.format(self.var_nr+1, self.var_nr),
+'                    v{} = ""'.format(self.var_nr+2),
+'                    for v{} in range(1, v{} + 1):'.format(self.var_nr+3, self.var_nr+1),
+'                        v{} += "/" + v{}[v{}]'.format(self.var_nr+2, self.var_nr, self.var_nr+3),
+'                    v{}.append(v{})'.format(self.var_nr+4, self.var_nr+2),
+'                v{}[0] = "/"'.format(self.var_nr+4),
+'            elif "" in v{}:'.format(self.var_nr),
+'                print("Error: invalid path")',
+'                quit()',
+'            else:',
+'                for v{} in range(0, len(v{})):'.format(self.var_nr+1, self.var_nr),
+'                    v{} = v{}[0]'.format(self.var_nr+2, self.var_nr),
+'                    for v{} in range(1, v{}+1):'.format(self.var_nr+3, self.var_nr+1),
+'                        v{} += "/" + v{}[v{}]'.format(self.var_nr+2, self.var_nr, self.var_nr+3),
+'                    v{}.append(v{})'.format(self.var_nr+4, self.var_nr+2),
+'',
+'        for v{} in v{}:'.format(self.var_nr+5, self.var_nr+4),
+'            if os.path.isfile(v{}):'.format(self.var_nr+5),
+'                print("Error: %s is a file - cannot create a directory there" % v{})'.format(self.var_nr+5),
+'                quit()',
+'            elif not os.path.exists(v{}):'.format(self.var_nr+5),
+'                os.mkdir(v{})'.format(self.var_nr+5),
+'except PermissionError:',
+"""    print("Error: Permission denied to download file as '%s'" % {})""".format(ctx.str_or_id()[1].getText()),
+'    quit()',
+'try:',
 '    urllib.request.urlretrieve({}, {})'.format(ctx.str_or_id()[0].getText(), ctx.str_or_id()[1].getText()),
-'except Exception as v{}:'.format(self.var_nr),
-'    print(str(v{}))'.format(self.var_nr)]
+'except PermissionError:',
+"""    print("Error: Permission denied to download file as '%s'" % {})""".format(ctx.str_or_id()[1].getText()),
+'    quit()',
+'except URLError as v{}:'.format(self.var_nr),
+'    print("Network error: " + str(v{}))'.format(self.var_nr),
+'    quit()']
 
     # Enter a parse tree produced by WordlifyParser#write.
     def enterWrite(self, ctx:WordlifyParser.WriteContext):
@@ -563,10 +629,8 @@ class MyWlListener(WordlifyListener):
 '    f = open({}, "w")'.format(ctx.str_or_id()[0].getText()),
 '    f.write({})'.format(ctx.str_or_id()[1].getText()),
 'except PermissionError as v{}:'.format(self.var_nr),
-'    print("Error: %s - Permission denied to write to file" % v{}.filename)'.format(self.var_nr),
+'    print("Error: Permission denied to write to file %s" % v{}.filename)'.format(self.var_nr),
 '    quit()']
-        
-
 
     # Enter a parse tree produced by WordlifyParser#read.
     def enterRead(self, ctx:WordlifyParser.ReadContext):

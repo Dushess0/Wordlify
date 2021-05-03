@@ -143,3 +143,33 @@ fn a(d, c) begin end"""
             if str(e) != """Line 3, column 3: function 'a' already exists:
     fn a(d, c) begin end""":
                 raise e
+
+    def test5(self): # should be no error
+        testString = """fn a(b) begin end
+
+a(3)"""
+        lines = testString.splitlines()
+
+        parser = self.setup(testString)
+        tree = parser.program() 
+
+        self.error.seek(0)
+        error = self.error.read() 
+        if error != "":
+            raise Exception(error)
+
+        fnListener = FnListener(lines)
+        walker = ParseTreeWalker()
+        
+        walker.walk(fnListener, tree)
+        functions = fnListener.getFunctions()             
+    
+        wlListener = MyWlListener(self.output, lines, functions) 
+        walker.walk(wlListener, tree)
+            
+        self.output.seek(0) 
+        self.assertEqual(self.output.read(), """def a(b):
+    pass
+
+a(3)
+""")
