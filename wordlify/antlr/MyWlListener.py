@@ -228,6 +228,18 @@ class MyWlListener(WordlifyListener):
                 pass
 
         # TODO return_fn:
+        fn_exists = False
+        line_nr = ctx.ID().getSymbol().line
+        line = self.src_lines[line_nr-1].lstrip()
+        col_nr = ctx.ID().getSymbol().column
+        try:
+            if self.vars[ctx.ID().getText()][0] == "function":
+                raise Exception("Line {}, column {}: '{}' is a function\n    {}".format(line_nr, col_nr, ctx.ID().getText(), line))
+        except KeyError:
+            pass
+        except Exception as e:
+            raise e
+
         ctx.parentCtx.lines = ["{} = {}".format(ctx.ID().getText(), ctx.value().getText())]
         self.vars[ctx.ID().getText()] = ctx.value().type
         ctx.parentCtx.parentCtx.localVars.append(ctx.ID().getText())
