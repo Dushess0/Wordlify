@@ -120,6 +120,7 @@ a=4;print(c) else end #weffwe"""
         testString = """fn a(b) begin end
 
 fn a(d, c) begin end"""
+        lines = testString.splitlines()
 
         parser = self.setup(testString)
         tree = parser.program() 
@@ -173,3 +174,27 @@ a(3)"""
 
 a(3)
 """)
+
+    def test6(self): # should be no error
+        testString = """print("Ąąę") # polskie znaki są wspierane"""
+        lines = testString.splitlines()
+
+        parser = self.setup(testString)
+        tree = parser.program() 
+
+        self.error.seek(0)
+        error = self.error.read() 
+        if error != "":
+            raise Exception(error)
+
+        fnListener = FnListener(lines)
+        walker = ParseTreeWalker()
+        
+        walker.walk(fnListener, tree)
+        functions = fnListener.getFunctions()             
+    
+        wlListener = MyWlListener(self.output, lines, functions) 
+        walker.walk(wlListener, tree)
+            
+        self.output.seek(0) 
+        self.assertEqual(self.output.read(), 'print("Ąąę")\n')

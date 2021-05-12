@@ -84,8 +84,8 @@ CMP_OP : '!=' | '<' | '>' | '==' | '<=' | '>=' ;
 LOG_OP : 'and' | 'or' | 'not' ;
 
 BOOL : 'true' | 'false' ;
-STR : '"' ([A-Za-z] | [0-9] | OTHER_CHAR | '\\"' | '\\\\' | '\\n' | '\\r')* '"' ;
-ID : [A-Za-z] ([A-Za-z] | [0-9] | '_')* ;
+STR : '"' (LETTER | [0-9] | OTHER_CHAR | '\\"' | '\\\\' | '\\n' | '\\r')* '"' ;
+ID : LETTER (LETTER | [0-9] | '_')* ;
 NUM : '-'? INT_PART ('.' [0-9]+)? ;
 
 WS : (' ' | '\t');
@@ -93,5 +93,6 @@ NL : ('#' OPT_CHARS)? '\n' ;
 END_COMMENT : '#' OPT_CHARS ;
 
 fragment INT_PART : [1-9] [0-9]* | '0' ;
-fragment OPT_CHARS : ([A-Za-z] | [0-9] | OTHER_CHAR | '"')* ;
+fragment OPT_CHARS : (LETTER | [0-9] | OTHER_CHAR | '"')* ;
+fragment LETTER : [A-Za-z] | 'ą' | 'Ą' | 'ć' | 'Ć' | 'ę' | 'Ę' | 'ł' | 'Ł' | 'ń' | 'Ń' | 'ó' | 'Ó' | 'ś' | 'Ś' | 'ź' | 'Ź' | 'ż' | 'Ż' ;
 fragment OTHER_CHAR : '!' | '#' | '$' | '%' | '&' | '\'' | '(' | ')' | '*' | '+' | ',' | '-' | '.' | '/' | ':' | ';' | '<' | '=' | '>' | '?' | '@' | '[' | ']' | '^' | '_' | '`' | '{' | '|' | '}' | '~' | ' ' | '\t' ;

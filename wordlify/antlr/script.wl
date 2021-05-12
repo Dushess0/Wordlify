@@ -5,5 +5,6 @@ fn a(b) begin
         c = 1
         print(c)
     end
+    
     print(c)
 end
