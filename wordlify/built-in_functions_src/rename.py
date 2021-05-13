@@ -30,15 +30,16 @@ try:
         quit()
         
     v = ""
+    v2 = old
     if old[-1] == "/":
-        old = old[:-1]
-    if "/" in old:
-        v = old[:old.rfind("/")+1]
+        v2 = old[:-1]
+    if "/" in v2:
+        v = v2[:v2.rfind("/")+1]
         
     v += new
     if os.path.exists(v):
         print("Error: '%s' already exists" % v)
         quit()
-    os.replace(old, v)
+    os.replace(v2, v)
 except PermissionError as v1:
     print("Error: Permission denied to rename %s to %s" % (old, new))
