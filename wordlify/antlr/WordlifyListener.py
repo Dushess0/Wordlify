@@ -134,12 +134,12 @@ class WordlifyListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by WordlifyParser#value.
-    def enterValue(self, ctx:WordlifyParser.ValueContext):
+    # Enter a parse tree produced by WordlifyParser#expr.
+    def enterExpr(self, ctx:WordlifyParser.ExprContext):
         pass
 
-    # Exit a parse tree produced by WordlifyParser#value.
-    def exitValue(self, ctx:WordlifyParser.ValueContext):
+    # Exit a parse tree produced by WordlifyParser#expr.
+    def exitExpr(self, ctx:WordlifyParser.ExprContext):
         pass
 
 
@@ -284,24 +284,6 @@ class WordlifyListener(ParseTreeListener):
 
     # Exit a parse tree produced by WordlifyParser#exit.
     def exitExit(self, ctx:WordlifyParser.ExitContext):
-        pass
-
-
-    # Enter a parse tree produced by WordlifyParser#str_or_id.
-    def enterStr_or_id(self, ctx:WordlifyParser.Str_or_idContext):
-        pass
-
-    # Exit a parse tree produced by WordlifyParser#str_or_id.
-    def exitStr_or_id(self, ctx:WordlifyParser.Str_or_idContext):
-        pass
-
-
-    # Enter a parse tree produced by WordlifyParser#num_or_id.
-    def enterNum_or_id(self, ctx:WordlifyParser.Num_or_idContext):
-        pass
-
-    # Exit a parse tree produced by WordlifyParser#num_or_id.
-    def exitNum_or_id(self, ctx:WordlifyParser.Num_or_idContext):
         pass
 
 

@@ -6,21 +6,25 @@ from WordlifyLexer import WordlifyLexer
 from WordlifyParser import WordlifyParser
 from MyWlListener import MyWlListener
 from FnListener import FnListener
+import os
 
 def main(argv):
     if len(argv) != 2 or argv[1][-3:] != ".wl":
         print("Pass *.wl file as parameter")
     else:
-        input = FileStream(argv[1])
+        input = FileStream(argv[1], encoding="utf-8")
         lexer = WordlifyLexer(input)
         stream = CommonTokenStream(lexer)
         parser = WordlifyParser(stream)
         tree = parser.program()
 
-        with open(argv[1][:-2] + "py", "r") as out_content:
-            out_lines = out_content.read()
+        destFileName = argv[1][:-2] + "py"
+        out_lines = ""
+        if os.path.isfile(destFileName):
+            with open(destFileName, "r") as out_content:
+                out_lines = out_content.read()
         
-        output = open(argv[1][:-2] + "py", "w")
+        output = open(destFileName, "w")
         
         with open(argv[1], "r") as text_file:
             src_lines = text_file.readlines()

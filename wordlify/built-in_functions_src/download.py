@@ -13,12 +13,13 @@ import urllib.request
 import os
 
 url = "https://github.com/Dushess0/Wordlify/archive/refs/heads/master.zip"
-dest = "a/c.zip"
+dest = "a/c.zip/"
 
 try:
     if dest == "":
         print("Error: Empty destination file name")
         quit()
+    v7 = dest
 
     if os.path.isdir(dest):
         print("Error: '%s' is a directory" % dest)
@@ -32,7 +33,7 @@ try:
         if os.name == "nt":
             if v1[-1] == "/": # trim unnecessary last '/'
                 v1 = v1[:-1]
-                dest = dest[:-1]
+                v7 = v1[:-1] # !
             v1 = v1.split("/")
             del v1[-1]
             
@@ -48,7 +49,7 @@ try:
         else:
             if v1 != "/" and v1[-1] == "/": # trim unnecessary last '/'
                 v1 = v1[:-1]
-                dest = dest[:-1]
+                v7 = v1[:-1] # !
             v1 = v1.split("/")
             del v1[-1]
             
@@ -76,13 +77,13 @@ try:
             elif not os.path.exists(v6):
                 os.mkdir(v6)
 except PermissionError:
-    print("Error: Permission denied to download file as '%s'" % dest)
+    print("Error: Permission denied to download file as '%s'" % v7)
     quit()
 
 try:
-    urllib.request.urlretrieve(url, dest)
+    urllib.request.urlretrieve(url, v7)
 except PermissionError:
-    print("Error: Permission denied to download file as '%s'" % dest)
+    print("Error: Permission denied to download file as '%s'" % v7)
     quit()
 except URLError as v1:
     print("Network error: " + str(v1))

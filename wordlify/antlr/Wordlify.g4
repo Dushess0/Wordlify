@@ -15,41 +15,39 @@ block_instr : if_instr ;
 
 if_instr : if_cond then else_if* else_block? END ;
 if_cond : IF (WS | NL)+ cond (WS | NL)+ ;
-then : THEN (WS | NL)+ ( (atom_instr (WS | NL)* ';' (WS | NL)* | atom_instr (WS* NL WS*)+ | if_instr (WS | NL)+)*
-       (atom_instr (WS | NL)* (';' | (WS | NL)+) | if_instr (WS | NL)+) )? ;
+then : THEN (WS | NL)+ ( (atom_instr (WS | NL)* ';' (WS | NL)* | atom_instr (WS* NL WS*)+ | block_instr (WS | NL)+)*
+       (atom_instr (WS | NL)* (';' | (WS | NL)+) | block_instr (WS | NL)+) )? ;
 else_if : ELSE (WS | NL)+ if_cond then ;
-else_block : ELSE (WS | NL)+ ( (atom_instr (WS | NL)* ';' (WS | NL)* | atom_instr (WS* NL WS*)+ | if_instr (WS | NL)+)*
-             (atom_instr (WS | NL)* (';' | (WS | NL)+) | if_instr (WS | NL)+) )? ;
+else_block : ELSE (WS | NL)+ ( (atom_instr (WS | NL)* ';' (WS | NL)* | atom_instr (WS* NL WS*)+ | block_instr (WS | NL)+)*
+             (atom_instr (WS | NL)* (';' | (WS | NL)+) | block_instr (WS | NL)+) )? ;
 
 cond : bool_fn | BOOL | comparison ;
-comparison : value (WS | NL)* CMP_OP (WS | NL)* value ;
+comparison : expr (WS | NL)* CMP_OP (WS | NL)* expr ;
 
 atom_instr : fn_call | exist | print_instr | rename | remove | move | copy | download | write | read | wait_instr | execute | get_files | date_modified | size | exit | assign | TIME | FILE | FOLDER | ARGS ;
 bool_fn : exist ;
 return_fn : exist | read | TIME | get_files | date_modified | size | FILE | FOLDER | ARGS ;
 
-assign : ID (WS | NL)* '=' (WS | NL)* value ;
-value : return_fn | STR | NUM | ID ;
+assign : ID (WS | NL)* '=' (WS | NL)* expr ;
+expr : return_fn | STR | NUM | ID ;
 
 fn_call : ID (WS | NL)* '(' (WS | NL)* ( value_or_id (WS | NL)* (',' (WS | NL)* value_or_id (WS | NL)*)* )? ')' ;
-exist : EXIST (WS | NL)* '(' (WS | NL)* str_or_id (WS | NL)* ')' ;
+exist : EXIST (WS | NL)* '(' (WS | NL)* value_or_id (WS | NL)* ')' ;
 print_instr : PRINT (WS | NL)* '(' (WS | NL)* value_or_id (WS | NL)* ')' ;
-rename : RENAME (WS | NL)* '(' (WS | NL)* str_or_id (WS | NL)* ',' (WS | NL)* str_or_id (WS | NL)* ')';
-remove : REMOVE (WS | NL)* '(' (WS | NL)* str_or_id (WS | NL)* ')' ;
-move : MOVE (WS | NL)* '(' (WS | NL)* str_or_id (WS | NL)* ',' (WS | NL)* str_or_id (WS | NL)* ')';
-copy : COPY (WS | NL)* '(' (WS | NL)* str_or_id (WS | NL)* ',' (WS | NL)* str_or_id (WS | NL)* ')';
-download : DOWNLOAD (WS | NL)* '(' (WS | NL)* str_or_id (WS | NL)* ',' (WS | NL)* str_or_id (WS | NL)* ')';
-write : WRITE (WS | NL)* '(' (WS | NL)* str_or_id (WS | NL)* ',' (WS | NL)* str_or_id (WS | NL)* ')';
-read : READ (WS | NL)* '(' (WS | NL)* str_or_id (WS | NL)* ')' ;
-wait_instr : WAIT (WS | NL)* '(' (WS | NL)* num_or_id (WS | NL)* ')' ;
-execute : EXECUTE (WS | NL)* '(' (WS | NL)* (str_or_id (WS | NL)* ',' (WS | NL)*)* str_or_id (WS | NL)* ')' ;
-get_files : GET_FILES (WS | NL)* '(' (WS | NL)* str_or_id (WS | NL)* ')' ;
-date_modified : DATE_MODIFIED (WS | NL)* '(' (WS | NL)* str_or_id (WS | NL)* ')' ;
-size : SIZE (WS | NL)* '(' (WS | NL)* str_or_id (WS | NL)* ')' ;
-exit : EXIT (WS | NL)* '(' (WS | NL)* (value_or_id) (WS | NL)* ')' ;
+rename : RENAME (WS | NL)* '(' (WS | NL)* value_or_id (WS | NL)* ',' (WS | NL)* value_or_id (WS | NL)* ')';
+remove : REMOVE (WS | NL)* '(' (WS | NL)* value_or_id (WS | NL)* ')' ;
+move : MOVE (WS | NL)* '(' (WS | NL)* value_or_id (WS | NL)* ',' (WS | NL)* value_or_id (WS | NL)* ')';
+copy : COPY (WS | NL)* '(' (WS | NL)* value_or_id (WS | NL)* ',' (WS | NL)* value_or_id (WS | NL)* ')';
+download : DOWNLOAD (WS | NL)* '(' (WS | NL)* value_or_id (WS | NL)* ',' (WS | NL)* value_or_id (WS | NL)* ')';
+write : WRITE (WS | NL)* '(' (WS | NL)* value_or_id (WS | NL)* ',' (WS | NL)* value_or_id (WS | NL)* ')';
+read : READ (WS | NL)* '(' (WS | NL)* value_or_id (WS | NL)* ')' ;
+wait_instr : WAIT (WS | NL)* '(' (WS | NL)* value_or_id (WS | NL)* ')' ;
+execute : EXECUTE (WS | NL)* '(' (WS | NL)* (value_or_id (WS | NL)* ',' (WS | NL)*)* value_or_id (WS | NL)* ')' ;
+get_files : GET_FILES (WS | NL)* '(' (WS | NL)* value_or_id (WS | NL)* ')' ;
+date_modified : DATE_MODIFIED (WS | NL)* '(' (WS | NL)* value_or_id (WS | NL)* ')' ;
+size : SIZE (WS | NL)* '(' (WS | NL)* value_or_id (WS | NL)* ')' ;
+exit : EXIT (WS | NL)* '(' (WS | NL)* value_or_id (WS | NL)* ')' ;
 
-str_or_id : STR | ID ;
-num_or_id: NUM |ID;
 value_or_id: NUM|STR|ID;
 
 /* Lexer rules: */
