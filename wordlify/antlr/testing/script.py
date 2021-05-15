@@ -1,10 +1,18 @@
-def a(b):
-    if b > 2:
-        c = 1
-        print(c)
-        if c > 0:
-            print("Zagnieżdżony if")
-        else:
-            print(c)
+import shutil
+import os
 
-a(3)
+file_name = "a"
+try:
+    os.remove(file_name)
+except PermissionError as v0:
+    print("Error: %s - Permission denied to delete" % v0.filename)
+    quit()
+except OSError:
+    try:
+        shutil.rmtree(file_name)
+    except PermissionError as v0:
+        print("Error: %s - Permission denied to delete" % v0.filename)
+        quit()
+    except OSError as v0:
+        print("Error: %s - No such file or directory" % v0.filename)
+        quit()

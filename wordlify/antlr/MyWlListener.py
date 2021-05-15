@@ -195,24 +195,6 @@ class MyWlListener(WordlifyListener):
         for line in ctx.lines:
             ctx.parentCtx.lines.append(" "*self.indent + line)
 
-    # Enter a parse tree produced by WordlifyParser#bool_fn.
-    def enterBool_fn(self, ctx:WordlifyParser.Bool_fnContext):
-        pass
-
-    # Exit a parse tree produced by WordlifyParser#bool_fn.
-    def exitBool_fn(self, ctx:WordlifyParser.Bool_fnContext):
-        pass
-
-
-    # Enter a parse tree produced by WordlifyParser#return_fn.
-    def enterReturn_fn(self, ctx:WordlifyParser.Return_fnContext):
-        pass
-
-    # Exit a parse tree produced by WordlifyParser#return_fn.
-    def exitReturn_fn(self, ctx:WordlifyParser.Return_fnContext):
-        pass
-
-
     # Enter a parse tree produced by WordlifyParser#assign.
     def enterAssign(self, ctx:WordlifyParser.AssignContext):
         pass
@@ -222,8 +204,8 @@ class MyWlListener(WordlifyListener):
         if ctx.ID().getText()[0] == "v":
             try:
                 nr = ctx.ID().getText()[1:]
-                self.var_nr = nr+1
-            except ValueError:
+                self.var_nr = int(nr) + 1
+            except Exception:
                 pass
 
         # TODO return_fn:
@@ -261,14 +243,14 @@ class MyWlListener(WordlifyListener):
                 col_nr = ctx.ID().getSymbol().column
                 raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, id, line))
             ctx.type = self.vars[id]
-        # TODO return_fn
+        # TODO fn_call
 
-    # Enter a parse tree produced by WordlifyParser#fn_call.
-    def enterFn_call(self, ctx:WordlifyParser.Fn_callContext):
+    # Enter a parse tree produced by WordlifyParser#own_fn_call.
+    def enterOwn_fn_call(self, ctx:WordlifyParser.Own_fn_callContext):
         pass
 
-    # Exit a parse tree produced by WordlifyParser#fn_call.
-    def exitFn_call(self, ctx:WordlifyParser.Fn_callContext):
+    # Exit a parse tree produced by WordlifyParser#own_fn_call.
+    def exitOwn_fn_call(self, ctx:WordlifyParser.Own_fn_callContext):
         line_nr = ctx.ID().getSymbol().line
         col_nr = ctx.ID().getSymbol().column
         line = self.src_lines[line_nr-1].lstrip()
@@ -372,8 +354,7 @@ class MyWlListener(WordlifyListener):
 '        quit()',
 '    os.replace(v{}, v{})'.format(self.var_nr+2, self.var_nr),
 'except PermissionError:',
-'    print("Error: Permission denied to rename %s to %s" % ({}, {}))'.format(ctx.value_or_id()[0].getText(), ctx.value_or_id()[1].getText()),
-'del v{}'.format(self.var_nr)]
+'    print("Error: Permission denied to rename %s to %s" % ({}, {}))'.format(ctx.value_or_id()[0].getText(), ctx.value_or_id()[1].getText())]
 
     # Enter a parse tree produced by WordlifyParser#remove.
     def enterRemove(self, ctx:WordlifyParser.RemoveContext):
@@ -443,7 +424,15 @@ class MyWlListener(WordlifyListener):
 '    if not os.path.exists({}):'.format(ctx.value_or_id()[0].getText()),
 '        print("Error: %s doesn\'t exist" % {})'.format(ctx.value_or_id()[0].getText()),
 '        quit()',
-'    elif not os.path.isdir({}):'.format(ctx.value_or_id()[1].getText()),
+'    if os.name == "nt": # Windows',
+'        if {}[1] == ":" and len({}) < 4:'.format(ctx.value_or_id()[0].getText()),
+'            print("Error: file to move cannot be root")',
+'            quit()',
+'    else:',
+'        if({} == "/"):'.format(ctx.value_or_id()[0].getText()),
+'            print("Error: file to move cannot be root")',
+'            quit()',
+'    if not os.path.isdir({}):'.format(ctx.value_or_id()[1].getText()),
 '        v{} = {}'.format(self.var_nr+1, ctx.value_or_id()[1].getText()),
 '        v{} = []'.format(self.var_nr+2),
 '        if os.name == "nt": # Windows',
@@ -505,11 +494,9 @@ class MyWlListener(WordlifyListener):
 '        shutil.move({}, {})'.format(ctx.value_or_id()[0].getText(), ctx.value_or_id()[1].getText()),
 '    else:',
 '        shutil.move({}, {})'.format(ctx.value_or_id()[0].getText(), ctx.value_or_id()[1].getText()),
-"    del v{}, v{}, v{}, v{}, v{}, v{}".format(self.var_nr+1, self.var_nr+2, self.var_nr+3, self.var_nr+4, self.var_nr+5, self.var_nr+6),
 'except PermissionError:',
 """    print("Error: Permission denied to move '%s' to '%s'" % ({}, {}))""".format(ctx.value_or_id()[0].getText(), ctx.value_or_id()[1].getText()),
-'    quit()',
-'del v{}'.format(self.var_nr)]
+'    quit()']
 
     # Enter a parse tree produced by WordlifyParser#copy.
     def enterCopy(self, ctx:WordlifyParser.CopyContext):
@@ -610,11 +597,9 @@ class MyWlListener(WordlifyListener):
 '            shutil.copy2({}, v{})'.format(ctx.value_or_id()[0].getText(), self.var_nr+1),
 '        else:',
 '            shutil.copytree({0}, v{1} + "/" + {0})'.format(ctx.value_or_id()[0].getText(), self.var_nr+1),
-'del v{}, v{}, v{}, v{}, v{}, v{}, v{}'.format(self.var_nr+1, self.var_nr+2, self.var_nr+3, self.var_nr+4, self.var_nr+5, self.var_nr+6, self.var_nr+7),
 'except PermissionError:',
 """    print("Error: Permission denied to copy '%s' to '%s'" % ({}, {}))""".format(ctx.value_or_id()[0].getText(), ctx.value_or_id()[1].getText()),
-'    quit()',
-'del v{}'.format(self.var_nr)]
+'    quit()']
 
 
     # Enter a parse tree produced by WordlifyParser#download.

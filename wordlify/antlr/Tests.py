@@ -198,3 +198,159 @@ a(3)
             
         self.output.seek(0) 
         self.assertEqual(self.output.read(), 'print("Ąąę")\n')
+
+    def test7(self): # should be listener error
+        testString = """a(3)
+
+fn a(b) begin
+    if b > 2 then
+        c = 1
+        print(c)
+
+        if c > 0 then
+            print("Zagnieżdżony if")
+        else
+            print(c)
+        end
+    end
+    
+    print(c)
+end"""
+        lines = testString.splitlines()
+
+        parser = self.setup(testString)
+        tree = parser.program() 
+
+        self.error.seek(0)
+        error = self.error.read() 
+        if error != "":
+            raise Exception(error)
+
+        fnListener = FnListener(testString.splitlines())
+        walker = ParseTreeWalker()
+        
+        try:
+            walker.walk(fnListener, tree)
+            functions = fnListener.getFunctions()             
+        
+            wlListener = MyWlListener(self.output, lines, functions) 
+            walker.walk(wlListener, tree)
+            raise Exception("No error detected when using variable out of scope")
+        except Exception as e:
+            if str(e) != """Line 15, column 10: variable 'c' doesn't exist:
+    print(c)""":
+                raise e
+
+    def test8(self): # should be no error
+        testString = """var1 = "a"; print(var1)"""
+        lines = testString.splitlines()
+
+        parser = self.setup(testString)
+        tree = parser.program() 
+
+        self.error.seek(0)
+        error = self.error.read() 
+        if error != "":
+            raise Exception(error)
+
+        fnListener = FnListener(lines)
+        walker = ParseTreeWalker()
+        
+        walker.walk(fnListener, tree)
+        functions = fnListener.getFunctions()             
+    
+        wlListener = MyWlListener(self.output, lines, functions) 
+        walker.walk(wlListener, tree)
+            
+        self.output.seek(0) 
+        self.assertEqual(self.output.read(), 'var1 = "a"\nprint(var1)\n')
+
+    def test9(self): # should be no error
+        testString = """v = "a"; print(v)"""
+        lines = testString.splitlines()
+
+        parser = self.setup(testString)
+        tree = parser.program() 
+
+        self.error.seek(0)
+        error = self.error.read() 
+        if error != "":
+            raise Exception(error)
+
+        fnListener = FnListener(lines)
+        walker = ParseTreeWalker()
+        
+        walker.walk(fnListener, tree)
+        functions = fnListener.getFunctions()             
+    
+        wlListener = MyWlListener(self.output, lines, functions) 
+        walker.walk(wlListener, tree)
+            
+        self.output.seek(0) 
+        self.assertEqual(self.output.read(), 'v = "a"\nprint(v)\n')
+
+    def test10(self): # should be no error
+        testString = """v1 = "a"; print(v1)"""
+        lines = testString.splitlines()
+
+        parser = self.setup(testString)
+        tree = parser.program() 
+
+        self.error.seek(0)
+        error = self.error.read() 
+        if error != "":
+            raise Exception(error)
+
+        fnListener = FnListener(lines)
+        walker = ParseTreeWalker()
+        
+        walker.walk(fnListener, tree)
+        functions = fnListener.getFunctions()             
+    
+        wlListener = MyWlListener(self.output, lines, functions) 
+        walker.walk(wlListener, tree)
+            
+        self.output.seek(0) 
+        self.assertEqual(self.output.read(), 'v1 = "a"\nprint(v1)\n')
+
+    def test10(self): # should be no error
+        testString = """v0 = "we"; remove("as")"""
+        lines = testString.splitlines()
+
+        parser = self.setup(testString)
+        tree = parser.program() 
+
+        self.error.seek(0)
+        error = self.error.read() 
+        if error != "":
+            raise Exception(error)
+
+        fnListener = FnListener(lines)
+        walker = ParseTreeWalker()
+        
+        walker.walk(fnListener, tree)
+        functions = fnListener.getFunctions()             
+    
+        wlListener = MyWlListener(self.output, lines, functions) 
+        walker.walk(wlListener, tree)
+            
+        self.output.seek(0) 
+        self.assertEqual(self.output.read(), """import shutil
+import os
+
+v0 = "we"
+try:
+    os.remove("as")
+except PermissionError as v1:
+    print("Error: %s - Permission denied to delete" % v1.filename)
+    quit()
+except OSError:
+    try:
+        shutil.rmtree("as")
+    except PermissionError as v1:
+        print("Error: %s - Permission denied to delete" % v1.filename)
+        quit()
+    except OSError as v1:
+        print("Error: %s - No such file or directory" % v1.filename)
+        quit()
+""")

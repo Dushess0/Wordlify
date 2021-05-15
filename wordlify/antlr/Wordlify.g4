@@ -21,17 +21,16 @@ else_if : ELSE (WS | NL)+ if_cond then ;
 else_block : ELSE (WS | NL)+ ( (atom_instr (WS | NL)* ';' (WS | NL)* | atom_instr (WS* NL WS*)+ | block_instr (WS | NL)+)*
              (atom_instr (WS | NL)* (';' | (WS | NL)+) | block_instr (WS | NL)+) )? ;
 
-cond : bool_fn | BOOL | comparison ;
+cond : fn_call | BOOL | comparison ;
 comparison : expr (WS | NL)* CMP_OP (WS | NL)* expr ;
 
-atom_instr : fn_call | exist | print_instr | rename | remove | move | copy | download | write | read | wait_instr | execute | get_files | date_modified | size | exit | assign | TIME | FILE | FOLDER | ARGS ;
-bool_fn : exist ;
-return_fn : exist | read | TIME | get_files | date_modified | size | FILE | FOLDER | ARGS ;
+expr : fn_call | STR | NUM | ID ;
 
+fn_call : own_fn_call | exist | print_instr | rename | remove | move | copy | download | write | read | wait_instr | execute | get_files | date_modified | size | exit | TIME | FILE | FOLDER | ARGS ;
+atom_instr : own_fn_call | exist | print_instr | rename | remove | move | copy | download | write | read | wait_instr | execute | get_files | date_modified | size | exit | assign | TIME | FILE | FOLDER | ARGS ;
 assign : ID (WS | NL)* '=' (WS | NL)* expr ;
-expr : return_fn | STR | NUM | ID ;
 
-fn_call : ID (WS | NL)* '(' (WS | NL)* ( value_or_id (WS | NL)* (',' (WS | NL)* value_or_id (WS | NL)*)* )? ')' ;
+own_fn_call : ID (WS | NL)* '(' (WS | NL)* ( value_or_id (WS | NL)* (',' (WS | NL)* value_or_id (WS | NL)*)* )? ')' ;
 exist : EXIST (WS | NL)* '(' (WS | NL)* value_or_id (WS | NL)* ')' ;
 print_instr : PRINT (WS | NL)* '(' (WS | NL)* value_or_id (WS | NL)* ')' ;
 rename : RENAME (WS | NL)* '(' (WS | NL)* value_or_id (WS | NL)* ',' (WS | NL)* value_or_id (WS | NL)* ')';

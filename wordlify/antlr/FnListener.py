@@ -116,25 +116,6 @@ class FnListener(WordlifyListener):
     def exitAtom_instr(self, ctx:WordlifyParser.Atom_instrContext):
         pass
 
-
-    # Enter a parse tree produced by WordlifyParser#bool_fn.
-    def enterBool_fn(self, ctx:WordlifyParser.Bool_fnContext):
-        pass
-
-    # Exit a parse tree produced by WordlifyParser#bool_fn.
-    def exitBool_fn(self, ctx:WordlifyParser.Bool_fnContext):
-        pass
-
-
-    # Enter a parse tree produced by WordlifyParser#return_fn.
-    def enterReturn_fn(self, ctx:WordlifyParser.Return_fnContext):
-        pass
-
-    # Exit a parse tree produced by WordlifyParser#return_fn.
-    def exitReturn_fn(self, ctx:WordlifyParser.Return_fnContext):
-        pass
-
-
     # Enter a parse tree produced by WordlifyParser#assign.
     def enterAssign(self, ctx:WordlifyParser.AssignContext):
         pass
@@ -153,12 +134,12 @@ class FnListener(WordlifyListener):
         pass
 
 
-    # Enter a parse tree produced by WordlifyParser#fn_call.
-    def enterFn_call(self, ctx:WordlifyParser.Fn_callContext):
+    # Enter a parse tree produced by WordlifyParser#own_fn_call.
+    def enterOwn_fn_call(self, ctx:WordlifyParser.Own_fn_callContext):
         pass
 
-    # Exit a parse tree produced by WordlifyParser#fn_call.
-    def exitFn_call(self, ctx:WordlifyParser.Fn_callContext):
+    # Exit a parse tree produced by WordlifyParser#own_fn_call.
+    def exitOwn_fn_call(self, ctx:WordlifyParser.Own_fn_callContext):
         pass
 
 
