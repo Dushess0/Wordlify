@@ -44,6 +44,13 @@ class FnListener(WordlifyListener):
     def exitBlock_instr(self, ctx:WordlifyParser.Block_instrContext):
         pass
 
+    # Enter a parse tree produced by WordlifyParser#while_instr.
+    def enterWhile_instr(self, ctx:WordlifyParser.While_instrContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#while_instr.
+    def exitWhile_instr(self, ctx:WordlifyParser.While_instrContext):
+        pass
 
     # Enter a parse tree produced by WordlifyParser#if_instr.
     def enterIf_instr(self, ctx:WordlifyParser.If_instrContext):
@@ -133,6 +140,14 @@ class FnListener(WordlifyListener):
     def exitExpr(self, ctx:WordlifyParser.ExprContext):
         pass
 
+
+    # Enter a parse tree produced by WordlifyParser#fn_call.
+    def enterFn_call(self, ctx:WordlifyParser.Fn_callContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#fn_call.
+    def exitFn_call(self, ctx:WordlifyParser.Fn_callContext):
+        pass
 
     # Enter a parse tree produced by WordlifyParser#own_fn_call.
     def enterOwn_fn_call(self, ctx:WordlifyParser.Own_fn_callContext):

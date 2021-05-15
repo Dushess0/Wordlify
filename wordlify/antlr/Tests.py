@@ -313,7 +313,7 @@ end"""
         self.output.seek(0) 
         self.assertEqual(self.output.read(), 'v1 = "a"\nprint(v1)\n')
 
-    def test10(self): # should be no error
+    def test11(self): # should be no error
         testString = """v0 = "we"; remove("as")"""
         lines = testString.splitlines()
 
@@ -353,4 +353,36 @@ except OSError:
     except OSError as v1:
         print("Error: %s - No such file or directory" % v1.filename)
         quit()
+""")
+
+    def test12(self): # should be no error
+        testString = """a = 0
+while a < 10 do
+    print(a)
+    a = a + 1
+end"""
+        lines = testString.splitlines()
+
+        parser = self.setup(testString)
+        tree = parser.program() 
+
+        self.error.seek(0)
+        error = self.error.read() 
+        if error != "":
+            raise Exception(error)
+
+        fnListener = FnListener(lines)
+        walker = ParseTreeWalker()
+        
+        walker.walk(fnListener, tree)
+        functions = fnListener.getFunctions()             
+    
+        wlListener = MyWlListener(self.output, lines, functions) 
+        walker.walk(wlListener, tree)
+            
+        self.output.seek(0) 
+        self.assertEqual(self.output.read(), """a = 0
+while a < 10:
+    print(a)
+    a = a + 1
 """)

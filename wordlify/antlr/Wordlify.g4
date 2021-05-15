@@ -11,7 +11,10 @@ fn_def : FN (WS | NL)+ ID (WS | NL)* '(' (WS | NL)* ( ID (WS | NL)* (',' (WS | N
          (atom_instr (WS | NL)* ';'? | block_instr) (WS | NL)+ )?
          END ;
 
-block_instr : if_instr ;
+block_instr : if_instr | while_instr ;
+
+while_instr : WHILE (WS | NL)+ cond (WS | NL)+ DO (WS | NL)+ ( (atom_instr (WS | NL)* ';' (WS | NL)* | atom_instr (WS* NL WS*)+ | block_instr (WS | NL)+)*
+       (atom_instr (WS | NL)* (';' | (WS | NL)+) | block_instr (WS | NL)+) )? END ;
 
 if_instr : if_cond then else_if* else_block? END ;
 if_cond : IF (WS | NL)+ cond (WS | NL)+ ;
@@ -24,7 +27,8 @@ else_block : ELSE (WS | NL)+ ( (atom_instr (WS | NL)* ';' (WS | NL)* | atom_inst
 cond : fn_call | BOOL | comparison ;
 comparison : expr (WS | NL)* CMP_OP (WS | NL)* expr ;
 
-expr : fn_call | STR | NUM | ID ;
+expr : fn_call | STR | NUM | ID | arith_expr ;
+arith_expr : (ID | NUM) (WS | NL)* ARITH_OP (WS | NL)* (ID | NUM) ;
 
 fn_call : own_fn_call | exist | print_instr | rename | remove | move | copy | download | write | read | wait_instr | execute | get_files | date_modified | size | exit | TIME | FILE | FOLDER | ARGS ;
 atom_instr : own_fn_call | exist | print_instr | rename | remove | move | copy | download | write | read | wait_instr | execute | get_files | date_modified | size | exit | assign | TIME | FILE | FOLDER | ARGS ;
@@ -51,6 +55,8 @@ value_or_id: NUM|STR|ID;
 
 /* Lexer rules: */
 FN : 'fn' ;
+WHILE : 'while' ;
+DO : 'do' ;
 IF : 'if' ;
 THEN : 'then' ;
 ELSE : 'else' ;
@@ -78,6 +84,7 @@ SIZE : 'size' ;
 READ : 'read' ;
 
 CMP_OP : '!=' | '<' | '>' | '==' | '<=' | '>=' ;
+ARITH_OP : '+' | '-' | '*' | '/' ;
 LOG_OP : 'and' | 'or' | 'not' ;
 
 BOOL : 'true' | 'false' ;
@@ -86,7 +93,7 @@ ID : LETTER (LETTER | [0-9] | '_')* ;
 NUM : '-'? INT_PART ('.' [0-9]+)? ;
 
 WS : (' ' | '\t');
-NL : ('#' OPT_CHARS)? '\n' ;
+NL : ('#' OPT_CHARS)? '\r'? '\n' ;
 END_COMMENT : '#' OPT_CHARS ;
 
 fragment INT_PART : [1-9] [0-9]* | '0' ;

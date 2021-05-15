@@ -35,6 +35,15 @@ class WordlifyListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by WordlifyParser#while_instr.
+    def enterWhile_instr(self, ctx:WordlifyParser.While_instrContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#while_instr.
+    def exitWhile_instr(self, ctx:WordlifyParser.While_instrContext):
+        pass
+
+
     # Enter a parse tree produced by WordlifyParser#if_instr.
     def enterIf_instr(self, ctx:WordlifyParser.If_instrContext):
         pass
@@ -104,6 +113,15 @@ class WordlifyListener(ParseTreeListener):
 
     # Exit a parse tree produced by WordlifyParser#expr.
     def exitExpr(self, ctx:WordlifyParser.ExprContext):
+        pass
+
+
+    # Enter a parse tree produced by WordlifyParser#arith_expr.
+    def enterArith_expr(self, ctx:WordlifyParser.Arith_exprContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#arith_expr.
+    def exitArith_expr(self, ctx:WordlifyParser.Arith_exprContext):
         pass
 
 
