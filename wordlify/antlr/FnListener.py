@@ -44,6 +44,16 @@ class FnListener(WordlifyListener):
     def exitBlock_instr(self, ctx:WordlifyParser.Block_instrContext):
         pass
 
+
+    # Enter a parse tree produced by WordlifyParser#foreach.
+    def enterForeach(self, ctx:WordlifyParser.ForeachContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#foreach.
+    def exitForeach(self, ctx:WordlifyParser.ForeachContext):
+        pass
+
+
     # Enter a parse tree produced by WordlifyParser#while_instr.
     def enterWhile_instr(self, ctx:WordlifyParser.While_instrContext):
         pass
@@ -290,6 +300,14 @@ class FnListener(WordlifyListener):
 
     # Exit a parse tree produced by WordlifyParser#exit.
     def exitExit(self, ctx:WordlifyParser.ExitContext):
+        pass
+
+    # Enter a parse tree produced by WordlifyParser#create.
+    def enterCreate(self, ctx:WordlifyParser.CreateContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#create.
+    def exitCreate(self, ctx:WordlifyParser.CreateContext):
         pass
 
     # Enter a parse tree produced by WordlifyParser#value_or_id.

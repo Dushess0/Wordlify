@@ -11,7 +11,12 @@ fn_def : FN (WS | NL)+ ID (WS | NL)* '(' (WS | NL)* ( ID (WS | NL)* (',' (WS | N
          (atom_instr (WS | NL)* ';'? | block_instr) (WS | NL)+ )?
          END ;
 
-block_instr : if_instr | while_instr ;
+block_instr : if_instr | while_instr | foreach ;
+
+foreach : FOREACH (WS | NL)+ ID (WS | NL)+ IN (WS | NL)+ ID (WS | NL)+ DO (WS | NL)+
+       ( (atom_instr (WS | NL)* ';' (WS | NL)* | atom_instr (WS* NL WS*)+ | block_instr (WS | NL)+)*
+       (atom_instr (WS | NL)* (';' | (WS | NL)+) | block_instr (WS | NL)+) )?
+       END ;
 
 while_instr : WHILE (WS | NL)+ cond (WS | NL)+ DO (WS | NL)+ ( (atom_instr (WS | NL)* ';' (WS | NL)* | atom_instr (WS* NL WS*)+ | block_instr (WS | NL)+)*
        (atom_instr (WS | NL)* (';' | (WS | NL)+) | block_instr (WS | NL)+) )? END ;
@@ -30,8 +35,8 @@ comparison : expr (WS | NL)* CMP_OP (WS | NL)* expr ;
 expr : fn_call | STR | NUM | ID | arith_expr ;
 arith_expr : (ID | NUM) (WS | NL)* ARITH_OP (WS | NL)* (ID | NUM) ;
 
-fn_call : own_fn_call | exist | print_instr | rename | remove | move | copy | download | write | read | wait_instr | execute | get_files | date_modified | size | exit | TIME | FILE | FOLDER | ARGS ;
-atom_instr : own_fn_call | exist | print_instr | rename | remove | move | copy | download | write | read | wait_instr | execute | get_files | date_modified | size | exit | assign | TIME | FILE | FOLDER | ARGS ;
+fn_call : own_fn_call | exist | print_instr | rename | remove | move | copy | download | write | read | wait_instr | execute | get_files | date_modified | size | exit | create | TIME | FILE | FOLDER | ARGS ;
+atom_instr : own_fn_call | exist | print_instr | rename | remove | move | copy | download | write | read | wait_instr | execute | get_files | date_modified | size | exit | create | assign | TIME | FILE | FOLDER | ARGS ;
 assign : ID (WS | NL)* '=' (WS | NL)* expr ;
 
 own_fn_call : ID (WS | NL)* '(' (WS | NL)* ( value_or_id (WS | NL)* (',' (WS | NL)* value_or_id (WS | NL)*)* )? ')' ;
@@ -50,12 +55,15 @@ get_files : GET_FILES (WS | NL)* '(' (WS | NL)* value_or_id (WS | NL)* ')' ;
 date_modified : DATE_MODIFIED (WS | NL)* '(' (WS | NL)* value_or_id (WS | NL)* ')' ;
 size : SIZE (WS | NL)* '(' (WS | NL)* value_or_id (WS | NL)* ')' ;
 exit : EXIT (WS | NL)* '(' (WS | NL)* value_or_id (WS | NL)* ')' ;
+create : CREATE (WS | NL)* '(' (WS | NL)* value_or_id (WS | NL)* ')' ;
 
 value_or_id: NUM|STR|ID;
 
 /* Lexer rules: */
 FN : 'fn' ;
 WHILE : 'while' ;
+FOREACH : 'foreach' ;
+IN : 'in' ;
 DO : 'do' ;
 IF : 'if' ;
 THEN : 'then' ;
@@ -82,6 +90,7 @@ FOLDER : 'folder' ;
 ARGS : 'args' ;
 SIZE : 'size' ;
 READ : 'read' ;
+CREATE : 'create' ;
 
 CMP_OP : '!=' | '<' | '>' | '==' | '<=' | '>=' ;
 ARITH_OP : '+' | '-' | '*' | '/' ;
