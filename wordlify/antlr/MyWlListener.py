@@ -100,6 +100,13 @@ class MyWlListener(WordlifyListener):
             col_nr = ctx.ID()[0].getSymbol().column
             raise Exception("Line {}, column {}: cannot create variable '{}' - a function with this name already exists:\n    {}".format(line_nr, col_nr, ctx.ID()[0].getText(), line))
 
+        if ctx.ID()[1].getText() not in self.vars:
+            line_nr = ctx.ID()[0].getSymbol().line
+            line = self.src_lines[line_nr-1].lstrip()
+            col_nr = ctx.ID()[0].getSymbol().column
+            raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, ctx.ID()[1].getText(), line))
+        # TODO add lists as a data type
+
         ctx.lines = [" "*self.indent + "for " + ctx.ID()[0].getText() + " in " + ctx.ID()[1].getText() + ":"]
         ctx.localVars = []
         self.indent += 4
