@@ -161,6 +161,24 @@ class WordlifyListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by WordlifyParser#array_append.
+    def enterArray_append(self, ctx:WordlifyParser.Array_appendContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#array_append.
+    def exitArray_append(self, ctx:WordlifyParser.Array_appendContext):
+        pass
+
+
+    # Enter a parse tree produced by WordlifyParser#array_elem.
+    def enterArray_elem(self, ctx:WordlifyParser.Array_elemContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#array_elem.
+    def exitArray_elem(self, ctx:WordlifyParser.Array_elemContext):
+        pass
+
+
     # Enter a parse tree produced by WordlifyParser#own_fn_call.
     def enterOwn_fn_call(self, ctx:WordlifyParser.Own_fn_callContext):
         pass
@@ -311,6 +329,15 @@ class WordlifyListener(ParseTreeListener):
 
     # Exit a parse tree produced by WordlifyParser#create.
     def exitCreate(self, ctx:WordlifyParser.CreateContext):
+        pass
+
+
+    # Enter a parse tree produced by WordlifyParser#length.
+    def enterLength(self, ctx:WordlifyParser.LengthContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#length.
+    def exitLength(self, ctx:WordlifyParser.LengthContext):
         pass
 
 
