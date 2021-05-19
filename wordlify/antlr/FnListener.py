@@ -310,6 +310,16 @@ class FnListener(WordlifyListener):
     def exitCreate(self, ctx:WordlifyParser.CreateContext):
         pass
 
+
+    # Enter a parse tree produced by WordlifyParser#array.
+    def enterArray(self, ctx:WordlifyParser.ArrayContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#array.
+    def exitArray(self, ctx:WordlifyParser.ArrayContext):
+        pass
+
+
     # Enter a parse tree produced by WordlifyParser#value_or_id.
     def enterValue_or_id(self, ctx:WordlifyParser.Value_or_idContext):
         pass

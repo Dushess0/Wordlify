@@ -100,7 +100,7 @@ class MyWlListener(WordlifyListener):
             col_nr = ctx.ID()[0].getSymbol().column
             raise Exception("Line {}, column {}: cannot create variable '{}' - a function with this name already exists:\n    {}".format(line_nr, col_nr, ctx.ID()[0].getText(), line))
 
-        if ctx.ID()[1].getText() not in self.vars:
+        if ctx.ID()[1].getText() not in self.vars or self.vars[ctx.ID()[1].getText()][0] == "function":
             line_nr = ctx.ID()[0].getSymbol().line
             line = self.src_lines[line_nr-1].lstrip()
             col_nr = ctx.ID()[0].getSymbol().column
@@ -219,7 +219,16 @@ class MyWlListener(WordlifyListener):
             else:
                 ctx.text = "False"
         elif ctx.comparison() != None:
-            ctx.text = ctx.comparison().expr()[0].getText() + " " + ctx.comparison().CMP_OP().getText() + " " + ctx.comparison().expr()[1].getText()
+            if ctx.comparison().expr()[0].array() != None:
+                text = ctx.comparison().expr()[0].array().text
+            else:
+                text = ctx.comparison().expr()[0].getText()
+
+            if ctx.comparison().expr()[1].array() != None:
+                text2 = ctx.comparison().expr()[1].array().text
+            else:
+                text2 = ctx.comparison().expr()[1].getText()
+            ctx.text = text + " " + ctx.comparison().CMP_OP().getText() + " " + text2
         else:
             ctx.text = "Tu ma być funkcja" # TODO
 
@@ -266,7 +275,10 @@ class MyWlListener(WordlifyListener):
         except Exception as e:
             raise e
 
-        ctx.parentCtx.lines = ["{} = {}".format(ctx.ID().getText(), ctx.expr().getText())]
+        if ctx.expr().array() != None:
+            ctx.parentCtx.lines = ["{} = {}".format(ctx.ID().getText(), ctx.expr().array().text)]
+        else:
+            ctx.parentCtx.lines = ["{} = {}".format(ctx.ID().getText(), ctx.expr().getText())]
         self.vars[ctx.ID().getText()] = ctx.expr().type
         ctx.parentCtx.parentCtx.localVars.append(ctx.ID().getText())
 
@@ -280,6 +292,8 @@ class MyWlListener(WordlifyListener):
             ctx.type = "str"
         elif ctx.NUM() != None:
             ctx.type = "num"
+        elif ctx.array() != None:
+            ctx.type = "array"
         elif ctx.ID() != None:
             id = ctx.ID().getText()
             if id not in self.vars or self.vars[id][0] == "function":
@@ -796,7 +810,7 @@ class MyWlListener(WordlifyListener):
             line_nr = voi1.ID().getSymbol().line
             line = self.src_lines[line_nr-1].lstrip()
             col_nr = voi1.ID().getSymbol().column
-            if voi1.ID().getText() not in self.vars:
+            if voi1.ID().getText() not in self.vars or self.vars[voi1.ID().getText()][0] == "function":
                 raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, voi1.ID().getText(), line))
 
         ctx.parentCtx.lines = [
@@ -929,7 +943,7 @@ class MyWlListener(WordlifyListener):
             line_nr = voi.ID().getSymbol().line
             line = self.src_lines[line_nr-1].lstrip()
             col_nr = voi.ID().getSymbol().column
-            if voi.ID().getText() not in self.vars:
+            if voi.ID().getText() not in self.vars or self.vars[voi.ID().getText()][0] == "function":
                 raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, voi.ID().getText(), line))
 
         ctx.parentCtx.lines = [
@@ -939,6 +953,32 @@ class MyWlListener(WordlifyListener):
 'except PermissionError as v{}:'.format(self.var_nr),
 '    print("Error: Permission denied to write to file %s" % v{}.filename)'.format(self.var_nr),
 '    quit()']
+
+
+    # Enter a parse tree produced by WordlifyParser#array.
+    def enterArray(self, ctx:WordlifyParser.ArrayContext):
+        ctx.text = "["
+
+    # Exit a parse tree produced by WordlifyParser#array.
+    def exitArray(self, ctx:WordlifyParser.ArrayContext):
+        vois = ctx.value_or_id()
+        if len(vois) > 0:
+            if vois[0].ID() != None:
+                line_nr = vois[0].ID().getSymbol().line
+                line = self.src_lines[line_nr-1].lstrip()
+                col_nr = vois[0].ID().getSymbol().column
+                if vois[0].ID().getText() not in self.vars or self.vars[vois[0].ID().getText()][0] == "function":
+                    raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, vois[0].ID().getText(), line))
+            ctx.text += vois[0].getText()
+            for i in range(1, len(vois)):
+                if vois[i].ID() != None:
+                    line_nr = vois[i].ID().getSymbol().line
+                    line = self.src_lines[line_nr-1].lstrip()
+                    col_nr = vois[i].ID().getSymbol().column
+                    if vois[i].ID().getText() not in self.vars or self.vars[vois[i].ID().getText()][0] == "function":
+                        raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, vois[i].ID().getText(), line))
+                ctx.text += ", " + vois[i].getText()
+        ctx.text += "]"
 
     # Enter a parse tree produced by WordlifyParser#value_or_id.
     def enterValue_or_id(self, ctx:WordlifyParser.Value_or_idContext):

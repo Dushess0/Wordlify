@@ -32,7 +32,7 @@ else_block : ELSE (WS | NL)+ ( (atom_instr (WS | NL)* ';' (WS | NL)* | atom_inst
 cond : fn_call | BOOL | comparison ;
 comparison : expr (WS | NL)* CMP_OP (WS | NL)* expr ;
 
-expr : fn_call | STR | NUM | ID | arith_expr ;
+expr : fn_call | STR | NUM | ID | arith_expr | array ;
 arith_expr : (ID | NUM) (WS | NL)* ARITH_OP (WS | NL)* (ID | NUM) ;
 
 fn_call : own_fn_call | exist | print_instr | rename | remove | move | copy | download | write | read | wait_instr | execute | get_files | date_modified | size | exit | create | TIME | FILE | FOLDER | ARGS ;
@@ -57,6 +57,7 @@ size : SIZE (WS | NL)* '(' (WS | NL)* value_or_id (WS | NL)* ')' ;
 exit : EXIT (WS | NL)* '(' (WS | NL)* value_or_id (WS | NL)* ')' ;
 create : CREATE (WS | NL)* '(' (WS | NL)* value_or_id (WS | NL)* ')' ;
 
+array : '[' (WS|NL)* (value_or_id ( (WS|NL)* ',' (WS|NL)* value_or_id )* (WS|NL)*)? ']' ;
 value_or_id: NUM|STR|ID;
 
 /* Lexer rules: */
