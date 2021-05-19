@@ -33,7 +33,7 @@ cond : fn_call | BOOL | comparison ;
 comparison : expr (WS | NL)* CMP_OP (WS | NL)* expr ;
 
 expr : fn_call | STR | NUM | ID | arith_expr | array ;
-arith_expr : (ID | NUM) (WS | NL)* ARITH_OP (WS | NL)* (ID | NUM) ;
+arith_expr : value_or_id (WS | NL)* ARITH_OP (WS | NL)* value_or_id ;
 
 fn_call : own_fn_call | exist | print_instr | rename | remove | move | copy | download | write | read | wait_instr | execute | get_files | date_modified | size | exit | create | TIME | FILE | FOLDER | ARGS ;
 atom_instr : own_fn_call | exist | print_instr | rename | remove | move | copy | download | write | read | wait_instr | execute | get_files | date_modified | size | exit | create | assign | TIME | FILE | FOLDER | ARGS ;
@@ -58,7 +58,7 @@ exit : EXIT (WS | NL)* '(' (WS | NL)* value_or_id (WS | NL)* ')' ;
 create : CREATE (WS | NL)* '(' (WS | NL)* value_or_id (WS | NL)* ')' ;
 
 array : '[' (WS|NL)* (value_or_id ( (WS|NL)* ',' (WS|NL)* value_or_id )* (WS|NL)*)? ']' ;
-value_or_id: NUM|STR|ID;
+value_or_id: NUM|STR|ID|BOOL;
 
 /* Lexer rules: */
 FN : 'fn' ;

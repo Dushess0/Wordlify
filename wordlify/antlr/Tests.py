@@ -338,21 +338,24 @@ end"""
         self.assertEqual(self.output.read(), """import shutil
 import os
 
-v0 = "we"
-try:
-    os.remove("as")
-except PermissionError as v1:
-    print("Error: %s - Permission denied to delete" % v1.filename)
-    quit()
-except OSError:
+def remove(filename):
     try:
-        shutil.rmtree("as")
-    except PermissionError as v1:
-        print("Error: %s - Permission denied to delete" % v1.filename)
+        os.remove(filename)
+    except PermissionError as v0:
+        print("Error: %s - Permission denied to delete" % v0.filename)
         quit()
-    except OSError as v1:
-        print("Error: %s - No such file or directory" % v1.filename)
-        quit()
+    except OSError:
+        try:
+            shutil.rmtree(filename)
+        except PermissionError as v0:
+            print("Error: %s - Permission denied to delete" % v0.filename)
+            quit()
+        except OSError as v0:
+            print("Error: %s - No such file or directory" % v0.filename)
+            quit()
+
+v0 = "we"
+remove("as")
 """)
 
     def test12(self): # should be no error

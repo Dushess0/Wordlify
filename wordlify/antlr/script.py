@@ -1,36 +1,21 @@
-import os.path
+import shutil
+import os
 
-def rename(old, new):
-    if os.name == "nt": # Windows
-        if old[-1] == ":" or old[-2:] == ":/":
-            print("Error: file to rename cannot be root")
-            quit()
-    else:
-        if old == "/":
-            print("Error: file to rename cannot be '/'")
-            quit()
-
-    if "/" in new:
-        print("Error: new name cannot be a path")
-        quit()
+def remove(filename):
     try:
-        if not os.path.exists(old):
-            print("Error: '%s' doesn't exist" % old)
+        os.remove(filename)
+    except PermissionError as v0:
+        print("Error: %s - Permission denied to delete" % v0.filename)
+        quit()
+    except OSError:
+        try:
+            shutil.rmtree(filename)
+        except PermissionError as v0:
+            print("Error: %s - Permission denied to delete" % v0.filename)
+            quit()
+        except OSError as v0:
+            print("Error: %s - No such file or directory" % v0.filename)
             quit()
 
-        v0 = ""
-        v2 = old
-        if old[-1] == "/":
-            v2 = old[:-1]
-        if "/" in v2:
-            v0 = v2[:v2.rfind("/")+1]
-
-        v0 += new
-        if os.path.exists(v0):
-            print("Error: '%s' already exists" % v0)
-            quit()
-        os.replace(v2, v0)
-    except PermissionError:
-        print("Error: Permission denied to rename %s to %s" % (old, new))
-
-rename("wedwef", "WESFER")
+v0 = "we"
+remove("as")

@@ -1,1 +1,1 @@
-rename("wedwef", "WESFER")
+v0 = "we"; remove("as")
