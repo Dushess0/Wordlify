@@ -14,7 +14,6 @@ class MyWlListener(WordlifyListener):
         for name in functions:
             self.vars[name] = ("function", functions[name])
 
-        self.var_nr = 0
         self.indent = 0
 
     def add_imps(self, imps):
@@ -52,24 +51,11 @@ class MyWlListener(WordlifyListener):
             ctx.localVars.append(ctx.ID()[1].getText())
             self.vars[ctx.ID()[1].getText()] = "any"
 
-            if ctx.ID()[1].getText()[0] == "v":
-                try:
-                    nr = ctx.ID()[1].getText()[1:]
-                    self.var_nr = nr+1
-                except ValueError:
-                    pass
-
             for i in range(2, len(ctx.ID())):
                 header += ", {}".format(ctx.ID()[i])
                 ctx.localVars.append(ctx.ID()[i].getText())
                 self.vars[ctx.ID()[i].getText()] = "any"
 
-                if ctx.ID()[i].getText()[0] == "v":
-                    try:
-                        nr = ctx.ID()[i].getText()[1:]
-                        self.var_nr = nr+1
-                    except ValueError:
-                        pass
         header += "):"
         self.indent+=4
         ctx.lines.append(header)
@@ -101,11 +87,15 @@ class MyWlListener(WordlifyListener):
             raise Exception("Line {}, column {}: cannot create variable '{}' - a function with this name already exists:\n    {}".format(line_nr, col_nr, ctx.ID()[0].getText(), line))
 
         if ctx.ID()[1].getText() not in self.vars or self.vars[ctx.ID()[1].getText()][0] == "function":
-            line_nr = ctx.ID()[0].getSymbol().line
+            line_nr = ctx.ID()[1].getSymbol().line
             line = self.src_lines[line_nr-1].lstrip()
-            col_nr = ctx.ID()[0].getSymbol().column
+            col_nr = ctx.ID()[1].getSymbol().column
             raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, ctx.ID()[1].getText(), line))
-        # TODO add lists as a data type
+        if self.vars[ctx.ID()[1].getText()] not in ["array", "any"]:
+            line_nr = ctx.ID()[1].getSymbol().line
+            line = self.src_lines[line_nr-1].lstrip()
+            col_nr = ctx.ID()[1].getSymbol().column
+            raise Exception("Line {}, column {}: variable '{}' must be of type 'array':\n    {}".format(line_nr, col_nr, ctx.ID()[1].getText(), line))
 
         ctx.lines = [" "*self.indent + "for " + ctx.ID()[0].getText() + " in " + ctx.ID()[1].getText() + ":"]
         ctx.localVars = []
@@ -229,7 +219,7 @@ class MyWlListener(WordlifyListener):
             else:
                 text2 = ctx.comparison().expr()[1].getText()
             ctx.text = text + " " + ctx.comparison().CMP_OP().getText() + " " + text2
-        else:
+        elif ctx.fn_call() != None:
             ctx.text = "Tu ma być funkcja" # TODO
 
     # Enter a parse tree produced by WordlifyParser#comparison.
@@ -256,13 +246,6 @@ class MyWlListener(WordlifyListener):
 
     # Exit a parse tree produced by WordlifyParser#assign.
     def exitAssign(self, ctx:WordlifyParser.AssignContext):
-        if ctx.ID().getText()[0] == "v":
-            try:
-                nr = ctx.ID().getText()[1:]
-                self.var_nr = int(nr) + 1
-            except Exception:
-                pass
-
         # TODO return_fn:
         line_nr = ctx.ID().getSymbol().line
         line = self.src_lines[line_nr-1].lstrip()
@@ -304,7 +287,10 @@ class MyWlListener(WordlifyListener):
             ctx.type = self.vars[id]
         elif ctx.arith_expr() != None:
             ctx.type = "num"
-        # TODO fn_call
+        elif ctx.fn_call() != None:
+            pass
+            # TODO ctx.type = ?
+
 
       # Enter a parse tree produced by WordlifyParser#arith_expr.
     def enterArith_expr(self, ctx:WordlifyParser.Arith_exprContext):
@@ -409,39 +395,43 @@ class MyWlListener(WordlifyListener):
                     raise Exception("Line {}, column {}: variable '{}' should be an 'str':\n    {}".format(line_nr, col_nr, voi.ID().getText(), line))
 
         self.add_imps(["import os.path"])
+        
+        ctx.parentCtx.lines = ["rename({}, {})".format(ctx.value_or_id()[0].getText(), ctx.value_or_id()[1].getText())]
 
-        ctx.parentCtx.lines = [
-'if os.name == "nt": # Windows',
-'    if {0}[-1] == ":" or {0}[-2:] == ":/":'.format(ctx.value_or_id()[0].getText()),
-'        print("Error: old file cannot be root")',
-'        quit()',
-'else:',
-'    if {} == "/":'.format(ctx.value_or_id()[0].getText()),
-"""        print("Error: old file cannot be '/'")""",
-'        quit()',
+        self.functions += [
+'def rename(old, new):',
+'    if os.name == "nt": # Windows',
+'        if old[-1] == ":" or old[-2:] == ":/":',
+'            print("Error: file to rename cannot be root")',
+'            quit()',
+'    else:',
+'        if old == "/":',
+"""            print("Error: file to rename cannot be '/'")""",
+'            quit()',
 '',
-'if "/" in {}:'.format(ctx.value_or_id()[1].getText()),
-'    print("Error: new name cannot be a path")',
-'    quit()',
-'try:',
-'    if not os.path.exists({}):'.format(ctx.value_or_id()[0].getText()),
-"""        print("Error: '%s' doesn't exist" % {})""".format(ctx.value_or_id()[0].getText()),
+'    if "/" in new:',
+'        print("Error: new name cannot be a path")',
 '        quit()',
+'    try:',
+'        if not os.path.exists(old):',
+"""            print("Error: '%s' doesn't exist" % old)""",
+'            quit()',
 '',
-'    v{} = ""'.format(self.var_nr),
-'    v{} = {}'.format(self.var_nr+2, ctx.value_or_id()[0].getText()),
-'    if {}[-1] == "/":'.format(ctx.value_or_id()[0].getText()),
-'        v{} = {}[:-1]'.format(self.var_nr+2 ,ctx.value_or_id()[0].getText()),
-'    if "/" in v{}:'.format(self.var_nr+2),
-'        v{0} = v{1}[:v{1}.rfind("/")+1]'.format(self.var_nr, self.var_nr+2),
+'        v0 = ""',
+'        v2 = old',
+'        if old[-1] == "/":',
+'            v2 = old[:-1]',
+'        if "/" in v2:',
+'            v0 = v2[:v2.rfind("/")+1]',
 '',
-'    v{} += {}'.format(self.var_nr, ctx.value_or_id()[1].getText()),
-'    if os.path.exists(v{}):'.format(self.var_nr),
-"""        print("Error: '%s' already exists" % v{})""".format(self.var_nr),
-'        quit()',
-'    os.replace(v{}, v{})'.format(self.var_nr+2, self.var_nr),
-'except PermissionError:',
-'    print("Error: Permission denied to rename %s to %s" % ({}, {}))'.format(ctx.value_or_id()[0].getText(), ctx.value_or_id()[1].getText())]
+'        v0 += new',
+'        if os.path.exists(v0):',
+"""            print("Error: '%s' already exists" % v0)""",
+'            quit()',
+'        os.replace(v2, v0)',
+'    except PermissionError:',
+'        print("Error: Permission denied to rename %s to %s" % (old, new))',
+'']
 
     # Enter a parse tree produced by WordlifyParser#remove.
     def enterRemove(self, ctx:WordlifyParser.RemoveContext):
