@@ -249,21 +249,33 @@ class MyWlListener(WordlifyListener):
 
     # Exit a parse tree produced by WordlifyParser#assign.
     def exitAssign(self, ctx:WordlifyParser.AssignContext):
+        obj=None
         # TODO return_fn:
-        line_nr = ctx.ID().getSymbol().line
-        line = self.src_lines[line_nr-1].lstrip()
-        col_nr = ctx.ID().getSymbol().column
+        if (ctx.ID()!=None):
+            obj = ctx.ID()
+        if (ctx.array_elem()!=None):
+            obj = ctx.array_elem()
+        
+        text =obj.getText()
+        line_nr=0
+        line=''
+        col_nr=0
+        if (hasattr(obj,'getSymbol')):
+            line_nr= obj.getSymbol().line
+            line = self.src_lines[line_nr-1].lstrip()
+            col_nr = obj.getSymbol().column
+       
         try:
-            if self.vars[ctx.ID().getText()][0] == "function":
-                raise Exception("Line {}, column {}: '{}' is a function\n    {}".format(line_nr, col_nr, ctx.ID().getText(), line))
+            if self.vars[obj.getText()][0] == "function":
+                raise Exception("Line {}, column {}: '{}' is a function\n    {}".format(line_nr, col_nr, obj.getText(), line))
         except KeyError:
             pass
         except Exception as e:
             raise e
 
-        ctx.parentCtx.lines = ["{} = {}".format(ctx.ID().getText(), ctx.expr().text)]
-        self.vars[ctx.ID().getText()] = ctx.expr().type
-        ctx.parentCtx.parentCtx.localVars.append(ctx.ID().getText())
+        ctx.parentCtx.lines = ["{} = {}".format(obj.getText(), ctx.expr().text)]
+        self.vars[obj.getText()] = ctx.expr().type
+        ctx.parentCtx.parentCtx.localVars.append(obj.getText())
 
     # Enter a parse tree produced by WordlifyParser#expr.
     def enterExpr(self, ctx:WordlifyParser.ExprContext):
@@ -369,7 +381,7 @@ class MyWlListener(WordlifyListener):
                 raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, index, line))
             if self.vars[index] not in ["num", "any"]:
                 raise Exception("Line {}, column {}: variable '{}' should be a 'num' - it's an array index:\n    {}".format(line_nr, col_nr, index, line))
-        elif voi.STR() != None or voi.BOOL() != None:
+        elif voi.STR() != None or (hasattr(voi,'BOOL') and voi.BOOL() != None):
             raise Exception("Line {}, column {}: array index must be a 'num':\n    {}".format(line_nr, col_nr, voi.getText(), line))
 
         ctx.text = "{}[{}]".format(ctx.ID().getText(), ctx.expr().getText())
@@ -447,15 +459,17 @@ class MyWlListener(WordlifyListener):
                 col_nr = voi.ID().getSymbol().column
                 if voi.ID().getText() not in self.vars or self.vars[voi.ID().getText()][0] == "function":
                     raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, voi.ID().getText(), line))
-                if self.vars[voi.ID().getText()] not in ["str", "any"]:
-                    raise Exception("Line {}, column {}: variable '{}' should be an 'str':\n    {}".format(line_nr, col_nr, voi.ID().getText(), line))
+                # if self.vars[voi.ID().getText()] not in ["str", "any"]:
+                #     raise Exception("Line {}, column {}: variable '{}' should be an 'str':\n    {}".format(line_nr, col_nr, voi.ID().getText(), line))
 
         self.add_imps(["import os.path"])
         
-        ctx.parentCtx.lines = ["rename({}, {})".format(ctx.value_or_id()[0].getText(), ctx.value_or_id()[1].getText())]
+        ctx.parentCtx.lines = ["rename({}, {})".format(ctx.value_or_id()[0].getText(), str(ctx.value_or_id()[1].getText()))]
 
         self.functions += [
 'def rename(old, new):',
+'    new=str(new)',
+'    old = str(old)',
 '    if os.name == "nt": # Windows',
 '        if old[-1] == ":" or old[-2:] == ":/":',
 '            print("Error: file to rename cannot be root")',
@@ -1004,7 +1018,7 @@ class MyWlListener(WordlifyListener):
 """        print("Error: No such file '%s'" % file)""",
 '        quit()',
 '    ctime = datetime.datetime.fromtimestamp(fname.stat().st_ctime)',
-'    return ctime',
+'    return str(ctime)',
         ]
 
 

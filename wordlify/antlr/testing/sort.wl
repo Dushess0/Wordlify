@@ -11,7 +11,8 @@ print(dates)
 
 fn sort() begin
     i = 1
-    while i < length(dates) do
+    l= length(dates)
+    while i < l do
         key = dates[i]
         j = i - 1
         while j >= 0 and key < dates[j] do
@@ -20,7 +21,7 @@ fn sort() begin
             j = j - 1
         end
         dates[j+1] = key
-        files[j+1] = key
+        #files[j+1] = key
         
         i = i + 1
     end
@@ -28,7 +29,8 @@ end
 
 sort()
 i = 0
-while i < length(files) do
+l= length(files)
+while i < l do
     a = files[i]
     i = i + 1
     rename(a, i)
