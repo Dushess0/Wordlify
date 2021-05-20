@@ -14,6 +14,7 @@ fn sort() begin
     l= length(dates)
     while i < l do
         key = dates[i]
+        key2 = files[i]
         j = i - 1
         while j >= 0 and key < dates[j] do
             dates[j+1] = dates[j]
@@ -21,7 +22,7 @@ fn sort() begin
             j = j - 1
         end
         dates[j+1] = key
-        #files[j+1] = key
+        files[j+1] = key2
         
         i = i + 1
     end
