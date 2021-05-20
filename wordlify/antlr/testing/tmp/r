@@ -15,9 +15,8 @@ def dateModified(file):
     if not fname.exists():
         print("Error: No such file '%s'" % file)
         quit()
-    mtime = datetime.datetime.fromtimestamp(fname.stat().st_mtime)
-    return str(mtime)
-
+    ctime = datetime.datetime.fromtimestamp(fname.stat().st_ctime)
+    return str(ctime)
 def sort():
     i = 1
     l = len(dates)

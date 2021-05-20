@@ -1012,14 +1012,14 @@ class MyWlListener(WordlifyListener):
         self.add_imps(["import pathlib", "import datetime"])
         ctx.parentCtx.lines = ["dateModified({})".format(ctx.value_or_id().getText())]
         self.functions +=[
-            'def dateModified(file):',
+'def dateModified(file):',
 '    fname = pathlib.Path(file)',
 '    if not fname.exists():',
 """        print("Error: No such file '%s'" % file)""",
 '        quit()',
-'    ctime = datetime.datetime.fromtimestamp(fname.stat().st_ctime)',
-'    return str(ctime)',
-        ]
+'    mtime = datetime.datetime.fromtimestamp(fname.stat().st_mtime)',
+'    return str(mtime)',
+'']
 
 
     # Enter a parse tree produced by WordlifyParser#size.
