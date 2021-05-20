@@ -1,4 +1,4 @@
-// Generated from /home/wojtek/Dokumenty/agh/sem6/kompilatory/Wordlify/wordlify/antlr/Wordlify.g4 by ANTLR 4.8
+// Generated from Wordlify.g4 by ANTLR 4.9.2
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;
@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class WordlifyParser extends Parser {
-	static { RuntimeMetaData.checkVersion("4.8", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.9.2", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
@@ -152,6 +152,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_program; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterProgram(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitProgram(this);
+		}
 	}
 
 	public final ProgramContext program() throws RecognitionException {
@@ -530,6 +538,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_fn_def; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterFn_def(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitFn_def(this);
+		}
 	}
 
 	public final Fn_defContext fn_def() throws RecognitionException {
@@ -1031,6 +1047,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_block_instr; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterBlock_instr(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitBlock_instr(this);
+		}
 	}
 
 	public final Block_instrContext block_instr() throws RecognitionException {
@@ -1109,6 +1133,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_foreach; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterForeach(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitForeach(this);
+		}
 	}
 
 	public final ForeachContext foreach() throws RecognitionException {
@@ -1564,6 +1596,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_while_instr; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterWhile_instr(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitWhile_instr(this);
+		}
 	}
 
 	public final While_instrContext while_instr() throws RecognitionException {
@@ -1961,6 +2001,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_if_instr; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterIf_instr(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitIf_instr(this);
+		}
 	}
 
 	public final If_instrContext if_instr() throws RecognitionException {
@@ -2033,6 +2081,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_if_cond; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterIf_cond(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitIf_cond(this);
+		}
 	}
 
 	public final If_condContext if_cond() throws RecognitionException {
@@ -2129,6 +2185,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_then; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterThen(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitThen(this);
+		}
 	}
 
 	public final ThenContext then() throws RecognitionException {
@@ -2475,6 +2539,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_else_if; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterElse_if(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitElse_if(this);
+		}
 	}
 
 	public final Else_ifContext else_if() throws RecognitionException {
@@ -2551,6 +2623,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_else_block; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterElse_block(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitElse_block(this);
+		}
 	}
 
 	public final Else_blockContext else_block() throws RecognitionException {
@@ -2892,6 +2972,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_cond; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterCond(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitCond(this);
+		}
 	}
 
 	public final CondContext cond() throws RecognitionException {
@@ -2962,6 +3050,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_comparison; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterComparison(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitComparison(this);
+		}
 	}
 
 	public final ComparisonContext comparison() throws RecognitionException {
@@ -3054,6 +3150,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_double_comparsion; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterDouble_comparsion(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitDouble_comparsion(this);
+		}
 	}
 
 	public final Double_comparsionContext double_comparsion() throws RecognitionException {
@@ -3146,6 +3250,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_expr; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterExpr(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitExpr(this);
+		}
 	}
 
 	public final ExprContext expr() throws RecognitionException {
@@ -3237,6 +3349,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_arith_expr; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterArith_expr(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitArith_expr(this);
+		}
 	}
 
 	public final Arith_exprContext arith_expr() throws RecognitionException {
@@ -3372,6 +3492,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_fn_call; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterFn_call(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitFn_call(this);
+		}
 	}
 
 	public final Fn_callContext fn_call() throws RecognitionException {
@@ -3616,6 +3744,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_atom_instr; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterAtom_instr(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitAtom_instr(this);
+		}
 	}
 
 	public final Atom_instrContext atom_instr() throws RecognitionException {
@@ -3819,6 +3955,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_assign; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterAssign(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitAssign(this);
+		}
 	}
 
 	public final AssignContext assign() throws RecognitionException {
@@ -3923,6 +4067,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_array_append; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterArray_append(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitArray_append(this);
+		}
 	}
 
 	public final Array_appendContext array_append() throws RecognitionException {
@@ -4037,6 +4189,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_array_elem; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterArray_elem(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitArray_elem(this);
+		}
 	}
 
 	public final Array_elemContext array_elem() throws RecognitionException {
@@ -4131,6 +4291,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_own_fn_call; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterOwn_fn_call(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitOwn_fn_call(this);
+		}
 	}
 
 	public final Own_fn_callContext own_fn_call() throws RecognitionException {
@@ -4312,6 +4480,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_exist; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterExist(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitExist(this);
+		}
 	}
 
 	public final ExistContext exist() throws RecognitionException {
@@ -4425,6 +4601,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_print_instr; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterPrint_instr(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitPrint_instr(this);
+		}
 	}
 
 	public final Print_instrContext print_instr() throws RecognitionException {
@@ -4541,6 +4725,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_rename; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterRename(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitRename(this);
+		}
 	}
 
 	public final RenameContext rename() throws RecognitionException {
@@ -4702,6 +4894,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_remove; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterRemove(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitRemove(this);
+		}
 	}
 
 	public final RemoveContext remove() throws RecognitionException {
@@ -4818,6 +5018,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_move; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterMove(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitMove(this);
+		}
 	}
 
 	public final MoveContext move() throws RecognitionException {
@@ -4982,6 +5190,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_copy; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterCopy(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitCopy(this);
+		}
 	}
 
 	public final CopyContext copy() throws RecognitionException {
@@ -5146,6 +5362,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_download; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterDownload(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitDownload(this);
+		}
 	}
 
 	public final DownloadContext download() throws RecognitionException {
@@ -5310,6 +5534,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_write; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterWrite(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitWrite(this);
+		}
 	}
 
 	public final WriteContext write() throws RecognitionException {
@@ -5471,6 +5703,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_read; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterRead(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitRead(this);
+		}
 	}
 
 	public final ReadContext read() throws RecognitionException {
@@ -5584,6 +5824,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_wait_instr; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterWait_instr(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitWait_instr(this);
+		}
 	}
 
 	public final Wait_instrContext wait_instr() throws RecognitionException {
@@ -5700,6 +5948,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_execute; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterExecute(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitExecute(this);
+		}
 	}
 
 	public final ExecuteContext execute() throws RecognitionException {
@@ -5876,6 +6132,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_get_files; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterGet_files(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitGet_files(this);
+		}
 	}
 
 	public final Get_filesContext get_files() throws RecognitionException {
@@ -5989,6 +6253,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_date_modified; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterDate_modified(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitDate_modified(this);
+		}
 	}
 
 	public final Date_modifiedContext date_modified() throws RecognitionException {
@@ -6102,6 +6374,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_size; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterSize(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitSize(this);
+		}
 	}
 
 	public final SizeContext size() throws RecognitionException {
@@ -6215,6 +6495,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_exit; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterExit(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitExit(this);
+		}
 	}
 
 	public final ExitContext exit() throws RecognitionException {
@@ -6328,6 +6616,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_create; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterCreate(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitCreate(this);
+		}
 	}
 
 	public final CreateContext create() throws RecognitionException {
@@ -6442,6 +6738,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_length; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterLength(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitLength(this);
+		}
 	}
 
 	public final LengthContext length() throws RecognitionException {
@@ -6573,6 +6877,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_array; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterArray(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitArray(this);
+		}
 	}
 
 	public final ArrayContext array() throws RecognitionException {
@@ -6725,6 +7037,14 @@ public class WordlifyParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_value_or_id; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).enterValue_or_id(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof WordlifyListener ) ((WordlifyListener)listener).exitValue_or_id(this);
+		}
 	}
 
 	public final Value_or_idContext value_or_id() throws RecognitionException {

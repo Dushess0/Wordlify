@@ -7,6 +7,7 @@ foreach filename in files do
 end
 
 print(dates)
+print(files)
 
 
 fn sort() begin
@@ -29,6 +30,9 @@ fn sort() begin
 end
 
 sort()
+print(dates)
+print(files)
+
 i = 0
 l= length(files)
 while i < l do

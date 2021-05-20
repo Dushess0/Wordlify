@@ -22,12 +22,14 @@ def sort():
     l = len(dates)
     while i < l:
         key = dates[i]
+        key2 = files[i]
         j = i - 1
         while j >= 0 and key < dates[j]:
             dates[j+1] = dates[j]
             files[j+1] = files[j]
             j = j - 1
         dates[j+1] = key
+        files[j+1] = key2
         i = i + 1
 
 def rename(old, new):
@@ -70,7 +72,10 @@ dates = []
 for filename in files:
     dates.append(dateModified(filename))
 print(dates)
+print(files)
 sort()
+print(dates)
+print(files)
 i = 0
 l = len(files)
 while i < l:
