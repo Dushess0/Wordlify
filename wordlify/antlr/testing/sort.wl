@@ -1,17 +1,13 @@
 files = getFiles(".")
 dates = []
 
+
 foreach filename in files do
     dates <- dateModified(filename)
 end
 
-sort()
-i = 0
-while i < length(files) do
-    a = files[i]
-    i = i + 1
-    rename(a, i)
-end
+print(dates)
+
 
 fn sort() begin
     i = 1
@@ -29,3 +25,12 @@ fn sort() begin
         i = i + 1
     end
 end
+
+sort()
+i = 0
+while i < length(files) do
+    a = files[i]
+    i = i + 1
+    rename(a, i)
+end
+

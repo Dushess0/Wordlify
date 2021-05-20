@@ -199,7 +199,11 @@ class MyWlListener(WordlifyListener):
     # Enter a parse tree produced by WordlifyParser#cond.
     def enterCond(self, ctx:WordlifyParser.CondContext):
         pass
-
+    def getTextFromComparsion(self,comparsion):
+        text = comparsion.expr()[0].text
+        text2 = comparsion.expr()[1].text
+        op= comparsion.CMP_OP().getText()
+        return text + " " + op + " " + text2
     # Exit a parse tree produced by WordlifyParser#cond.
     def exitCond(self, ctx:WordlifyParser.CondContext):
         if ctx.BOOL() != None:
@@ -208,13 +212,18 @@ class MyWlListener(WordlifyListener):
             else:
                 ctx.text = "False"
         elif ctx.comparison() != None:
-            text = ctx.comparison().expr()[0].text
-            text2 = ctx.comparison().expr()[1].text
 
-            ctx.text = text + " " + ctx.comparison().CMP_OP().getText() + " " + text2
+            ctx.text = self.getTextFromComparsion(ctx.comparison())
+        elif ctx.double_comparsion() != None:
+            op= ctx.double_comparsion().LOG_OP().getText()
+            cmp1= ctx.double_comparsion().comparison()[0]
+            cmp2= ctx.double_comparsion().comparison()[1]
+            ctx.text = self.getTextFromComparsion(cmp1) + " " + op + " " +self.getTextFromComparsion(cmp2)
         elif ctx.fn_call() != None:
             # TODO check if return type is bool
-            ctx.text = ctx.fn_call().lines[0]
+            ctx.text = ""
+            if hasattr(ctx.fn_call(),'lines') != None:
+                ctx.text = ctx.fn_call().lines[0]
 
     # Enter a parse tree produced by WordlifyParser#comparison.
     def enterComparison(self, ctx:WordlifyParser.ComparisonContext):
@@ -284,7 +293,10 @@ class MyWlListener(WordlifyListener):
             ctx.text = ctx.arith_expr().text
             ctx.type = "num"
         elif ctx.fn_call() != None:
-            ctx.text = ctx.fn_call().lines[0]
+            ctx.text = ""
+            call= ctx.fn_call()
+            if hasattr(ctx.fn_call(),'lines'):
+                ctx.text = ctx.fn_call().lines[0]
             ctx.type = "any" # TODO
         elif ctx.array_elem() != None:
             ctx.text = ctx.array_elem().text
@@ -339,24 +351,28 @@ class MyWlListener(WordlifyListener):
         line_nr = ctx.ID().getSymbol().line
         line = self.src_lines[line_nr-1].lstrip()
         col_nr = ctx.ID().getSymbol().column
-        if ctx.ID().getText() not in self.vars or self.vars[ctx.ID().getText()][0] == "function":
-            raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, ctx.value_or_id().ID().getText(), line))
-        if self.vars[ctx.value_or_id().ID().getText()] not in ["array", "any"]:
-            raise Exception("Line {}, column {}: variable '{}' should be an 'array':\n    {}".format(line_nr, col_nr, ctx.value_or_id().ID().getText(), line))
+        expression = ctx.expr()
+        index=ctx.expr().getText()
+        arrayName=ctx.ID().getText()
+        if arrayName not in self.vars or self.vars[ctx.ID().getText()][0] == "function":
+            raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, arrayName, line))
+        if self.vars[arrayName] not in ["array", "any"]:
+            raise Exception("Line {}, column {}: variable '{}' should be an 'array':\n    {}".format(line_nr, col_nr, arrayName, line))
         #----------------------------
-        voi = ctx.value_or_id()
-        line_nr = voi.getSymbol().line
-        line = self.src_lines[line_nr-1].lstrip()
-        col_nr = voi.getSymbol().column
+        voi = ctx.expr()
+        if hasattr(voi,'ID') and voi.ID() != None:
+            col_nr = voi.ID().getSymbol().column
+        else:
+            col_nr=0
         if voi.ID() != None:
-            if voi.ID().getText() not in self.vars or self.vars[voi.ID().getText()][0] == "function":
-                raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, voi.ID().getText(), line))
-            if self.vars[voi.ID().getText()] not in ["num", "any"]:
-                raise Exception("Line {}, column {}: variable '{}' should be a 'num' - it's an array index:\n    {}".format(line_nr, col_nr, voi.ID().getText(), line))
+            if index not in self.vars or self.vars[index][0] == "function":
+                raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, index, line))
+            if self.vars[index] not in ["num", "any"]:
+                raise Exception("Line {}, column {}: variable '{}' should be a 'num' - it's an array index:\n    {}".format(line_nr, col_nr, index, line))
         elif voi.STR() != None or voi.BOOL() != None:
             raise Exception("Line {}, column {}: array index must be a 'num':\n    {}".format(line_nr, col_nr, voi.getText(), line))
 
-        ctx.text = "{}[{}]".format(ctx.ID().getText(), ctx.value_or_id().getText())
+        ctx.text = "{}[{}]".format(ctx.ID().getText(), ctx.expr().getText())
 
     # Enter a parse tree produced by WordlifyParser#own_fn_call.
     def enterOwn_fn_call(self, ctx:WordlifyParser.Own_fn_callContext):
@@ -966,7 +982,7 @@ class MyWlListener(WordlifyListener):
         self.functions += [
 'def getFiles(dir):',
 '    try:',
-'        os.listdir(dir)',
+'        return os.listdir(dir)',
 '    except PermissionError:',
 """        print("Error: Permission denied to list directory '%s'" % dir)""",
 '        quit()',
@@ -974,11 +990,22 @@ class MyWlListener(WordlifyListener):
 
     # Enter a parse tree produced by WordlifyParser#date_modified.
     def enterDate_modified(self, ctx:WordlifyParser.Date_modifiedContext):
+        
         pass
 
     # Exit a parse tree produced by WordlifyParser#date_modified.
     def exitDate_modified(self, ctx:WordlifyParser.Date_modifiedContext):
-        pass
+        self.add_imps(["import pathlib", "import datetime"])
+        ctx.parentCtx.lines = ["dateModified({})".format(ctx.value_or_id().getText())]
+        self.functions +=[
+            'def dateModified(file):',
+'    fname = pathlib.Path(file)',
+'    if not fname.exists():',
+"""        print("Error: No such file '%s'" % file)""",
+'        quit()',
+'    ctime = datetime.datetime.fromtimestamp(fname.stat().st_ctime)',
+'    return ctime',
+        ]
 
 
     # Enter a parse tree produced by WordlifyParser#size.

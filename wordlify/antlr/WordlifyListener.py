@@ -116,6 +116,15 @@ class WordlifyListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by WordlifyParser#double_comparsion.
+    def enterDouble_comparsion(self, ctx:WordlifyParser.Double_comparsionContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#double_comparsion.
+    def exitDouble_comparsion(self, ctx:WordlifyParser.Double_comparsionContext):
+        pass
+
+
     # Enter a parse tree produced by WordlifyParser#expr.
     def enterExpr(self, ctx:WordlifyParser.ExprContext):
         pass

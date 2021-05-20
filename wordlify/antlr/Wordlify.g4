@@ -29,17 +29,18 @@ else_if : ELSE (WS | NL)+ if_cond then ;
 else_block : ELSE (WS | NL)+ ( (atom_instr (WS | NL)* ';' (WS | NL)* | atom_instr (WS* NL WS*)+ | block_instr (WS | NL)+)*
              (atom_instr (WS | NL)* (';' | (WS | NL)+) | block_instr (WS | NL)+) )? ;
 
-cond : fn_call | BOOL | comparison ;
-comparison : expr (WS | NL)* CMP_OP (WS | NL)* expr ;
+cond : fn_call | BOOL | comparison | double_comparsion;
+comparison : expr (WS | NL)* CMP_OP (WS | NL)* expr  ;
+double_comparsion:  comparison (WS | NL)* LOG_OP  (WS | NL)* comparison;
 
 expr : fn_call | STR | NUM | ID | arith_expr | array | array_elem ;
 arith_expr : value_or_id (WS | NL)* ARITH_OP (WS | NL)* value_or_id ;
 
 fn_call : own_fn_call | exist | print_instr | rename | remove | move | copy | download | write | read | wait_instr | execute | get_files | date_modified | size | exit | create | length | TIME | FILE | FOLDER | ARGS ;
 atom_instr : own_fn_call | exist | print_instr | rename | remove | move | copy | download | write | read | wait_instr | execute | get_files | date_modified | size | exit | create | array_append | assign | TIME | FILE | FOLDER | ARGS ;
-assign : ID (WS | NL)* '=' (WS | NL)* expr ;
-array_append : ID (WS|NL)* APPEND (WS|NL)* expr ;
-array_elem : ID '[' (WS|NL)* value_or_id (WS|NL)* ']' ;
+assign : (ID| array_elem) (WS | NL)* '=' (WS | NL)* expr ;
+array_append : ID (WS|NL)* APPEND  (WS | NL)* expr (WS|NL)* ;
+array_elem : ID '[' (WS|NL)* expr (WS|NL)* ']' ;
 
 own_fn_call : ID (WS | NL)* '(' (WS | NL)* ( value_or_id (WS | NL)* (',' (WS | NL)* value_or_id (WS | NL)*)* )? ')' ;
 exist : EXIST (WS | NL)* '(' (WS | NL)* value_or_id (WS | NL)* ')' ;
