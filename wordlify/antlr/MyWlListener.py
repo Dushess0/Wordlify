@@ -1064,7 +1064,7 @@ class MyWlListener(WordlifyListener):
 
         ctx.parentCtx.lines = ["create({})".format(ctx.value_or_id().getText())]
         self.functions += [
-'def create(filename):'
+'def create(filename):',
 '    try:',
 '        with open(str(filename), "x"):',
 '            pass',
