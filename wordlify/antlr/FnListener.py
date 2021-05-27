@@ -34,7 +34,7 @@ class FnListener(WordlifyListener):
             line = self.src_lines[line_nr-1].lstrip()
             col_nr = ctx.ID()[0].getSymbol().column
             id = ctx.ID()[0].getText()
-            raise Exception("Line {}, column {}: function '{}' already exists:\n    {}".format(line_nr, col_nr, id, line))
+            raise Exception("Line {}, column {}: function '{}' declared more than once:\n    {}".format(line_nr, col_nr, id, line))
 
     # Enter a parse tree produced by WordlifyParser#block_instr.
     def enterBlock_instr(self, ctx:WordlifyParser.Block_instrContext):
@@ -124,6 +124,21 @@ class FnListener(WordlifyListener):
     def exitComparison(self, ctx:WordlifyParser.ComparisonContext):
         pass
 
+    # Enter a parse tree produced by WordlifyParser#double_comparsion.
+    def enterDouble_comparsion(self, ctx:WordlifyParser.Double_comparsionContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#double_comparsion.
+    def exitDouble_comparsion(self, ctx:WordlifyParser.Double_comparsionContext):
+        pass
+
+    # Enter a parse tree produced by WordlifyParser#arith_expr.
+    def enterArith_expr(self, ctx:WordlifyParser.Arith_exprContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#arith_expr.
+    def exitArith_expr(self, ctx:WordlifyParser.Arith_exprContext):
+        pass
 
     # Enter a parse tree produced by WordlifyParser#atom_instr.
     def enterAtom_instr(self, ctx:WordlifyParser.Atom_instrContext):
