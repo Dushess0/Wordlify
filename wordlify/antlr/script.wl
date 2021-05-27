@@ -1,1 +1,7 @@
-v0 = "we"; remove("as")
+a = 5
+
+fn a(b) begin
+    a = 5
+end
+
+a(2)

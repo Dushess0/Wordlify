@@ -47,28 +47,12 @@ class MyWlListener(WordlifyListener):
 
         if len(ctx.ID()) > 1:
             header += ctx.ID()[1].getText()
-            if ctx.ID()[1].getText() in self.vars and self.vars[ctx.ID()[1].getText()][0] == "function":
-                line_nr = ctx.ID()[1].getSymbol().line
-                line = self.src_lines[line_nr-1].lstrip()
-                col_nr = ctx.ID()[1].getSymbol().column
-                raise Exception("Line {}, column {}: cannot create variable '{}' - it is already a function:\n    {}".format(line_nr, col_nr, ctx.ID()[1].getText(), line))
-
-            if ctx.ID()[1].getText() not in self.vars:
-                ctx.localVars.append(ctx.ID()[1].getText())
+            ctx.localVars.append(ctx.ID()[1].getText())
             self.vars[ctx.ID()[1].getText()] = "any"
 
             for i in range(2, len(ctx.ID())):
                 header += ", {}".format(ctx.ID()[i].getText())
-
-                if ctx.ID()[i].getText() in self.vars and self.vars[ctx.ID()[i].getText()][0] == "function":
-                    line_nr = ctx.ID()[i].getSymbol().line
-                    line = self.src_lines[line_nr-1].lstrip()
-                    col_nr = ctx.ID()[i].getSymbol().column
-                    raise Exception("Line {}, column {}: cannot create variable '{}' - it is already a function:\n    {}".format(line_nr, col_nr, ctx.ID()[i].getText(), line))
-
-                if ctx.ID()[i].getText() not in self.vars:
-                    ctx.localVars.append(ctx.ID()[i].getText())
-
+                ctx.localVars.append(ctx.ID()[i].getText())
                 self.vars[ctx.ID()[i].getText()] = "any"
 
         header += "):"
@@ -83,7 +67,8 @@ class MyWlListener(WordlifyListener):
         self.indent-=4
         self.functions += ctx.lines
         for v in ctx.localVars:
-            del self.vars[v]
+            if v not in ctx.parentCtx.localVars:
+                del self.vars[v]
 
     # Enter a parse tree produced by WordlifyParser#block_instr.
     def enterBlock_instr(self, ctx:WordlifyParser.Block_instrContext):
@@ -101,30 +86,19 @@ class MyWlListener(WordlifyListener):
             col_nr = ctx.ID()[0].getSymbol().column
             raise Exception("Line {}, column {}: cannot create variable '{}' - a function with this name already exists:\n    {}".format(line_nr, col_nr, ctx.ID()[0].getText(), line))
 
-        if ctx.ID()[1].getText() not in self.vars:
+        if ctx.ID()[1].getText() not in self.vars or self.vars[ctx.ID()[1].getText()][0] == "function":
             line_nr = ctx.ID()[1].getSymbol().line
             line = self.src_lines[line_nr-1].lstrip()
             col_nr = ctx.ID()[1].getSymbol().column
             raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, ctx.ID()[1].getText(), line))
-        
         if self.vars[ctx.ID()[1].getText()] not in ["array", "any"]:
             line_nr = ctx.ID()[1].getSymbol().line
             line = self.src_lines[line_nr-1].lstrip()
             col_nr = ctx.ID()[1].getSymbol().column
             raise Exception("Line {}, column {}: variable '{}' must be of type 'array':\n    {}".format(line_nr, col_nr, ctx.ID()[1].getText(), line))
 
-        if ctx.ID()[0].getText() in self.vars and self.vars[ctx.ID()[0].getText()][0] == "function":
-            line_nr = ctx.ID()[0].getSymbol().line
-            line = self.src_lines[line_nr-1].lstrip()
-            col_nr = ctx.ID()[0].getSymbol().column
-            raise Exception("Line {}, column {}: cannot create variable '{}' - it is already a function:\n    {}".format(line_nr, col_nr, ctx.ID()[0].getText(), line))
-
-        if ctx.ID()[0].getText() not in self.vars:
-            ctx.localVars.append(ctx.ID()[0].getText())
-
-        self.vars[ctx.ID()[0].getText()] = "any"
-
         ctx.lines = [" "*self.indent + "for " + ctx.ID()[0].getText() + " in " + ctx.ID()[1].getText() + ":"]
+        ctx.localVars = []
         self.indent += 4
 
     # Exit a parse tree produced by WordlifyParser#foreach.
@@ -135,11 +109,12 @@ class MyWlListener(WordlifyListener):
         self.indent -= 4
 
         for localVar in ctx.localVars:
-            del self.vars[localVar]
+            if localVar not in ctx.parentCtx.parentCtx.localVars:
+                del self.vars[localVar]
 
     # Enter a parse tree produced by WordlifyParser#while_instr.
     def enterWhile_instr(self, ctx:WordlifyParser.While_instrContext):
-        ctx.lines = [" "*self.indent + "while " + ctx.cond().text + ":"]
+        ctx.lines = [" "*self.indent + "while " + ctx.cond().getText() + ":"]
         ctx.localVars = []
         self.indent += 4
 
@@ -151,7 +126,8 @@ class MyWlListener(WordlifyListener):
         self.indent -= 4
 
         for localVar in ctx.localVars:
-            del self.vars[localVar]
+            if localVar not in ctx.parentCtx.parentCtx.localVars:
+                del self.vars[localVar]
 
     # Enter a parse tree produced by WordlifyParser#if_instr.
     def enterIf_instr(self, ctx:WordlifyParser.If_instrContext):
@@ -183,7 +159,8 @@ class MyWlListener(WordlifyListener):
             ctx.parentCtx.lines += ctx.lines
         self.indent -= 4
         for localVar in ctx.localVars:
-            del self.vars[localVar]
+            if localVar not in ctx.parentCtx.parentCtx.parentCtx.localVars:
+                del self.vars[localVar]
 
     # Enter a parse tree produced by WordlifyParser#else_if.
     def enterElse_if(self, ctx:WordlifyParser.Else_ifContext):
@@ -198,7 +175,8 @@ class MyWlListener(WordlifyListener):
             for line in ctx.lines:
                 ctx.parentCtx.lines.append(line)
         for localVar in ctx.localVars:
-            del self.vars[localVar]
+            if localVar not in ctx.parentCtx.parentCtx.parentCtx.localVars:
+                del self.vars[localVar]
 
     # Enter a parse tree produced by WordlifyParser#else_block.
     def enterElse_block(self, ctx:WordlifyParser.Else_blockContext):
@@ -216,18 +194,17 @@ class MyWlListener(WordlifyListener):
                 ctx.parentCtx.lines.append(line)
         self.indent -= 4
         for localVar in ctx.localVars:
-            del self.vars[localVar]
+            if localVar not in ctx.parentCtx.parentCtx.parentCtx.localVars:
+                del self.vars[localVar]
 
     # Enter a parse tree produced by WordlifyParser#cond.
     def enterCond(self, ctx:WordlifyParser.CondContext):
         pass
-
     def getTextFromComparsion(self,comparsion):
         text = comparsion.expr()[0].text
         text2 = comparsion.expr()[1].text
         op= comparsion.CMP_OP().getText()
         return text + " " + op + " " + text2
-
     # Exit a parse tree produced by WordlifyParser#cond.
     def exitCond(self, ctx:WordlifyParser.CondContext):
         if ctx.BOOL() != None:
@@ -271,8 +248,6 @@ class MyWlListener(WordlifyListener):
     def enterAssign(self, ctx:WordlifyParser.AssignContext):
         pass
 
-    # dotąd jest bez bugów
-
     # Exit a parse tree produced by WordlifyParser#assign.
     def exitAssign(self, ctx:WordlifyParser.AssignContext):
         obj=None
@@ -301,8 +276,6 @@ class MyWlListener(WordlifyListener):
 
         ctx.parentCtx.lines = ["{} = {}".format(obj.getText(), ctx.expr().text)]
         self.vars[obj.getText()] = ctx.expr().type
-
-        
         ctx.parentCtx.parentCtx.localVars.append(obj.getText())
 
     # Enter a parse tree produced by WordlifyParser#expr.
@@ -342,14 +315,6 @@ class MyWlListener(WordlifyListener):
             ctx.text = ctx.array_elem().text
             ctx.type = "any"
 
-
-    # Enter a parse tree produced by WordlifyParser#double_comparsion.
-    def enterDouble_comparsion(self, ctx:WordlifyParser.Double_comparsionContext):
-        pass
-
-    # Exit a parse tree produced by WordlifyParser#double_comparsion.
-    def exitDouble_comparsion(self, ctx:WordlifyParser.Double_comparsionContext):
-        pass
 
       # Enter a parse tree produced by WordlifyParser#arith_expr.
     def enterArith_expr(self, ctx:WordlifyParser.Arith_exprContext):
