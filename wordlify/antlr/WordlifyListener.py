@@ -143,6 +143,15 @@ class WordlifyListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by WordlifyParser#concat.
+    def enterConcat(self, ctx:WordlifyParser.ConcatContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#concat.
+    def exitConcat(self, ctx:WordlifyParser.ConcatContext):
+        pass
+
+
     # Enter a parse tree produced by WordlifyParser#fn_call.
     def enterFn_call(self, ctx:WordlifyParser.Fn_callContext):
         pass
