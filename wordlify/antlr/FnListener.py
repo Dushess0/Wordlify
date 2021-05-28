@@ -293,6 +293,15 @@ class FnListener(WordlifyListener):
         pass
 
 
+
+    # Enter a parse tree produced by WordlifyParser#is_dir.
+    def enterIs_dir(self, ctx:WordlifyParser.Is_dirContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#is_dir.
+    def exitIs_dir(self, ctx:WordlifyParser.Is_dirContext):
+        pass
+
     # Enter a parse tree produced by WordlifyParser#execute.
     def enterExecute(self, ctx:WordlifyParser.ExecuteContext):
         pass

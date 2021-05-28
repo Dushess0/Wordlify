@@ -37,14 +37,15 @@ expr : fn_call | STR | NUM | ID | BOOL | arith_expr | array | array_elem | conca
 arith_expr : value_or_id (WS | NL)* ARITH_OP (WS | NL)* value_or_id ;
 concat : value_or_id ( (WS|NL)* CONCAT_OP (WS|NL)* value_or_id )+ ;
 
-fn_call : own_fn_call | exist | print_instr | rename | remove | move | copy | download | write | read | wait_instr | execute | get_files | date_modified | size | exit | create | length | TIME | FILE | FOLDER | ARGS ;
-atom_instr : own_fn_call | exist | print_instr | rename | remove | move | copy | download | write | read | wait_instr | execute | get_files | date_modified | size | exit | create | array_append | assign | TIME | FILE | FOLDER | ARGS ;
+fn_call : own_fn_call | exist | print_instr | rename | remove | move | copy | download | write | read | wait_instr | execute | get_files | date_modified | size | exit | create | length | is_dir | TIME | FILE | FOLDER | ARGS ;
+atom_instr : own_fn_call | exist | print_instr | rename | remove | move | copy | download | write | read | wait_instr | execute | get_files | date_modified | size | exit | create | array_append | assign | is_dir | TIME | FILE | FOLDER | ARGS ;
 assign : (ID| array_elem) (WS | NL)* '=' (WS | NL)* expr ;
 array_append : ID (WS|NL)* APPEND  (WS | NL)* expr (WS|NL)* ;
 array_elem : ID '[' (WS|NL)* expr (WS|NL)* ']' ;
 
 own_fn_call : ID (WS | NL)* '(' (WS | NL)* ( value_or_id (WS | NL)* (',' (WS | NL)* value_or_id (WS | NL)*)* )? ')' ;
 exist : EXIST (WS | NL)* '(' (WS | NL)* value_or_id (WS | NL)* ')' ;
+is_dir : IS_DIR (WS|NL)* '(' (WS|NL)* value_or_id (WS|NL)* ')' ;
 print_instr : PRINT (WS | NL)* '(' (WS | NL)* value_or_id (WS | NL)* ')' ;
 rename : RENAME (WS | NL)* '(' (WS | NL)* value_or_id (WS | NL)* ',' (WS | NL)* value_or_id (WS | NL)* ')';
 remove : REMOVE (WS | NL)* '(' (WS | NL)* value_or_id (WS | NL)* ')' ;
@@ -91,6 +92,7 @@ EXIT : 'exit' ;
 TIME : 'time' ;
 GET_FILES : 'getFiles' ;
 DATE_MODIFIED : 'dateModified' ;
+IS_DIR : 'isDir' ;
 FILE : 'file' ;
 FOLDER : 'folder' ;
 ARGS : 'args' ;

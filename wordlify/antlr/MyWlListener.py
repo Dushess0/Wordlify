@@ -668,6 +668,35 @@ class MyWlListener(WordlifyListener):
 '    quit()',
 '']
 
+
+    # Enter a parse tree produced by WordlifyParser#is_dir.
+    def enterIs_dir(self, ctx:WordlifyParser.Is_dirContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#is_dir.
+    def exitIs_dir(self, ctx:WordlifyParser.Is_dirContext):
+        if ctx.value_or_id().STR() == None and ctx.value_or_id().ID() == None: # are args of type 'str'? 
+            line_nr = ctx.value_or_id().children[0].getSymbol().line
+            line = self.src_lines[line_nr-1].lstrip()
+            col_nr = ctx.value_or_id().children[0].getSymbol().column
+            raise Exception("Line {}, column {}: argument of 'remove' function must be of type 'str':\n    {}".format(line_nr, col_nr, line))
+        if ctx.value_or_id().ID() != None:
+            line_nr = ctx.value_or_id().ID().getSymbol().line
+            line = self.src_lines[line_nr-1].lstrip()
+            col_nr = ctx.value_or_id().ID().getSymbol().column
+            if ctx.value_or_id().ID().getText() not in self.vars:
+                raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, ctx.value_or_id().ID().getText(), line))
+            if self.vars[ctx.value_or_id().ID().getText()] not in ["str", "any"]:
+                raise Exception("Line {}, column {}: variable '{}' should be an 'str':\n    {}".format(line_nr, col_nr, ctx.value_or_id().ID().getText(), line))
+
+        self.add_imps(["import os.path"])
+        ctx.parentCtx.lines = ["isDir({})".format(ctx.value_or_id().getText())]
+
+        self.functions += [
+'def isDir(dir_name):',
+'    return os.path.isdir(dir_name)',
+'']
+
     # Enter a parse tree produced by WordlifyParser#copy.
     def enterCopy(self, ctx:WordlifyParser.CopyContext):
         pass

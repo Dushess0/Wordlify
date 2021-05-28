@@ -215,6 +215,15 @@ class WordlifyListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by WordlifyParser#is_dir.
+    def enterIs_dir(self, ctx:WordlifyParser.Is_dirContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#is_dir.
+    def exitIs_dir(self, ctx:WordlifyParser.Is_dirContext):
+        pass
+
+
     # Enter a parse tree produced by WordlifyParser#print_instr.
     def enterPrint_instr(self, ctx:WordlifyParser.Print_instrContext):
         pass

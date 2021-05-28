@@ -1,5 +1,4 @@
 filenames = getFiles(".") # tablica
-createDir("backup_files")
 
 foreach name in filenames do
     copy(name, "backup_files") # utworzy sam?
