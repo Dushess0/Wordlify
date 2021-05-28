@@ -10,7 +10,10 @@ class MyWlListener(WordlifyListener):
         self.functions = []
         self.fn_specs = {}
 
+        self.is_in_fn = False # are we now in a function?
+        self.vars_from_out_changed_in_fn = []
         self.vars = {}
+        self.vars_owners = {}
         for name in functions:
             self.fn_specs[name] = functions[name]
 
@@ -24,7 +27,6 @@ class MyWlListener(WordlifyListener):
     # Enter a parse tree produced by WordlifyParser#program.
     def enterProgram(self, ctx:WordlifyParser.ProgramContext):
         ctx.lines = []
-        ctx.localVars = []
 
     # Exit a parse tree produced by WordlifyParser#program.
     def exitProgram(self, ctx:WordlifyParser.ProgramContext):
@@ -42,18 +44,22 @@ class MyWlListener(WordlifyListener):
 
     # Enter a parse tree produced by WordlifyParser#fn_def.
     def enterFn_def(self, ctx:WordlifyParser.Fn_defContext):
+        self.is_in_fn = True
         ctx.lines = []
-        ctx.localVars = []
         header = "def {}(".format(ctx.ID()[0].getText())
 
         if len(ctx.ID()) > 1:
             header += ctx.ID()[1].getText()
-            ctx.localVars.append(ctx.ID()[1].getText())
+
+            if ctx.ID()[1].getText() not in self.vars_owners:
+                self.vars_owners[ctx.ID()[1].getText()] = ctx
             self.vars[ctx.ID()[1].getText()] = "any"
 
             for i in range(2, len(ctx.ID())):
                 header += ", {}".format(ctx.ID()[i].getText())
-                ctx.localVars.append(ctx.ID()[i].getText())
+
+                if ctx.ID()[1].getText() not in self.vars_owners:
+                    self.vars_owners[ctx.ID()[1].getText()] = ctx
                 self.vars[ctx.ID()[i].getText()] = "any"
 
         header += "):"
@@ -67,9 +73,22 @@ class MyWlListener(WordlifyListener):
         ctx.lines.append("")
         self.indent-=4
         self.functions += ctx.lines
-        for v in ctx.localVars:
-            if v not in ctx.parentCtx.localVars:
-                del self.vars[v]
+
+        for var in self.vars_from_out_changed_in_fn:
+            self.vars[var] = "any"
+
+        vars_to_delete = []
+
+        for var in self.vars_owners:
+            if self.vars_owners[var] == ctx:
+                vars_to_delete.append(var)
+
+        for var in vars_to_delete:
+            del self.vars[var]
+            del self.vars_owners[var]
+        
+        self.is_in_fn = False
+        self.vars_from_out_changed_in_fn = []
 
     # Enter a parse tree produced by WordlifyParser#block_instr.
     def enterBlock_instr(self, ctx:WordlifyParser.Block_instrContext):
@@ -94,7 +113,8 @@ class MyWlListener(WordlifyListener):
 
         ctx.lines = [" "*self.indent + "for " + ctx.ID()[0].getText() + " in " + ctx.ID()[1].getText() + ":"]
 
-        ctx.localVars = [ctx.ID()[0].getText()]
+        if ctx.ID()[0].getText() not in self.vars_owners:
+            self.vars_owners[ctx.ID()[0].getText()] = ctx
         self.vars[ctx.ID()[0].getText()] = "any"
 
         self.indent += 4
@@ -106,14 +126,19 @@ class MyWlListener(WordlifyListener):
         ctx.parentCtx.parentCtx.lines += ctx.lines
         self.indent -= 4
 
-        for localVar in ctx.localVars:
-            if localVar not in ctx.parentCtx.parentCtx.localVars:
-                del self.vars[localVar]
+        vars_to_delete = []
+
+        for var in self.vars_owners:
+            if self.vars_owners[var] == ctx:
+                vars_to_delete.append(var)
+
+        for var in vars_to_delete:
+            del self.vars[var]
+            del self.vars_owners[var]
 
     # Enter a parse tree produced by WordlifyParser#while_instr.
     def enterWhile_instr(self, ctx:WordlifyParser.While_instrContext):
         ctx.lines = [" "*self.indent + "while " + ctx.cond().getText() + ":"]
-        ctx.localVars = []
         self.indent += 4
 
     # Exit a parse tree produced by WordlifyParser#while_instr.
@@ -123,9 +148,15 @@ class MyWlListener(WordlifyListener):
         ctx.parentCtx.parentCtx.lines += ctx.lines
         self.indent -= 4
 
-        for localVar in ctx.localVars:
-            if localVar not in ctx.parentCtx.parentCtx.localVars:
-                del self.vars[localVar]
+        vars_to_delete = []
+
+        for var in self.vars_owners:
+            if self.vars_owners[var] == ctx:
+                vars_to_delete.append(var)
+
+        for var in vars_to_delete:
+            del self.vars[var]
+            del self.vars_owners[var]
 
     # Enter a parse tree produced by WordlifyParser#if_instr.
     def enterIf_instr(self, ctx:WordlifyParser.If_instrContext):
@@ -146,7 +177,6 @@ class MyWlListener(WordlifyListener):
     # Enter a parse tree produced by WordlifyParser#then.
     def enterThen(self, ctx:WordlifyParser.ThenContext):
         ctx.lines = []
-        ctx.localVars = []
         self.indent += 4
 
     # Exit a parse tree produced by WordlifyParser#then.
@@ -156,14 +186,20 @@ class MyWlListener(WordlifyListener):
         else:
             ctx.parentCtx.lines += ctx.lines
         self.indent -= 4
-        for localVar in ctx.localVars:
-            if localVar not in ctx.parentCtx.parentCtx.parentCtx.localVars:
-                del self.vars[localVar]
+        
+        vars_to_delete = []
+
+        for var in self.vars_owners:
+            if self.vars_owners[var] == ctx:
+                vars_to_delete.append(var)
+
+        for var in vars_to_delete:
+            del self.vars[var]
+            del self.vars_owners[var]
 
     # Enter a parse tree produced by WordlifyParser#else_if.
     def enterElse_if(self, ctx:WordlifyParser.Else_ifContext):
         ctx.lines = [" "*self.indent + "elif "]
-        ctx.localVars = []
 
     # Exit a parse tree produced by WordlifyParser#else_if.
     def exitElse_if(self, ctx:WordlifyParser.Else_ifContext):
@@ -172,14 +208,20 @@ class MyWlListener(WordlifyListener):
         else:
             for line in ctx.lines:
                 ctx.parentCtx.lines.append(line)
-        for localVar in ctx.localVars:
-            if localVar not in ctx.parentCtx.parentCtx.parentCtx.localVars:
-                del self.vars[localVar]
 
+        vars_to_delete = []
+
+        for var in self.vars_owners:
+            if self.vars_owners[var] == ctx:
+                vars_to_delete.append(var)
+
+        for var in vars_to_delete:
+            del self.vars[var]
+            del self.vars_owners[var]
+        
     # Enter a parse tree produced by WordlifyParser#else_block.
     def enterElse_block(self, ctx:WordlifyParser.Else_blockContext):
         ctx.lines = []
-        ctx.localVars = []
         self.indent += 4
 
     # Exit a parse tree produced by WordlifyParser#else_block.
@@ -191,13 +233,21 @@ class MyWlListener(WordlifyListener):
             for line in ctx.lines:
                 ctx.parentCtx.lines.append(line)
         self.indent -= 4
-        for localVar in ctx.localVars:
-            if localVar not in ctx.parentCtx.parentCtx.parentCtx.localVars:
-                del self.vars[localVar]
+
+        vars_to_delete = []
+
+        for var in self.vars_owners:
+            if self.vars_owners[var] == ctx:
+                vars_to_delete.append(var)
+
+        for var in vars_to_delete:
+            del self.vars[var]
+            del self.vars_owners[var]
 
     # Enter a parse tree produced by WordlifyParser#cond.
     def enterCond(self, ctx:WordlifyParser.CondContext):
         pass
+
     def getTextFromComparsion(self,comparsion):
         text = comparsion.expr()[0].text
         text2 = comparsion.expr()[1].text
@@ -257,8 +307,16 @@ class MyWlListener(WordlifyListener):
             obj = ctx.array_elem()
         
         ctx.parentCtx.lines = ["{} = {}".format(obj.getText(), ctx.expr().text)]
+
+        if self.is_in_fn:
+            if obj.getText() not in self.vars:
+                self.vars_owners[obj.getText()] = ctx.parentCtx.parentCtx
+            if obj.getText() not in self.vars_from_out_changed_in_fn:
+                self.vars_from_out_changed_in_fn.append(obj.getText())
+        else:
+            if obj.getText() not in self.vars:
+                self.vars_owners[obj.getText()] = ctx.parentCtx.parentCtx
         self.vars[obj.getText()] = ctx.expr().type
-        ctx.parentCtx.parentCtx.localVars.append(obj.getText())
 
     # Enter a parse tree produced by WordlifyParser#expr.
     def enterExpr(self, ctx:WordlifyParser.ExprContext):
