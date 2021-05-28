@@ -138,11 +138,12 @@ class MyWlListener(WordlifyListener):
 
     # Enter a parse tree produced by WordlifyParser#while_instr.
     def enterWhile_instr(self, ctx:WordlifyParser.While_instrContext):
-        ctx.lines = [" "*self.indent + "while " + ctx.cond().getText() + ":"]
+        ctx.lines = []
         self.indent += 4
 
     # Exit a parse tree produced by WordlifyParser#while_instr.
     def exitWhile_instr(self, ctx:WordlifyParser.While_instrContext):
+        ctx.lines.insert(0, " "*(self.indent-4) + "while " + ctx.cond().text + ":")
         if len(ctx.lines) == 1:
             ctx.lines.append(" "*self.indent + "pass")
         ctx.parentCtx.parentCtx.lines += ctx.lines
@@ -785,7 +786,14 @@ class MyWlListener(WordlifyListener):
 '        if not os.path.exists(old):',
 '            print("Error: %s doesn\'t exist" % old)',
 '            quit()',
-'        elif not os.path.isdir(new):',
+'        v1 = new',
+'        if os.name == "nt": # Windows',
+'            if new[-1] == "/":',
+'                v1 = new[:-1]',
+'        else:',
+'            if new != "/" and new[-1] == "/":',
+'                v1 = new[:-1]',
+'        if not os.path.isdir(new):',
 '            v1 = new',
 '            v2 = []',
 '            if os.name == "nt": # Windows',

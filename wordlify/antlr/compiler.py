@@ -1,5 +1,6 @@
 #!/bin/python3
 
+from WlErrListener import WlErrListener
 import sys
 from antlr4 import *
 from WordlifyLexer import WordlifyLexer
@@ -7,7 +8,7 @@ from WordlifyParser import WordlifyParser
 from MyWlListener import MyWlListener
 from FnListener import FnListener
 import os
-import pathlib
+import io
 
 def main(argv):
     if len(argv) != 2 or argv[1][-3:] != ".wl":
@@ -17,7 +18,17 @@ def main(argv):
         lexer = WordlifyLexer(input)
         stream = CommonTokenStream(lexer)
         parser = WordlifyParser(stream)
+        error = io.StringIO()
+        parser.removeErrorListeners()
+        parser.addErrorListener(WlErrListener(error))
+
         tree = parser.program()
+        error.seek(0)
+        msg = error.read()
+        if msg != "":
+            print(msg)
+            print("\nSyntax error occured given above.")
+            quit()
         
         destFileName = argv[1][:-2] + "py"
         out_lines = ""

@@ -10,9 +10,10 @@ fn rename_recur(dir_name) begin
     filenames = getFiles(dir_name)
     
     foreach name in filenames do
-        name = dir_name . "/" . name
         new_name = name . ".bak"
+        name = dir_name . "/" . name
         rename(name, new_name)
+        new_name = name . ".bak"
         
         if isDir(new_name) then
             rename_recur(new_name)
