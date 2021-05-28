@@ -38,6 +38,7 @@ l= length(files)
 while i < l do
     a = files[i]
     i = i + 1
-    rename(a, i)
+    new = i . "_" . a
+    rename(a, new)
 end
 

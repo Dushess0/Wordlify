@@ -93,7 +93,10 @@ class MyWlListener(WordlifyListener):
             raise Exception("Line {}, column {}: variable '{}' must be of type 'array':\n    {}".format(line_nr, col_nr, ctx.ID()[1].getText(), line))
 
         ctx.lines = [" "*self.indent + "for " + ctx.ID()[0].getText() + " in " + ctx.ID()[1].getText() + ":"]
-        ctx.localVars = []
+
+        ctx.localVars = [ctx.ID()[0].getText()]
+        self.vars[ctx.ID()[0].getText()] = "any"
+
         self.indent += 4
 
     # Exit a parse tree produced by WordlifyParser#foreach.
@@ -329,14 +332,16 @@ class MyWlListener(WordlifyListener):
     # Exit a parse tree produced by WordlifyParser#concat.
     def exitConcat(self, ctx:WordlifyParser.ConcatContext):
         for voi in ctx.value_or_id():
-            if voi.ID() == None and voi.STR() == None:
-                line_nr = voi.getSymbol().line
-                line = self.src_lines[line_nr-1].lstrip()
-                col_nr = voi.getSymbol().column
-                raise Exception("Line {}, column {}: cannot concatenate non-strings:\n    {}".format(line_nr, col_nr, line))
-            
             if voi.ID() != None:
-                pass
+                line_nr = voi.ID().getSymbol().line
+                line = self.src_lines[line_nr-1].lstrip()
+                col_nr = voi.ID().getSymbol().column
+                if voi.ID().getText() not in self.vars:
+                    raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, voi.ID().getText(), line))
+
+        ctx.text = "str(" +  ctx.value_or_id()[0].getText() + ")"
+        for i in range(1, len(ctx.value_or_id())):
+            ctx.text += " + " + "str(" + ctx.value_or_id()[i].getText() + ")"
 
     # Enter a parse tree produced by WordlifyParser#fn_call.
     def enterFn_call(self, ctx:WordlifyParser.Fn_callContext):
@@ -364,26 +369,24 @@ class MyWlListener(WordlifyListener):
         line_nr = ctx.ID().getSymbol().line
         line = self.src_lines[line_nr-1].lstrip()
         col_nr = ctx.ID().getSymbol().column
-        expression = ctx.expr()
-        index=ctx.expr().getText()
+        
         arrayName=ctx.ID().getText()
         if arrayName not in self.vars:
             raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, arrayName, line))
         if self.vars[arrayName] not in ["array", "any"]:
             raise Exception("Line {}, column {}: variable '{}' should be an 'array':\n    {}".format(line_nr, col_nr, arrayName, line))
         #----------------------------
-        voi = ctx.expr()
-        if hasattr(voi,'ID') and voi.ID() != None:
-            col_nr = voi.ID().getSymbol().column
-        else:
-            col_nr=0
-        if voi.ID() != None:
-            if index not in self.vars:
-                raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, index, line))
-            if self.vars[index] not in ["num", "any"]:
-                raise Exception("Line {}, column {}: variable '{}' should be a 'num' - it's an array index:\n    {}".format(line_nr, col_nr, index, line))
-        elif voi.STR() != None or (hasattr(voi,'BOOL') and voi.BOOL() != None):
-            raise Exception("Line {}, column {}: array index must be a 'num':\n    {}".format(line_nr, col_nr, voi.getText(), line))
+        
+        if ctx.expr().ID() == None and ctx.expr().NUM() == None:
+            line_nr = ctx.expr().getSymbol().line
+            col_nr = ctx.expr().getSymbol().column
+            line = self.src_lines[line_nr-1].lstrip()
+            raise Exception("Line {}, column {}: array index must be a 'num':\n    {}".format(line_nr, col_nr, line))
+        if ctx.expr().ID() != None:
+            if ctx.expr().ID().getText() not in self.vars:
+                raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, ctx.expr().ID().getText(), line))
+            if self.vars[ctx.expr().ID().getText()] not in ["num", "any"]:
+                raise Exception("Line {}, column {}: array index must be a 'num':\n    {}".format(line_nr, col_nr, line))
 
         ctx.text = "{}[{}]".format(ctx.ID().getText(), ctx.expr().getText())
 
@@ -547,7 +550,7 @@ class MyWlListener(WordlifyListener):
     # Exit a parse tree produced by WordlifyParser#move.
     def exitMove(self, ctx:WordlifyParser.MoveContext):
         for voi in ctx.value_or_id(): # are args of type 'str'?  
-            if voi.NUM() != None:
+            if voi.STR() == None and voi.ID() == None:
                 line_nr = voi.NUM().getSymbol().line
                 line = self.src_lines[line_nr-1].lstrip()
                 col_nr = voi.NUM().getSymbol().column
@@ -556,7 +559,7 @@ class MyWlListener(WordlifyListener):
                 line_nr = voi.ID().getSymbol().line
                 line = self.src_lines[line_nr-1].lstrip()
                 col_nr = voi.ID().getSymbol().column
-                if voi.ID().getText() not in self.vars or self.vars[voi.ID().getText()][0] == "function":
+                if voi.ID().getText() not in self.vars:
                     raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, voi.ID().getText(), line))
                 if self.vars[voi.ID().getText()] not in ["str", "any"]:
                     raise Exception("Line {}, column {}: variable '{}' should be an 'str':\n    {}".format(line_nr, col_nr, voi.ID().getText(), line))
@@ -653,7 +656,7 @@ class MyWlListener(WordlifyListener):
     # Exit a parse tree produced by WordlifyParser#copy.
     def exitCopy(self, ctx:WordlifyParser.CopyContext):
         for voi in ctx.value_or_id(): # are args of type 'str'?  
-            if voi.NUM() != None:
+            if voi.STR() == None and voi.ID() == None:
                 line_nr = voi.NUM().getSymbol().line
                 line = self.src_lines[line_nr-1].lstrip()
                 col_nr = voi.NUM().getSymbol().column
@@ -662,7 +665,7 @@ class MyWlListener(WordlifyListener):
                 line_nr = voi.ID().getSymbol().line
                 line = self.src_lines[line_nr-1].lstrip()
                 col_nr = voi.ID().getSymbol().column
-                if voi.ID().getText() not in self.vars or self.vars[voi.ID().getText()][0] == "function":
+                if voi.ID().getText() not in self.vars:
                     raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, voi.ID().getText(), line))
                 if self.vars[voi.ID().getText()] not in ["str", "any"]:
                     raise Exception("Line {}, column {}: variable '{}' should be an 'str':\n    {}".format(line_nr, col_nr, voi.ID().getText(), line))
@@ -760,7 +763,7 @@ class MyWlListener(WordlifyListener):
     # Exit a parse tree produced by WordlifyParser#download.
     def exitDownload(self, ctx:WordlifyParser.DownloadContext):
         for voi in ctx.value_or_id(): # are args of type 'str'?  
-            if voi.NUM() != None:
+            if voi.STR() == None and voi.ID() == None:
                 line_nr = voi.NUM().getSymbol().line
                 line = self.src_lines[line_nr-1].lstrip()
                 col_nr = voi.NUM().getSymbol().column
@@ -769,7 +772,7 @@ class MyWlListener(WordlifyListener):
                 line_nr = voi.ID().getSymbol().line
                 line = self.src_lines[line_nr-1].lstrip()
                 col_nr = voi.ID().getSymbol().column
-                if voi.ID().getText() not in self.vars or self.vars[voi.ID().getText()][0] == "function":
+                if voi.ID().getText() not in self.vars:
                     raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, voi.ID().getText(), line))
                 if self.vars[voi.ID().getText()] not in ["str", "any"]:
                     raise Exception("Line {}, column {}: variable '{}' should be an 'str':\n    {}".format(line_nr, col_nr, voi.ID().getText(), line))
@@ -861,7 +864,7 @@ class MyWlListener(WordlifyListener):
     def exitWrite(self, ctx:WordlifyParser.WriteContext):
         voi0 = ctx.value_or_id()[0]
         voi1 = ctx.value_or_id()[1]
-        if voi0.NUM() != None:
+        if voi0.STR() == None and voi0.ID() == None:
             line_nr = voi0.NUM().getSymbol().line
             line = self.src_lines[line_nr-1].lstrip()
             col_nr = voi0.NUM().getSymbol().column
@@ -870,7 +873,7 @@ class MyWlListener(WordlifyListener):
             line_nr = voi0.ID().getSymbol().line
             line = self.src_lines[line_nr-1].lstrip()
             col_nr = voi0.ID().getSymbol().column
-            if voi0.ID().getText() not in self.vars or self.vars[voi0.ID().getText()][0] == "function":
+            if voi0.ID().getText() not in self.vars:
                 raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, voi0.ID().getText(), line))
             if self.vars[voi0.ID().getText()] not in ["str", "any"]:
                 raise Exception("Line {}, column {}: variable '{}' should be an 'str':\n    {}".format(line_nr, col_nr, voi0.ID().getText(), line))
@@ -878,7 +881,7 @@ class MyWlListener(WordlifyListener):
             line_nr = voi1.ID().getSymbol().line
             line = self.src_lines[line_nr-1].lstrip()
             col_nr = voi1.ID().getSymbol().column
-            if voi1.ID().getText() not in self.vars or self.vars[voi1.ID().getText()][0] == "function":
+            if voi1.ID().getText() not in self.vars:
                 raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, voi1.ID().getText(), line))
 
 
@@ -910,7 +913,7 @@ class MyWlListener(WordlifyListener):
 
     # Exit a parse tree produced by WordlifyParser#wait_instr.
     def exitWait_instr(self, ctx:WordlifyParser.Wait_instrContext):
-        if ctx.value_or_id().STR() != None: # is arg of type 'num'?
+        if ctx.value_or_id().NUM() == None and ctx.value_or_id().ID() == None: # is arg of type 'num'?
             line_nr = ctx.value_or_id().STR().getSymbol().line
             line = self.src_lines[line_nr-1].lstrip()
             col_nr = ctx.value_or_id().STR().getSymbol().column
@@ -919,7 +922,7 @@ class MyWlListener(WordlifyListener):
             line_nr = ctx.value_or_id().ID().getSymbol().line
             line = self.src_lines[line_nr-1].lstrip()
             col_nr = ctx.value_or_id().ID().getSymbol().column
-            if ctx.value_or_id().ID().getText() not in self.vars or self.vars[ctx.value_or_id().ID().getText()][0] == "function":
+            if ctx.value_or_id().ID().getText() not in self.vars:
                 raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, ctx.value_or_id().ID().getText(), line))
             if self.vars[ctx.value_or_id().ID().getText()] not in ["num", "any"]:
                 raise Exception("Line {}, column {}: variable '{}' should be a 'num':\n    {}".format(line_nr, col_nr, ctx.value_or_id().ID().getText(), line))
@@ -936,8 +939,7 @@ class MyWlListener(WordlifyListener):
     def exitExecute(self, ctx:WordlifyParser.ExecuteContext):
         # TODO arguments for program to execute
         for voi in ctx.value_or_id(): # are args of type 'str'?  
-            #TODO add if voi.BOOL() != None - in all built-in functions
-            if voi.NUM() != None:
+            if voi.STR() == None and voi.ID() == None:
                 line_nr = voi.NUM().getSymbol().line
                 line = self.src_lines[line_nr-1].lstrip()
                 col_nr = voi.NUM().getSymbol().column
@@ -946,7 +948,7 @@ class MyWlListener(WordlifyListener):
                 line_nr = voi.ID().getSymbol().line
                 line = self.src_lines[line_nr-1].lstrip()
                 col_nr = voi.ID().getSymbol().column
-                if voi.ID().getText() not in self.vars or self.vars[voi.ID().getText()][0] == "function":
+                if voi.ID().getText() not in self.vars:
                     raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, voi.ID().getText(), line))
                 if self.vars[voi.ID().getText()] not in ["str", "any"]:
                     raise Exception("Line {}, column {}: variable '{}' should be an 'str':\n    {}".format(line_nr, col_nr, voi.ID().getText(), line))
@@ -972,7 +974,7 @@ class MyWlListener(WordlifyListener):
 
     # Exit a parse tree produced by WordlifyParser#get_files.
     def exitGet_files(self, ctx:WordlifyParser.Get_filesContext):
-        if ctx.value_or_id().NUM() != None or ctx.value_or_id().BOOL() != None: # is arg of type 'str'?
+        if ctx.value_or_id().STR() == None and ctx.value_or_id().ID() == None: # is arg of type 'str'?
             line_nr = ctx.value_or_id().STR().getSymbol().line
             line = self.src_lines[line_nr-1].lstrip()
             col_nr = ctx.value_or_id().STR().getSymbol().column
@@ -981,7 +983,7 @@ class MyWlListener(WordlifyListener):
             line_nr = ctx.value_or_id().ID().getSymbol().line
             line = self.src_lines[line_nr-1].lstrip()
             col_nr = ctx.value_or_id().ID().getSymbol().column
-            if ctx.value_or_id().ID().getText() not in self.vars or self.vars[ctx.value_or_id().ID().getText()][0] == "function":
+            if ctx.value_or_id().ID().getText() not in self.vars:
                 raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, ctx.value_or_id().ID().getText(), line))
             if self.vars[ctx.value_or_id().ID().getText()] not in ["str", "any"]:
                 raise Exception("Line {}, column {}: variable '{}' should be a 'str':\n    {}".format(line_nr, col_nr, ctx.value_or_id().ID().getText(), line))
@@ -1005,6 +1007,20 @@ class MyWlListener(WordlifyListener):
 
     # Exit a parse tree produced by WordlifyParser#date_modified.
     def exitDate_modified(self, ctx:WordlifyParser.Date_modifiedContext):
+        if ctx.value_or_id().STR() == None and ctx.value_or_id().ID() == None: # is arg of type 'str'?
+            line_nr = ctx.value_or_id().STR().getSymbol().line
+            line = self.src_lines[line_nr-1].lstrip()
+            col_nr = ctx.value_or_id().STR().getSymbol().column
+            raise Exception("Line {}, column {}: argument of 'wait' function must be of type 'str':\n    {}".format(line_nr, col_nr, line))
+        if ctx.value_or_id().ID() != None:
+            line_nr = ctx.value_or_id().ID().getSymbol().line
+            line = self.src_lines[line_nr-1].lstrip()
+            col_nr = ctx.value_or_id().ID().getSymbol().column
+            if ctx.value_or_id().ID().getText() not in self.vars:
+                raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, ctx.value_or_id().ID().getText(), line))
+            if self.vars[ctx.value_or_id().ID().getText()] not in ["str", "any"]:
+                raise Exception("Line {}, column {}: variable '{}' should be a 'str':\n    {}".format(line_nr, col_nr, ctx.value_or_id().ID().getText(), line))
+
         self.add_imps(["import pathlib", "import datetime"])
         ctx.parentCtx.lines = ["dateModified({})".format(ctx.value_or_id().getText())]
         self.functions +=[
@@ -1037,10 +1053,8 @@ class MyWlListener(WordlifyListener):
             line_nr = ctx.value_or_id().ID().getSymbol().line
             line = self.src_lines[line_nr-1].lstrip()
             col_nr = ctx.value_or_id().ID().getSymbol().column
-            if ctx.value_or_id().ID().getText() not in self.vars or self.vars[ctx.value_or_id().ID().getText()][0] == "function":
+            if ctx.value_or_id().ID().getText() not in self.vars:
                 raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, ctx.value_or_id().ID().getText(), line))
-            if self.vars[ctx.value_or_id().ID().getText()][0] == "function":
-                raise Exception("Line {}, column {}: argument of 'exit' function can't be a function:\n    {}".format(line_nr, col_nr, line))
 
         ctx.parentCtx.lines = ['quit({0})'.format(ctx.value_or_id().getText())]
 
@@ -1055,7 +1069,7 @@ class MyWlListener(WordlifyListener):
             line_nr = voi.ID().getSymbol().line
             line = self.src_lines[line_nr-1].lstrip()
             col_nr = voi.ID().getSymbol().column
-            if voi.ID().getText() not in self.vars or self.vars[voi.ID().getText()][0] == "function":
+            if voi.ID().getText() not in self.vars:
                 raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, voi.ID().getText(), line))
 
         ctx.parentCtx.lines = ["create({})".format(ctx.value_or_id().getText())]
@@ -1080,7 +1094,7 @@ class MyWlListener(WordlifyListener):
             line_nr = ctx.ID().getSymbol().line
             line = self.src_lines[line_nr-1].lstrip()
             col_nr = ctx.ID().getSymbol().column
-            if ctx.ID().getText() not in self.vars or self.vars[ctx.ID().getText()][0] == "function":
+            if ctx.ID().getText() not in self.vars:
                 raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, ctx.ID().getText(), line))
             if self.vars[ctx.ID().getText()] not in ["array", "any"]:
                 raise Exception("Line {}, column {}: variable '{}' must be of type 'array':\n    {}".format(line_nr, col_nr, ctx.ID().getText(), line))
@@ -1102,7 +1116,7 @@ class MyWlListener(WordlifyListener):
                 line_nr = vois[0].ID().getSymbol().line
                 line = self.src_lines[line_nr-1].lstrip()
                 col_nr = vois[0].ID().getSymbol().column
-                if vois[0].ID().getText() not in self.vars or self.vars[vois[0].ID().getText()][0] == "function":
+                if vois[0].ID().getText() not in self.vars:
                     raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, vois[0].ID().getText(), line))
             ctx.text += vois[0].getText()
             for i in range(1, len(vois)):
@@ -1110,7 +1124,7 @@ class MyWlListener(WordlifyListener):
                     line_nr = vois[i].ID().getSymbol().line
                     line = self.src_lines[line_nr-1].lstrip()
                     col_nr = vois[i].ID().getSymbol().column
-                    if vois[i].ID().getText() not in self.vars or self.vars[vois[i].ID().getText()][0] == "function":
+                    if vois[i].ID().getText() not in self.vars:
                         raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, vois[i].ID().getText(), line))
                 ctx.text += ", " + vois[i].getText()
         ctx.text += "]"

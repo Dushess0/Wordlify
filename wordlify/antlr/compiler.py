@@ -42,7 +42,7 @@ def main(argv):
         except Exception as e:
             print(e)
             output.write(out_lines)
-            # raise e
+            raise e
         output.close()   
 
 if __name__ == '__main__':

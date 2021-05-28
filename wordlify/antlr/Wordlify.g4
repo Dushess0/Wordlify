@@ -33,9 +33,9 @@ cond : fn_call | BOOL | comparison | double_comparsion;
 comparison : expr (WS | NL)* CMP_OP (WS | NL)* expr  ;
 double_comparsion:  comparison (WS | NL)* LOG_OP  (WS | NL)* comparison;
 
-expr : fn_call | STR | NUM | ID | arith_expr | array | array_elem | concat ;
+expr : fn_call | STR | NUM | ID | BOOL | arith_expr | array | array_elem | concat ;
 arith_expr : value_or_id (WS | NL)* ARITH_OP (WS | NL)* value_or_id ;
-concat : value_or_id (WS|NL)* ( CONCAT_OP (WS|NL)* value_or_id )+ ;
+concat : value_or_id ( (WS|NL)* CONCAT_OP (WS|NL)* value_or_id )+ ;
 
 fn_call : own_fn_call | exist | print_instr | rename | remove | move | copy | download | write | read | wait_instr | execute | get_files | date_modified | size | exit | create | length | TIME | FILE | FOLDER | ARGS ;
 atom_instr : own_fn_call | exist | print_instr | rename | remove | move | copy | download | write | read | wait_instr | execute | get_files | date_modified | size | exit | create | array_append | assign | TIME | FILE | FOLDER | ARGS ;

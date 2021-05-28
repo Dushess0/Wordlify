@@ -441,3 +441,113 @@ print(a)
         self.assertEqual(self.output.read(), """if ["cefe", 4] == []:
     pass
 """)
+
+    def testfib_files(self): # should be no error
+        testString = """a = 0
+b = 1
+c = a + b
+while c < 100 do
+    create(c)
+    a = b
+    b = c
+    c = a + b
+    wait(1)
+end"""
+        lines = testString.splitlines()
+
+        parser = self.setup(testString)
+        tree = parser.program() 
+
+        self.error.seek(0)
+        error = self.error.read() 
+        if error != "":
+            raise Exception(error)
+
+        fnListener = FnListener(lines)
+        walker = ParseTreeWalker()
+        
+        walker.walk(fnListener, tree)
+        functions = fnListener.getFunctions()             
+    
+        wlListener = MyWlListener(self.output, lines, functions) 
+        walker.walk(wlListener, tree)
+            
+        self.output.seek(0) 
+        self.assertEqual(self.output.read(), """import time
+
+def create(filename):
+    try:
+        with open(str(filename), "x"):
+            pass
+    except PermissionError as v0:
+        print("Error: Permission denied to write to file %s" % v0.filename)
+        quit()
+
+a = 0
+b = 1
+c = a + b
+while c < 100:
+    create(c)
+    a = b
+    b = c
+    c = a + b
+    time.sleep(1)
+""")
+
+    def testfib(self): # should be no error
+        testString = """a = 0
+b = 1
+c = a + b
+while c < 100 do
+    write("a", c)
+    write("a", "\\n")
+    a = b
+    b = c
+    c = a + b
+end"""
+        lines = testString.splitlines()
+
+        parser = self.setup(testString)
+        tree = parser.program() 
+
+        self.error.seek(0)
+        error = self.error.read() 
+        if error != "":
+            raise Exception(error)
+
+        fnListener = FnListener(lines)
+        walker = ParseTreeWalker()
+        
+        walker.walk(fnListener, tree)
+        functions = fnListener.getFunctions()             
+    
+        wlListener = MyWlListener(self.output, lines, functions) 
+        walker.walk(wlListener, tree)
+            
+        self.output.seek(0) 
+        self.assertEqual(self.output.read(), """def write(filename, content):
+    try:
+        with open(filename, "a") as v0:
+            v0.write(str(content))
+    except PermissionError as v1:
+        print("Error: Permission denied to write to file %s" % v1.filename)
+        quit()
+
+def write(filename, content):
+    try:
+        with open(filename, "a") as v0:
+            v0.write(str(content))
+    except PermissionError as v1:
+        print("Error: Permission denied to write to file %s" % v1.filename)
+        quit()
+
+a = 0
+b = 1
+c = a + b
+while c < 100:
+    write("a", c)
+    write("a", "\\n")
+    a = b
+    b = c
+    c = a + b
+""")
