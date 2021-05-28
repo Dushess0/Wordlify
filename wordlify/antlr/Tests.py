@@ -551,3 +551,157 @@ while c < 100:
     b = c
     c = a + b
 """)
+
+    def testSort(self): # should be no error
+        testString = """files = getFiles(".")
+dates = []
+
+
+foreach filename in files do
+    dates <- dateModified(filename)
+end
+
+print(dates)
+print(files)
+
+
+fn sort() begin
+    i = 1
+    l= length(dates)
+    while i < l do
+        key = dates[i]
+        key2 = files[i]
+        j = i - 1
+        while j >= 0 and key < dates[j] do
+            dates[j+1] = dates[j]
+            files[j+1] = files[j]
+            j = j - 1
+        end
+        dates[j+1] = key
+        files[j+1] = key2
+        
+        i = i + 1
+    end
+end
+
+sort()
+print(dates)
+print(files)
+
+i = 0
+l= length(files)
+while i < l do
+    a = files[i]
+    i = i + 1
+    new = i . "_" . a
+    rename(a, new)
+end
+
+"""
+        lines = testString.splitlines()
+
+        parser = self.setup(testString)
+        tree = parser.program() 
+
+        self.error.seek(0)
+        error = self.error.read() 
+        if error != "":
+            raise Exception(error)
+
+        fnListener = FnListener(lines)
+        walker = ParseTreeWalker()
+        
+        walker.walk(fnListener, tree)
+        functions = fnListener.getFunctions()             
+    
+        wlListener = MyWlListener(self.output, lines, functions) 
+        walker.walk(wlListener, tree)
+            
+        self.output.seek(0) 
+        self.assertEqual(self.output.read(), """import os
+import pathlib
+import datetime
+import os.path
+
+def getFiles(dir):
+    try:
+        return os.listdir(dir)
+    except PermissionError:
+        print("Error: Permission denied to list directory '%s'" % dir)
+        quit()
+
+def dateModified(file):
+    fname = pathlib.Path(file)
+    if not fname.exists():
+        print("Error: No such file '%s'" % file)
+        quit()
+    mtime = datetime.datetime.fromtimestamp(fname.stat().st_mtime)
+    return str(mtime)
+
+def sort():
+    i = 1
+    l = len(dates)
+    while i < l:
+        key = dates[i]
+        key2 = files[i]
+        j = i - 1
+        while j >= 0 and key < dates[j]:
+            dates[j+1] = dates[j]
+            files[j+1] = files[j]
+            j = j - 1
+        dates[j+1] = key
+        files[j+1] = key2
+        i = i + 1
+
+def rename(old, new):
+    new=str(new)
+    old = str(old)
+    if os.name == "nt": # Windows
+        if old[-1] == ":" or old[-2:] == ":/":
+            print("Error: file to rename cannot be root")
+            quit()
+    else:
+        if old == "/":
+            print("Error: file to rename cannot be '/'")
+            quit()
+
+    if "/" in new:
+        print("Error: new name cannot be a path")
+        quit()
+    try:
+        if not os.path.exists(old):
+            print("Error: '%s' doesn't exist" % old)
+            quit()
+
+        v0 = ""
+        v2 = old
+        if old[-1] == "/":
+            v2 = old[:-1]
+        if "/" in v2:
+            v0 = v2[:v2.rfind("/")+1]
+
+        v0 += new
+        if os.path.exists(v0):
+            print("Error: '%s' already exists" % v0)
+            quit()
+        os.replace(v2, v0)
+    except PermissionError:
+        print("Error: Permission denied to rename %s to %s" % (old, new))
+
+files = getFiles(".")
+dates = []
+for filename in files:
+    dates.append(dateModified(filename))
+print(dates)
+print(files)
+sort()
+print(dates)
+print(files)
+i = 0
+l = len(files)
+while i < l:
+    a = files[i]
+    i = i + 1
+    new = str(i) + str("_") + str(a)
+    rename(a, new)
+""")

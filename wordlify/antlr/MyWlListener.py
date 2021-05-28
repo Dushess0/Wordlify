@@ -256,8 +256,6 @@ class MyWlListener(WordlifyListener):
         if (ctx.array_elem()!=None):
             obj = ctx.array_elem()
         
-        text =obj.getText()
-       
         ctx.parentCtx.lines = ["{} = {}".format(obj.getText(), ctx.expr().text)]
         self.vars[obj.getText()] = ctx.expr().type
         ctx.parentCtx.parentCtx.localVars.append(obj.getText())
@@ -376,19 +374,40 @@ class MyWlListener(WordlifyListener):
         if self.vars[arrayName] not in ["array", "any"]:
             raise Exception("Line {}, column {}: variable '{}' should be an 'array':\n    {}".format(line_nr, col_nr, arrayName, line))
         #----------------------------
-        
-        if ctx.expr().ID() == None and ctx.expr().NUM() == None:
-            line_nr = ctx.expr().getSymbol().line
-            col_nr = ctx.expr().getSymbol().column
+
+        if ctx.expr().STR() != None or ctx.expr().BOOL() != None:
+            line_nr = ctx.expr().children[0].getSymbol().line
+            col_nr = ctx.expr().children[0].getSymbol().column
             line = self.src_lines[line_nr-1].lstrip()
             raise Exception("Line {}, column {}: array index must be a 'num':\n    {}".format(line_nr, col_nr, line))
         if ctx.expr().ID() != None:
+            line_nr = ctx.expr().ID().getSymbol().line
+            col_nr = ctx.expr().ID().getSymbol().column
+            line = self.src_lines[line_nr-1].lstrip()
             if ctx.expr().ID().getText() not in self.vars:
                 raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, ctx.expr().ID().getText(), line))
             if self.vars[ctx.expr().ID().getText()] not in ["num", "any"]:
                 raise Exception("Line {}, column {}: array index must be a 'num':\n    {}".format(line_nr, col_nr, line))
+            ctx.text = "{}[{}]".format(ctx.ID().getText(), ctx.expr().getText())
+        if ctx.expr().array() != None:
+            line_nr = ctx.expr().array().value_or_id()[0].children[0].getSymbol().line
+            col_nr = ctx.expr().array().value_or_id()[0].children[0].getSymbol().column
+            line = self.src_lines[line_nr-1].lstrip()
+            raise Exception("Line {}, column {}: array index must be a 'num', found 'array':\n    {}".format(line_nr, col_nr, line))
+        if ctx.expr().concat() != None:
+            line_nr = ctx.expr().concat().value_or_id()[0].children[0].getSymbol().line
+            col_nr = ctx.expr().concat().value_or_id()[0].children[0].getSymbol().column
+            line = self.src_lines[line_nr-1].lstrip()
+            raise Exception("Line {}, column {}: array index must be a 'num', found 'str':\n    {}".format(line_nr, col_nr, line))        
 
-        ctx.text = "{}[{}]".format(ctx.ID().getText(), ctx.expr().getText())
+        if ctx.expr().fn_call() != None:
+            ctx.text = "{}[{}]".format(ctx.ID().getText(), ctx.expr().fn_call().lines[0])
+        elif ctx.expr().arith_expr() != None:
+            ctx.text = "{}[{}]".format(ctx.ID().getText(), ctx.expr().arith_expr().text)
+        elif ctx.expr().NUM() != None:
+            ctx.text = "{}[{}]".format(ctx.ID().getText(), ctx.expr().getText())
+        elif ctx.expr().array_elem() != None:
+            ctx.text = "{}[{}]".format(ctx.ID().getText(), ctx.expr().array_elem().text)
 
     # Enter a parse tree produced by WordlifyParser#own_fn_call.
     def enterOwn_fn_call(self, ctx:WordlifyParser.Own_fn_callContext):
@@ -978,7 +997,7 @@ class MyWlListener(WordlifyListener):
             line_nr = ctx.value_or_id().STR().getSymbol().line
             line = self.src_lines[line_nr-1].lstrip()
             col_nr = ctx.value_or_id().STR().getSymbol().column
-            raise Exception("Line {}, column {}: argument of 'wait' function must be of type 'str':\n    {}".format(line_nr, col_nr, line))
+            raise Exception("Line {}, column {}: argument of 'getFiles' function must be of type 'str':\n    {}".format(line_nr, col_nr, line))
         if ctx.value_or_id().ID() != None:
             line_nr = ctx.value_or_id().ID().getSymbol().line
             line = self.src_lines[line_nr-1].lstrip()
