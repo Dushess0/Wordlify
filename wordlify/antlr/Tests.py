@@ -909,3 +909,29 @@ for name in filenames:
     copy(name, "backup_files")
 rename_recur("backup_files")
 """)
+
+    def test20(self): # should be no error
+        testString = 'a = 2; print  (a."dwe")'
+        lines = testString.splitlines()
+
+        parser = self.setup(testString)
+        tree = parser.program() 
+
+        self.error.seek(0)
+        error = self.error.read() 
+        if error != "":
+            raise Exception(error)
+
+        fnListener = FnListener(lines)
+        walker = ParseTreeWalker()
+        
+        walker.walk(fnListener, tree)
+        functions = fnListener.getFunctions()             
+    
+        wlListener = MyWlListener(self.output, lines, functions) 
+        walker.walk(wlListener, tree)
+            
+        self.output.seek(0) 
+        self.assertEqual(self.output.read(), """a = 2
+print(str(a) + str("dwe"))
+""")
