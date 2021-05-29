@@ -378,6 +378,11 @@ class MyWlListener(WordlifyListener):
                     line = self.src_lines[line_nr-1].lstrip()
                     col_nr = id.getSymbol().column
                     raise Exception("Line {}, column {}: variable '{}' should be a 'num', but is '{}':\n    {}".format(line_nr, col_nr, id.getText(), self.vars[id.getText()], line))
+            if voi.NUM() == None and voi.ID() == None:
+                line_nr = voi.children[0].getSymbol().line
+                line = self.src_lines[line_nr-1].lstrip()
+                col_nr = voi.children[0].getSymbol().column
+                raise Exception("Line {}, column {}: an arithmetic expression should consist of only nums:\n    {}".format(line_nr, col_nr, line))                
         
         ctx.text = "{} {} {}".format(ctx.value_or_id()[0].getText(), ctx.ARITH_OP(), ctx.value_or_id()[1].getText())
 
@@ -526,9 +531,9 @@ class MyWlListener(WordlifyListener):
     def exitRename(self, ctx:WordlifyParser.RenameContext):
         for voi in ctx.value_or_id(): # are args of type 'str'?  
             if voi.STR() == None and voi.ID() == None:
-                line_nr = voi.NUM().getSymbol().line
+                line_nr = voi.children[0].getSymbol().line
                 line = self.src_lines[line_nr-1].lstrip()
-                col_nr = voi.NUM().getSymbol().column
+                col_nr = voi.children[0].getSymbol().column
                 raise Exception("Line {}, column {}: arguments of 'rename' function must be of type 'str':\n    {}".format(line_nr, col_nr, line))
             if voi.ID() != None:
                 line_nr = voi.ID().getSymbol().line
