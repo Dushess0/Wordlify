@@ -212,6 +212,25 @@ class FnListener(WordlifyListener):
         pass
 
 
+
+    # Enter a parse tree produced by WordlifyParser#args.
+    def enterArgs(self, ctx:WordlifyParser.ArgsContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#args.
+    def exitArgs(self, ctx:WordlifyParser.ArgsContext):
+        pass
+
+
+    # Enter a parse tree produced by WordlifyParser#is_file.
+    def enterIs_file(self, ctx:WordlifyParser.Is_fileContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#is_file.
+    def exitIs_file(self, ctx:WordlifyParser.Is_fileContext):
+        pass
+
+
     # Enter a parse tree produced by WordlifyParser#print_instr.
     def enterPrint_instr(self, ctx:WordlifyParser.Print_instrContext):
         pass

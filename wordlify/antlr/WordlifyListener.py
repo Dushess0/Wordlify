@@ -215,6 +215,15 @@ class WordlifyListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by WordlifyParser#is_file.
+    def enterIs_file(self, ctx:WordlifyParser.Is_fileContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#is_file.
+    def exitIs_file(self, ctx:WordlifyParser.Is_fileContext):
+        pass
+
+
     # Enter a parse tree produced by WordlifyParser#is_dir.
     def enterIs_dir(self, ctx:WordlifyParser.Is_dirContext):
         pass
@@ -365,6 +374,15 @@ class WordlifyListener(ParseTreeListener):
 
     # Exit a parse tree produced by WordlifyParser#length.
     def exitLength(self, ctx:WordlifyParser.LengthContext):
+        pass
+
+
+    # Enter a parse tree produced by WordlifyParser#args.
+    def enterArgs(self, ctx:WordlifyParser.ArgsContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#args.
+    def exitArgs(self, ctx:WordlifyParser.ArgsContext):
         pass
 
 

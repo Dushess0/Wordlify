@@ -426,15 +426,18 @@ class MyWlListener(WordlifyListener):
 
     # Exit a parse tree produced by WordlifyParser#array_elem.
     def exitArray_elem(self, ctx:WordlifyParser.Array_elemContext):
-        line_nr = ctx.ID().getSymbol().line
-        line = self.src_lines[line_nr-1].lstrip()
-        col_nr = ctx.ID().getSymbol().column
-        
-        arrayName=ctx.ID().getText()
-        if arrayName not in self.vars:
-            raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, arrayName, line))
-        if self.vars[arrayName] not in ["array", "any"]:
-            raise Exception("Line {}, column {}: variable '{}' should be an 'array':\n    {}".format(line_nr, col_nr, arrayName, line))
+        if ctx.ID() != None:
+            line_nr = ctx.ID().getSymbol().line
+            line = self.src_lines[line_nr-1].lstrip()
+            col_nr = ctx.ID().getSymbol().column
+            
+            arrayName=ctx.ID().getText()
+            if arrayName not in self.vars:
+                raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, arrayName, line))
+            if self.vars[arrayName] not in ["array", "any"]:
+                raise Exception("Line {}, column {}: variable '{}' should be an 'array':\n    {}".format(line_nr, col_nr, arrayName, line))
+        elif ctx.args(): 
+            arrayName = ctx.lines[0]
         #----------------------------
 
         if ctx.expr().STR() != None or ctx.expr().BOOL() != None:
@@ -463,13 +466,13 @@ class MyWlListener(WordlifyListener):
             raise Exception("Line {}, column {}: array index must be a 'num', found 'str':\n    {}".format(line_nr, col_nr, line))        
 
         if ctx.expr().fn_call() != None:
-            ctx.text = "{}[{}]".format(ctx.ID().getText(), ctx.expr().fn_call().lines[0])
+            ctx.text = "{}[{}]".format(arrayName, ctx.expr().fn_call().lines[0])
         elif ctx.expr().arith_expr() != None:
-            ctx.text = "{}[{}]".format(ctx.ID().getText(), ctx.expr().arith_expr().text)
+            ctx.text = "{}[{}]".format(arrayName, ctx.expr().arith_expr().text)
         elif ctx.expr().NUM() != None:
-            ctx.text = "{}[{}]".format(ctx.ID().getText(), ctx.expr().getText())
+            ctx.text = "{}[{}]".format(arrayName, ctx.expr().getText())
         elif ctx.expr().array_elem() != None:
-            ctx.text = "{}[{}]".format(ctx.ID().getText(), ctx.expr().array_elem().text)
+            ctx.text = "{}[{}]".format(arrayName, ctx.expr().array_elem().text)
 
     # Enter a parse tree produced by WordlifyParser#own_fn_call.
     def enterOwn_fn_call(self, ctx:WordlifyParser.Own_fn_callContext):
@@ -505,6 +508,36 @@ class MyWlListener(WordlifyListener):
     def exitExist(self, ctx:WordlifyParser.ExistContext):
         pass
 
+
+    # Enter a parse tree produced by WordlifyParser#is_file.
+    def enterIs_file(self, ctx:WordlifyParser.Is_fileContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#is_file.
+    def exitIs_file(self, ctx:WordlifyParser.Is_fileContext):
+        if ctx.expr().type not in ["str", "any"]:
+            line_nr = ctx.IS_FILE().getSymbol().line
+            line = self.src_lines[line_nr-1].lstrip()
+            col_nr = ctx.IS_FILE().getSymbol().column
+            raise Exception("Line {}, column {}: argument of 'isFile' function must be of type 'str':\n    {}".format(line_nr, col_nr, line))    
+
+        self.add_imps(["import os.path"])
+        ctx.parentCtx.lines = ["isFile({})".format(ctx.expr().text)]
+
+        self.functions += [
+'def isFile(name):',
+'    return os.path.isfile(name)',
+'']
+
+
+    # Enter a parse tree produced by WordlifyParser#args.
+    def enterArgs(self, ctx:WordlifyParser.ArgsContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#args.
+    def exitArgs(self, ctx:WordlifyParser.ArgsContext):
+        self.add_imps(["import sys"])
+        ctx.parentCtx.lines = ["sys.argv"]
 
     # Enter a parse tree produced by WordlifyParser#print_instr.
     def enterPrint_instr(self, ctx:WordlifyParser.Print_instrContext):
@@ -1097,6 +1130,8 @@ class MyWlListener(WordlifyListener):
             if self.vars[ctx.ID().getText()] not in ["array", "any"]:
                 raise Exception("Line {}, column {}: variable '{}' must be of type 'array':\n    {}".format(line_nr, col_nr, ctx.ID().getText(), line))
             text = ctx.ID().getText()
+        elif ctx.args() != None:
+            text = ctx.lines[0]
         else:
             text = ctx.array().text
 
