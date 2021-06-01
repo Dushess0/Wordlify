@@ -1,19 +1,24 @@
 from antlr4 import *
 from WordlifyParser import WordlifyParser
 from WordlifyListener import WordlifyListener
+import os.path
+import os
+import re
 # This class defines a complete listener for a parse tree produced by WordlifyParser.
 class MyWlListener(WordlifyListener):
-    def __init__(self, output, src_lines, functions):
+    def __init__(self, output, src_lines, functions,dest_path=None,compiler_path=None):
         self.output = output
         self.src_lines = src_lines
         self.imports = []
         self.functions = []
         self.fn_specs = {}
-
+        self.dest_path=dest_path
+        self.compiler_path=compiler_path
         self.is_in_fn = False # are we now in a function?
         self.vars_from_out_changed_in_fn = []
         self.vars = {}
         self.vars_owners = {}
+        self.module_functions = []
         for name in functions:
             self.fn_specs[name] = functions[name]
 
@@ -24,6 +29,31 @@ class MyWlListener(WordlifyListener):
             if imp not in self.imports:
                 self.imports.append(imp)
 
+    # Enter a parse tree produced by WordlifyParser#import_call.
+    def enterImport_call(self, ctx:WordlifyParser.Import_callContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#import_call.
+    def exitImport_call(self, ctx:WordlifyParser.Import_callContext):
+        module=os.path.join(self.dest_path,str(ctx.ID()))
+        compiler_path='"'+os.path.join(self.compiler_path,"compiler.py")+'"'
+        if os.path.isfile(module+".wl"):
+                os.system("python "+compiler_path+" "+module+".wl")           
+        
+        with open(module+'.py') as file:
+                content=file.read()
+        spliited=content.split('\n')
+
+        for line in spliited:
+            x= re.search("^def ",line)
+            if x:
+                function_name=line.split("def ")[1].split("(")[0]
+                self.module_functions.append(function_name)
+        self.functions+=spliited
+
+        
+
+    
     # Enter a parse tree produced by WordlifyParser#program.
     def enterProgram(self, ctx:WordlifyParser.ProgramContext):
         ctx.lines = []
@@ -290,6 +320,8 @@ class MyWlListener(WordlifyListener):
 
     # Exit a parse tree produced by WordlifyParser#atom_instr.
     def exitAtom_instr(self, ctx:WordlifyParser.Atom_instrContext):
+        if not hasattr(ctx,'lines'):
+            ctx.lines=[]
         for line in ctx.lines:
             ctx.parentCtx.lines.append(" "*self.indent + line)
 
@@ -363,8 +395,11 @@ class MyWlListener(WordlifyListener):
 
     # Exit a parse tree produced by WordlifyParser#arith_expr.
     def exitArith_expr(self, ctx:WordlifyParser.Arith_exprContext):
+        is_string=False
         for voi in ctx.value_or_id():
             id = voi.ID()
+            if voi.STR()!=None:
+                is_string=True
             if id != None:
                 if id.getText() not in self.vars:
                     line_nr = id.getSymbol().line
@@ -376,12 +411,13 @@ class MyWlListener(WordlifyListener):
                     line = self.src_lines[line_nr-1].lstrip()
                     col_nr = id.getSymbol().column
                     raise Exception("Line {}, column {}: variable '{}' should be a 'num', but is '{}':\n    {}".format(line_nr, col_nr, id.getText(), self.vars[id.getText()], line))
-            if voi.NUM() == None and voi.ID() == None:
+            if voi.NUM() == None and voi.ID() == None and voi.STR() == None:
                 line_nr = voi.children[0].getSymbol().line
                 line = self.src_lines[line_nr-1].lstrip()
                 col_nr = voi.children[0].getSymbol().column
                 raise Exception("Line {}, column {}: an arithmetic expression should consist of only nums:\n    {}".format(line_nr, col_nr, line))                
-        
+        if is_string and ctx.ARITH_OP()=="+":
+            ctx.text = "str({}) {} str({})".format(ctx.value_or_id()[0].getText(), ctx.ARITH_OP(), ctx.value_or_id()[1].getText())
         ctx.text = "{} {} {}".format(ctx.value_or_id()[0].getText(), ctx.ARITH_OP(), ctx.value_or_id()[1].getText())
 
 
@@ -484,11 +520,11 @@ class MyWlListener(WordlifyListener):
         col_nr = ctx.ID().getSymbol().column
         line = self.src_lines[line_nr-1].lstrip()
         id = ctx.ID().getText()
-
-        if ctx.ID().getText() not in self.fn_specs:
-            raise Exception("Line {}, column {}: function '{}' doesn't exist:\n    {}".format(line_nr, col_nr, id, line))
-        if self.fn_specs[ctx.ID().getText()] != len(ctx.expr()):
-            raise Exception("Line {}, column {}: function '{}' expects {} arguments, found {}:\n    {}".format(line_nr, col_nr, id, self.fn_specs[ctx.ID().getText()], len(ctx.expr()), line))
+        if id not in self.module_functions:
+            if ctx.ID().getText() not in self.fn_specs:
+                raise Exception("Line {}, column {}: function '{}' doesn't exist:\n    {}".format(line_nr, col_nr, id, line))
+            if self.fn_specs[ctx.ID().getText()] != len(ctx.expr()):
+                raise Exception("Line {}, column {}: function '{}' expects {} arguments, found {}:\n    {}".format(line_nr, col_nr, id, self.fn_specs[ctx.ID().getText()], len(ctx.expr()), line))
 
         header = "{}(".format(ctx.ID().getText())
         if len(ctx.expr()) > 0:
@@ -877,7 +913,7 @@ class MyWlListener(WordlifyListener):
         ctx.parentCtx.lines = ["download({}, {})".format(ctx.expr()[0].text, ctx.expr()[1].text)]
 
         self.functions += [
-'def download(url, filename):'
+'def download(url, filename):',
 '    try:',
 '        if filename == "":',
 '            print("Error: Empty destination file name")',
@@ -1009,15 +1045,13 @@ class MyWlListener(WordlifyListener):
     # Exit a parse tree produced by WordlifyParser#execute.
     def exitExecute(self, ctx:WordlifyParser.ExecuteContext):
         # TODO arguments for program to execute
-        for expr in ctx.expr(): # are args of type 'str'?  
-            if expr.type not in ["str", "any"]:
-                line_nr = ctx.EXECUTE().getSymbol().line
-                line = self.src_lines[line_nr-1].lstrip()
-                col_nr = ctx.EXECUTE().getSymbol().column
-                raise Exception("Line {}, column {}: argument of 'execute' function must be of type 'str':\n    {}".format(line_nr, col_nr, line))    
+        args=[]
+
+        for expr in ctx.expr(): # are args of type 'str'?
+            args.append(expr.text)  
 
         self.add_imps(["import os"])
-        ctx.parentCtx.lines = ["execute({})".format(ctx.expr[0].text)]
+        ctx.parentCtx.lines = ["execute({})".format(','.join(args))]
 
         self.functions += [
 'def execute(command):',
@@ -1079,14 +1113,42 @@ class MyWlListener(WordlifyListener):
 '    return str(mtime)',
 '']
 
+    # Enter a parse tree produced by WordlifyParser#basename.
+    def enterBasename(self, ctx:WordlifyParser.BasenameContext):
+        pass
 
+    # Exit a parse tree produced by WordlifyParser#basename.
+    def exitBasename(self, ctx:WordlifyParser.BasenameContext):
+        if ctx.expr().type not in ["str", "any"]:
+            line_nr = ctx.BASENAME().getSymbol().line
+            line = self.src_lines[line_nr-1].lstrip()
+            col_nr = ctx.BASENAME().getSymbol().column
+            raise Exception("Line {}, column {}: argument of 'baseName' function must be of type 'str':\n    {}".format(line_nr, col_nr, line))    
+
+        self.add_imps(["import os", "import urllib"])
+        ctx.parentCtx.lines = ["baseName({})".format(ctx.expr().text)]
+        self.functions +=[
+'def baseName(url):',
+'    return  os.path.basename(urllib.parse.urlparse(url).path)',
+'']
     # Enter a parse tree produced by WordlifyParser#size.
     def enterSize(self, ctx:WordlifyParser.SizeContext):
         pass
 
     # Exit a parse tree produced by WordlifyParser#size.
     def exitSize(self, ctx:WordlifyParser.SizeContext):
-        pass
+        if ctx.expr().type not in ["str", "any"]:
+            line_nr = ctx.SIZE().getSymbol().line
+            line = self.src_lines[line_nr-1].lstrip()
+            col_nr = ctx.SIZE().getSymbol().column
+            raise Exception("Line {}, column {}: argument of 'size' function must be of type 'str':\n    {}".format(line_nr, col_nr, line))    
+
+        self.add_imps(["import os"])
+        ctx.parentCtx.lines = ["size({})".format(ctx.expr().text)]
+        self.functions +=[
+'def size(file):',
+'    return os.path.getsize(file)',
+'']
 
 
     # Enter a parse tree produced by WordlifyParser#exit.

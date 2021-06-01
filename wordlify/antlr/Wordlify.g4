@@ -2,8 +2,8 @@ grammar Wordlify;
 
 /* Parser rules */
 program : (WS | NL)*
-          ( (atom_instr (WS | NL)* ';' (WS | NL)* | atom_instr (WS* NL WS*)+ | (block_instr | fn_def) (WS | NL)+)*
-          (atom_instr (WS | NL)* ';'? | (block_instr | fn_def)) )?
+          ( (atom_instr (WS | NL)* ';' (WS | NL)* | atom_instr (WS* NL WS*)+ | (block_instr | fn_def | import_call) (WS | NL)+)*
+          (atom_instr (WS | NL)* ';'? | (block_instr | fn_def | import_call)) )?
           (WS | NL)* END_COMMENT? EOF ;
 
 fn_def : FN (WS | NL)+ ID (WS | NL)* '(' (WS | NL)* ( ID (WS | NL)* (',' (WS | NL)* ID (WS | NL)*)* )? ')' (WS | NL)* BEGIN (WS | NL)+
@@ -37,12 +37,13 @@ expr : fn_call | STR | NUM | ID | BOOL | arith_expr | array | array_elem | conca
 arith_expr : value_or_id (WS | NL)* ARITH_OP (WS | NL)* value_or_id ;
 concat : value_or_id ( (WS|NL)* CONCAT_OP (WS|NL)* value_or_id )+ ;
 
-fn_call : own_fn_call | exist | print_instr | rename | remove | move | copy | download | write | read | wait_instr | execute | get_files | date_modified | size | exit | create | length | is_dir | is_file | TIME | FILE | FOLDER | args ;
-atom_instr : own_fn_call | exist | print_instr | rename | remove | move | copy | download | write | read | wait_instr | execute | get_files | date_modified | size | exit | create | array_append | assign | is_dir | is_file | TIME | FILE | FOLDER | args ;
+fn_call : own_fn_call  | exist | print_instr | rename | basename | remove | move | copy | download | write | read | wait_instr | execute | get_files | date_modified | size | exit | create | length | is_dir | is_file | TIME | FILE | FOLDER | args ;
+atom_instr : own_fn_call |exist | print_instr | rename | basename | remove | move | copy | download | write | read | wait_instr | execute | get_files | date_modified | size | exit | create | array_append | assign | is_dir | is_file | TIME | FILE | FOLDER | args ;
 assign : (ID| array_elem) (WS | NL)* '=' (WS | NL)* expr ;
 array_append : ID (WS|NL)* APPEND  (WS | NL)* expr (WS|NL)* ;
 array_elem : (ID|args) '[' (WS|NL)* expr (WS|NL)* ']' ;
 
+import_call: IMPORT (WS | NL)* ID (WS | NL)*;
 own_fn_call : ID (WS | NL)* '(' (WS | NL)* ( expr (WS | NL)* (',' (WS | NL)* expr (WS | NL)*)* )? ')' ;
 exist : EXIST (WS | NL)* '(' (WS | NL)* expr (WS | NL)* ')' ;
 is_file : IS_FILE (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' ;
@@ -63,6 +64,7 @@ size : SIZE (WS | NL)* '(' (WS | NL)* expr (WS | NL)* ')' ;
 exit : EXIT (WS | NL)* '(' (WS | NL)* expr (WS | NL)* ')' ;
 create : CREATE (WS | NL)* '(' (WS | NL)* expr (WS | NL)* ')' ;
 length : LENGTH (WS|NL)* '(' (WS|NL)* (ID|array|args) (WS|NL)* ')' ;
+basename: BASENAME (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' ;
 args : ARGS ;
 
 array : '[' (WS|NL)* (value_or_id ( (WS|NL)* ',' (WS|NL)* value_or_id )* (WS|NL)*)? ']' ;
@@ -80,6 +82,8 @@ ELSE : 'else' ;
 BEGIN : 'begin' ;
 END : 'end' ;
 
+BASENAME: 'baseName';
+IMPORT: 'use' ;
 EXIST : 'exist' ;
 PRINT : 'print' ;
 RENAME : 'rename' ;

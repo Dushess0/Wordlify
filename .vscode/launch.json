@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "./wordlify/antlr/compiler.py",
             "console": "integratedTerminal",
-            "args": ["./wordlify/antlr/testing/sort.wl"]
+            "args": ["./wordlify/antlr/testing/download.wl"]
         }
     ]
 }

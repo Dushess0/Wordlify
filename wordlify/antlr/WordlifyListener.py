@@ -197,6 +197,15 @@ class WordlifyListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by WordlifyParser#import_call.
+    def enterImport_call(self, ctx:WordlifyParser.Import_callContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#import_call.
+    def exitImport_call(self, ctx:WordlifyParser.Import_callContext):
+        pass
+
+
     # Enter a parse tree produced by WordlifyParser#own_fn_call.
     def enterOwn_fn_call(self, ctx:WordlifyParser.Own_fn_callContext):
         pass
@@ -374,6 +383,15 @@ class WordlifyListener(ParseTreeListener):
 
     # Exit a parse tree produced by WordlifyParser#length.
     def exitLength(self, ctx:WordlifyParser.LengthContext):
+        pass
+
+
+    # Enter a parse tree produced by WordlifyParser#basename.
+    def enterBasename(self, ctx:WordlifyParser.BasenameContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#basename.
+    def exitBasename(self, ctx:WordlifyParser.BasenameContext):
         pass
 
 

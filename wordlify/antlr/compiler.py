@@ -48,7 +48,7 @@ def main(argv):
         try:
             walker.walk(fnListener, tree)
             functions = fnListener.getFunctions()
-            wlListener = MyWlListener(output, src_lines, functions)
+            wlListener = MyWlListener(output, src_lines, functions,dest_path=os.path.dirname(destFileName),compiler_path=os.path.dirname(os.path.realpath(__file__)))
             walker.walk(wlListener, tree)
         except Exception as e:
             print(e)
