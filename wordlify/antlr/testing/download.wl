@@ -14,10 +14,10 @@ foreach url in urls do  filenames <- baseName(url) end
 to_download=[]
 i=0
 foreach f in filenames do 
-    prefix="File with name:" + f
+    prefix="File with name:" . f
     if isFile(f) then 
-        print(prefix + " exists") 
-    else  print(prefix + " not exists") 
+        print(prefix . " exists") 
+    else  print(prefix . " not exists") 
     to_download <- urls[i]
     
     end

@@ -34,7 +34,7 @@ comparison : expr (WS | NL)* CMP_OP (WS | NL)* expr  ;
 double_comparsion:  comparison (WS | NL)* LOG_OP  (WS | NL)* comparison;
 
 expr : fn_call | STR | NUM | ID | BOOL | arith_expr | array | array_elem | concat ;
-arith_expr : value_or_id (WS | NL)* ARITH_OP (WS | NL)* value_or_id ;
+arith_expr : value_or_id ( (WS|NL)* ARITH_OP (WS|NL)* value_or_id )+ ;
 concat : value_or_id ( (WS|NL)* CONCAT_OP (WS|NL)* value_or_id )+ ;
 
 fn_call : own_fn_call  | exist | print_instr | rename | basename | remove | move | copy | download | write | read | wait_instr | execute | get_files | date_modified | size | exit | create | length | is_dir | is_file | TIME | FILE | FOLDER | args ;
@@ -43,7 +43,7 @@ assign : (ID| array_elem) (WS | NL)* '=' (WS | NL)* expr ;
 array_append : ID (WS|NL)* APPEND  (WS | NL)* expr (WS|NL)* ;
 array_elem : (ID|args) '[' (WS|NL)* expr (WS|NL)* ']' ;
 
-import_call: IMPORT (WS | NL)* ID (WS | NL)*;
+import_call: IMPORT (WS | NL)* ID;
 own_fn_call : ID (WS | NL)* '(' (WS | NL)* ( expr (WS | NL)* (',' (WS | NL)* expr (WS | NL)*)* )? ')' ;
 exist : EXIST (WS | NL)* '(' (WS | NL)* expr (WS | NL)* ')' ;
 is_file : IS_FILE (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' ;

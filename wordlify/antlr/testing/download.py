@@ -106,11 +106,11 @@ for url in urls:
 to_download = []
 i = 0
 for f in filenames:
-    prefix = "File with name:" + f
+    prefix = str("File with name:") + str(f)
     if isFile(f):
-        print(prefix + " exists")
+        print(str(prefix) + str(" exists"))
     else:
-        print(prefix + " not exists")
+        print(str(prefix) + str(" not exists"))
         to_download.append(urls[i])
     i = i + 1
 multi_download(to_download)

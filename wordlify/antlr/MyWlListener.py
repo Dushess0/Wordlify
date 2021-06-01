@@ -38,7 +38,10 @@ class MyWlListener(WordlifyListener):
         module=os.path.join(self.dest_path,str(ctx.ID()))
         compiler_path='"'+os.path.join(self.compiler_path,"compiler.py")+'"'
         if os.path.isfile(module+".wl"):
+            if os.name == "nt":
                 os.system("python "+compiler_path+" "+module+".wl")           
+            else:
+                os.system("python3 "+compiler_path+" "+module+".wl")           
         
         with open(module+'.py') as file:
                 content=file.read()
@@ -395,11 +398,8 @@ class MyWlListener(WordlifyListener):
 
     # Exit a parse tree produced by WordlifyParser#arith_expr.
     def exitArith_expr(self, ctx:WordlifyParser.Arith_exprContext):
-        is_string=False
         for voi in ctx.value_or_id():
             id = voi.ID()
-            if voi.STR()!=None:
-                is_string=True
             if id != None:
                 if id.getText() not in self.vars:
                     line_nr = id.getSymbol().line
@@ -411,14 +411,15 @@ class MyWlListener(WordlifyListener):
                     line = self.src_lines[line_nr-1].lstrip()
                     col_nr = id.getSymbol().column
                     raise Exception("Line {}, column {}: variable '{}' should be a 'num', but is '{}':\n    {}".format(line_nr, col_nr, id.getText(), self.vars[id.getText()], line))
-            if voi.NUM() == None and voi.ID() == None and voi.STR() == None:
+            if voi.NUM() == None and voi.ID() == None:
                 line_nr = voi.children[0].getSymbol().line
                 line = self.src_lines[line_nr-1].lstrip()
                 col_nr = voi.children[0].getSymbol().column
                 raise Exception("Line {}, column {}: an arithmetic expression should consist of only nums:\n    {}".format(line_nr, col_nr, line))                
-        if is_string and ctx.ARITH_OP()=="+":
-            ctx.text = "str({}) {} str({})".format(ctx.value_or_id()[0].getText(), ctx.ARITH_OP(), ctx.value_or_id()[1].getText())
-        ctx.text = "{} {} {}".format(ctx.value_or_id()[0].getText(), ctx.ARITH_OP(), ctx.value_or_id()[1].getText())
+
+        ctx.text = ctx.value_or_id()[0].getText()
+        for i in range(1, len(ctx.value_or_id())):
+            ctx.text += " {} {}".format(ctx.ARITH_OP()[i-1].getText(), ctx.value_or_id()[i].getText())
 
 
     # Enter a parse tree produced by WordlifyParser#concat.
