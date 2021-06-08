@@ -290,23 +290,29 @@ class MyWlListener(WordlifyListener):
 
     # Exit a parse tree produced by WordlifyParser#cond.
     def exitCond(self, ctx:WordlifyParser.CondContext):
+        ctx.text = ctx.single_cond()[0].text
+        for i in range(1, len(ctx.single_cond())):
+            ctx.text += " {} {}".format(ctx.BIN_LOG_OP()[i-1].getText(), ctx.single_cond()[i].text)
+
+    # Enter a parse tree produced by WordlifyParser#single_cond.
+    def enterSingle_cond(self, ctx:WordlifyParser.Single_condContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#single_cond.
+    def exitSingle_cond(self, ctx:WordlifyParser.Single_condContext):
+        ctx.text = ""
+        if ctx.NOT() != None:
+            ctx.text += "not "
         if ctx.BOOL() != None:
             if ctx.BOOL().getText() == "true":
-                ctx.text = "True"
+                ctx.text += "True"
             else:
-                ctx.text = "False"
+                ctx.text += "False"
         elif ctx.comparison() != None:
-
-            ctx.text = self.getTextFromComparsion(ctx.comparison())
-        elif ctx.double_comparsion() != None:
-            op= ctx.double_comparsion().LOG_OP().getText()
-            cmp1= ctx.double_comparsion().comparison()[0]
-            cmp2= ctx.double_comparsion().comparison()[1]
-            ctx.text = self.getTextFromComparsion(cmp1) + " " + op + " " +self.getTextFromComparsion(cmp2)
+            ctx.text += self.getTextFromComparsion(ctx.comparison())
         elif ctx.fn_call() != None:
-            ctx.text = ""
             if hasattr(ctx.fn_call(),'lines') != None:
-                ctx.text = ctx.fn_call().lines[0]
+                ctx.text += ctx.fn_call().lines[0]
 
     # Enter a parse tree produced by WordlifyParser#comparison.
     def enterComparison(self, ctx:WordlifyParser.ComparisonContext):

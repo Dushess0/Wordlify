@@ -107,21 +107,21 @@ class WordlifyListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by WordlifyParser#single_cond.
+    def enterSingle_cond(self, ctx:WordlifyParser.Single_condContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#single_cond.
+    def exitSingle_cond(self, ctx:WordlifyParser.Single_condContext):
+        pass
+
+
     # Enter a parse tree produced by WordlifyParser#comparison.
     def enterComparison(self, ctx:WordlifyParser.ComparisonContext):
         pass
 
     # Exit a parse tree produced by WordlifyParser#comparison.
     def exitComparison(self, ctx:WordlifyParser.ComparisonContext):
-        pass
-
-
-    # Enter a parse tree produced by WordlifyParser#double_comparsion.
-    def enterDouble_comparsion(self, ctx:WordlifyParser.Double_comparsionContext):
-        pass
-
-    # Exit a parse tree produced by WordlifyParser#double_comparsion.
-    def exitDouble_comparsion(self, ctx:WordlifyParser.Double_comparsionContext):
         pass
 
 

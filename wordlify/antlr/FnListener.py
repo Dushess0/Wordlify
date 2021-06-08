@@ -54,6 +54,14 @@ class FnListener(WordlifyListener):
         pass
 
 
+    # Enter a parse tree produced by WordlifyParser#single_cond.
+    def enterSingle_cond(self, ctx:WordlifyParser.Single_condContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#single_cond.
+    def exitSingle_cond(self, ctx:WordlifyParser.Single_condContext):
+        pass
+
     # Enter a parse tree produced by WordlifyParser#while_instr.
     def enterWhile_instr(self, ctx:WordlifyParser.While_instrContext):
         pass
