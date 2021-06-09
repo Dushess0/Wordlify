@@ -25,9 +25,13 @@ def main(argv):
         tree = parser.program()
         error.seek(0)
         msg = error.read()
+
+        with open(argv[1], "r") as text_file:
+            src_lines = text_file.readlines()
+
         if msg != "":
-            print(msg)
-            print("\nSyntax error occured given above.")
+            errorDetails = msg.split(",")
+            print("Line {}, column {}: unexpected symbol '{}'\n    {}".format(errorDetails[0], errorDetails[1], errorDetails[2], src_lines[int(errorDetails[0])-1].lstrip()))
             quit()
         
         destFileName = argv[1][:-2] + "py"
@@ -37,9 +41,6 @@ def main(argv):
                 out_lines = out_content.read()
         
         output = open(destFileName, "w")
-        
-        with open(argv[1], "r") as text_file:
-            src_lines = text_file.readlines()
 
         fnListener = FnListener(src_lines)
 

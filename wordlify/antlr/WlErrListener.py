@@ -11,7 +11,7 @@ class WlErrListener(ErrorListener):
         self._symbol = ''
     
     def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):        
-        self.output.write(msg)
+        self.output.write("{},{},{}".format(line, column, offendingSymbol.text))
         self._symbol = offendingSymbol.text
         
     @property        
