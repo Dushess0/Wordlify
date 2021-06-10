@@ -38,11 +38,11 @@ def process_error(content):
         if word.lower() in keywords.keys():
                 keywords[word.lower()]+=1
     if keywords["foreach"] + keywords["while"] > keywords["do"]:
-        print("There is missed 'do' in foreach/while statement")
+        print("There is missing 'do' in foreach/while statement")
     if keywords["foreach"] + keywords["while"] < keywords["do"]:
         print("'do' used without foreach/while statement")
     if keywords["if"] > keywords["then"]:
-        print("There is missed 'then' after 'if' statement")
+        print("There is missing 'then' after 'if' statement")
     if keywords["if"] < keywords["then"]:
         print("'then' used without 'if' statement")
 
