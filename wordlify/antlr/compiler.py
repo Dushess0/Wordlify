@@ -13,7 +13,7 @@ import io
 
 def process_error(content):
     full_content= "".join(content)
-    brackets={"[":0,"]":0,"(":0,")":0}
+    brackets={"[":0,"]":0,"(":0,")":0,"'":0, '"':0}
     for char in full_content:
         if char.lower() in brackets.keys():
                 brackets[char]+=1
@@ -24,10 +24,16 @@ def process_error(content):
             print("Possible cause: unpaired bracket")
         if item=="(" and brackets["("]!=brackets[")"]:
             print("Possible cause: unpaired bracket")
+        if item =="'" and brackets["'"]%2 !=0:
+            print("Possible cause: unpaired ' ")
+        if item =='"' and brackets['"']%2 !=0:
+            print('Possible cause: unpaired " ')
+        
 
 
 
     keywords={"while":0,"foreach":0,"for":0,"do":0,"end":0,"in":0,"if":0,"else":0,"then":0,"begin":0}
+    
     for word in full_content.split():
         if word.lower() in keywords.keys():
                 keywords[word.lower()]+=1
@@ -38,7 +44,7 @@ def process_error(content):
     if keywords["if"] > keywords["then"]:
         print("There is missed 'then' after 'if' statement")
     if keywords["if"] < keywords["then"]:
-        print("'then' used without 'if' statement ")
+        print("'then' used without 'if' statement")
 
 
 def main(argv):
