@@ -23,7 +23,7 @@ public class WordlifyParser extends Parser {
 		DATE_MODIFIED=33, IS_DIR=34, IS_FILE=35, FILE=36, FOLDER=37, ARGS=38, 
 		SIZE=39, READ=40, CREATE=41, LENGTH=42, APPEND=43, CMP_OP=44, ARITH_OP=45, 
 		CONCAT_OP=46, BIN_LOG_OP=47, NOT=48, BOOL=49, STR=50, ID=51, NUM=52, WS=53, 
-		NL=54, END_COMMENT=55;
+		NL=54, END_COMMENT=55, ERROR_CHAR=56;
 	public static final int
 		RULE_program = 0, RULE_fn_def = 1, RULE_block_instr = 2, RULE_foreach = 3, 
 		RULE_while_instr = 4, RULE_if_instr = 5, RULE_if_cond = 6, RULE_then = 7, 
@@ -70,7 +70,7 @@ public class WordlifyParser extends Parser {
 			"WAIT", "EXECUTE", "EXIT", "TIME", "GET_FILES", "DATE_MODIFIED", "IS_DIR", 
 			"IS_FILE", "FILE", "FOLDER", "ARGS", "SIZE", "READ", "CREATE", "LENGTH", 
 			"APPEND", "CMP_OP", "ARITH_OP", "CONCAT_OP", "BIN_LOG_OP", "NOT", "BOOL", 
-			"STR", "ID", "NUM", "WS", "NL", "END_COMMENT"
+			"STR", "ID", "NUM", "WS", "NL", "END_COMMENT", "ERROR_CHAR"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
@@ -7542,7 +7542,7 @@ public class WordlifyParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\39\u0604\4\2\t\2\4"+
+		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3:\u0604\4\2\t\2\4"+
 		"\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t"+
 		"\13\4\f\t\f\4\r\t\r\4\16\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22"+
 		"\4\23\t\23\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\4\30\t\30\4\31\t\31"+

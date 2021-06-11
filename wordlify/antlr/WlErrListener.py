@@ -10,7 +10,7 @@ class WlErrListener(ErrorListener):
         self.output = output        
         self._symbol = ''
     
-    def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):        
+    def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e): 
         self.output.write("{},{},{}".format(line, column, offendingSymbol.text))
         self._symbol = offendingSymbol.text
         

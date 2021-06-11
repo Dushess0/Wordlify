@@ -1,3 +1,4 @@
+do
 filenames = getFiles(".") # tablica
 
 foreach name in filenames do

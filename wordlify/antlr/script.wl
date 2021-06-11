@@ -1,3 +1,1 @@
-if 5 > 3 do
-    print("sf")
-end
+if 5>3 then print("sfdrf") end

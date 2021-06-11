@@ -123,6 +123,7 @@ NUM : '-'? INT_PART ('.' [0-9]+)? ;
 WS : (' ' | '\t');
 NL : ('#' OPT_CHARS)? '\r'? '\n' ;
 END_COMMENT : '#' OPT_CHARS ;
+ERROR_CHAR : . ;
 
 fragment INT_PART : [1-9] [0-9]* | '0' ;
 fragment OPT_CHARS : (LETTER | [0-9] | OTHER_CHAR | '"')* ;

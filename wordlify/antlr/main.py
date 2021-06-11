@@ -9,6 +9,7 @@ from MyWlListener import MyWlListener
 from FnListener import FnListener
 import os
 import io
+import subprocess
 
 
 def process_error(content):
@@ -83,6 +84,7 @@ def main(argv):
         fnListener = FnListener(src_lines)
 
         walker = ParseTreeWalker()
+        success = True
 
         try:
             walker.walk(fnListener, tree)
@@ -92,8 +94,21 @@ def main(argv):
         except Exception as e:
             print(e)
             output.write(out_lines)
+            success = False
             # raise e
         output.close()   
+
+        if success:
+            if os.name == "nt":
+                try:
+                    subprocess.run(["python", destFileName], check = True)
+                except subprocess.CalledProcessError:
+                    print("'python' command not found: it should be in PATH environment variable")          
+            else:
+                try:
+                    subprocess.run(['python3', destFileName], check = True)
+                except subprocess.CalledProcessError:
+                    print("'python3' command not found: it should be in PATH environment variable")
 
 if __name__ == '__main__':
     main(sys.argv)

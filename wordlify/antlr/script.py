@@ -1,2 +1,2 @@
-a = 5
-a = a - 1
+if 5 > 3:
+    print("sfdrf")
