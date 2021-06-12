@@ -40,8 +40,8 @@ else_if : ELSE (WS | NL)+ if_cond then ;
 else_block : ELSE (WS | NL)+ ( (atom_instr (WS|NL)* ';' (WS|NL)* | atom_instr (WS* NL WS*)+ | block_instr (WS | NL)+)*
              (atom_instr (WS|NL)* (';' | (WS | NL)+) | block_instr (WS | NL)+) )? ;
 
-cond : single_cond ( (WS|NL)* BIN_LOG_OP (WS|NL)* single_cond )* ;
-single_cond : NOT? (WS|NL)* ( fn_call | BOOL | comparison );
+cond : single_cond ( (WS|NL)+ BIN_LOG_OP (WS|NL)+ single_cond )* ;
+single_cond : (NOT (WS|NL)+ )? ( fn_call | BOOL | comparison );
 comparison : expr (WS|NL)* CMP_OP (WS|NL)* expr;
 
 expr : fn_call | STR | NUM | ID | BOOL | arith_expr | array | array_elem | concat ;

@@ -12,6 +12,7 @@ class WlErrListener(ErrorListener):
     
     def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e): 
         if msg[:9] == "no viable":
+            print(msg)
             msg = ""
         self.output.write("{},{},{}".format(line, column, msg))
         self._symbol = offendingSymbol.text

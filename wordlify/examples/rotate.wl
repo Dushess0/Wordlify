@@ -16,7 +16,7 @@ else
     end
 
     if isFile("log") then
-        rename2("log", "log.bak1")
+        rename("log", "log.bak1")
     end
     
     write("log", args[1])

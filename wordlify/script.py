@@ -1,1 +1,2 @@
-print("oidjf")
+if 1 < 2:
+    print("Sdf")

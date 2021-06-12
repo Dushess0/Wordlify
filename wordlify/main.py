@@ -1,5 +1,3 @@
-#!/bin/python3
-
 from WlErrListener import WlErrListener
 import sys
 from antlr4 import *
@@ -28,9 +26,6 @@ def process_error(content):
             print("Possible cause: unpaired ' ")
         if item =='"' and brackets['"']%2 !=0:
             print('Possible cause: unpaired " ')
-        
-
-
 
     keywords={"while":0,"foreach":0,"for":0,"do":0,"end":0,"in":0,"if":0,"else":0,"then":0,"begin":0}
     
@@ -47,7 +42,7 @@ def process_error(content):
         print("'then' used without 'if' statement")
 
 def main(argv):
-    if len(argv) != 2 or argv[1][-3:] != ".wl":
+    if len(argv) < 2 or argv[1][-3:] != ".wl":
         print("Pass *.wl file as parameter")
     else:
         input = FileStream(argv[1], encoding="utf-8")
@@ -68,8 +63,9 @@ def main(argv):
         if msg != "":
             errorDetails = msg.split(",")
 
-            if int(errorDetails[0]) == len(src_lines) + 1:
-                errorDetails[0] = len(src_lines)
+            errorDetails[0] = int(errorDetails[0])
+            if errorDetails[0] == len(src_lines) + 1:
+                errorDetails[0] -= 1
             line = src_lines[errorDetails[0]-1].lstrip()
 
             print("Line {}, column {}: {}\n    {}".format(errorDetails[0], errorDetails[1], errorDetails[2], line))
@@ -102,14 +98,16 @@ def main(argv):
         output.close()   
 
         if success:
+            del argv[0]
+            argv[0] = destFileName
             if os.name == "nt":
                 try:
-                    subprocess.run(["python", destFileName], check = True)
+                    subprocess.run(["python"] + argv, check = True)
                 except subprocess.CalledProcessError:
                     print("'python' command not found: it should be in PATH environment variable")          
             else:
                 try:
-                    subprocess.run(['python3', destFileName], check = True)
+                    subprocess.run(['python3'] + argv, check = True)
                 except subprocess.CalledProcessError:
                     print("'python3' command not found: it should be in PATH environment variable")
 
