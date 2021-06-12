@@ -5,8 +5,28 @@ program : (WS|NL)*
           ( (atom_instr (WS|NL)* ';' (WS|NL)* | atom_instr (WS* NL WS*)+ | (block_instr | fn_def | import_call) (WS | NL)+)*
           (atom_instr (WS|NL)* ';'? | (block_instr | fn_def | import_call)) )?
           (WS|NL)* END_COMMENT? EOF ;
+       //    |
+       //    (WS|NL)*
+       //    ( (atom_instr (WS|NL)* ';' (WS|NL)* | atom_instr (WS* NL WS*)+ | (block_instr | fn_def | import_call) (WS | NL)+)*
+       //    (atom_instr (WS|NL)* ';'? | (block_instr | fn_def | import_call)) )?
+       //    (WS|NL)* END_COMMENT? EOF;
 
 fn_def : FN (WS | NL)+ ID (WS|NL)* '(' (WS|NL)* ( ID (WS|NL)* (',' (WS|NL)* ID (WS|NL)*)* )? ')' (WS|NL)* BEGIN (WS | NL)+
+         ( (atom_instr (WS|NL)* ';' (WS|NL)* | atom_instr (WS* NL WS*)+ | block_instr (WS | NL)+)*
+         (atom_instr (WS|NL)* ';'? | block_instr) (WS | NL)+ )?
+         END
+         |
+         FN (WS | NL)+ ID (WS|NL)* {self.notifyErrorListeners("Missing opening paranthesis")} ( ID (WS|NL)* (',' (WS|NL)* ID (WS|NL)*)* )? ')' (WS|NL)* BEGIN (WS | NL)+
+         ( (atom_instr (WS|NL)* ';' (WS|NL)* | atom_instr (WS* NL WS*)+ | block_instr (WS | NL)+)*
+         (atom_instr (WS|NL)* ';'? | block_instr) (WS | NL)+ )?
+         END
+         |
+         FN (WS | NL)+ ID (WS|NL)* '(' (WS|NL)* ( ID (WS|NL)* (',' (WS|NL)* ID (WS|NL)*)* )? {self.notifyErrorListeners("Missing closing paranthesis")} (WS|NL)* BEGIN (WS | NL)+
+         ( (atom_instr (WS|NL)* ';' (WS|NL)* | atom_instr (WS* NL WS*)+ | block_instr (WS | NL)+)*
+         (atom_instr (WS|NL)* ';'? | block_instr) (WS | NL)+ )?
+         END 
+         |
+         FN (WS | NL)+ ID (WS|NL)* {self.notifyErrorListeners("Missing paranthesis")} ( ID (WS|NL)* (',' (WS|NL)* ID (WS|NL)*)* )?  (WS|NL)* BEGIN (WS | NL)+
          ( (atom_instr (WS|NL)* ';' (WS|NL)* | atom_instr (WS* NL WS*)+ | block_instr (WS | NL)+)*
          (atom_instr (WS|NL)* ';'? | block_instr) (WS | NL)+ )?
          END ;
@@ -21,10 +41,16 @@ foreach : FOREACH (WS | NL)+ ID (WS | NL)+ IN (WS | NL)+ ID (WS | NL)+ DO (WS | 
 while_instr : WHILE (WS | NL)+ cond (WS | NL)+ DO (WS | NL)+ ( (atom_instr (WS|NL)* ';' (WS|NL)* | atom_instr (WS* NL WS*)+ | block_instr (WS | NL)+)*
        (atom_instr (WS|NL)* (';' | (WS | NL)+) | block_instr (WS | NL)+) )? END ;
 
-if_instr : if_cond then else_if* else_block? END ;
+if_instr : if_cond then else_if* else_block? END
+           | 
+           if_cond then else_if* else_block? {self.notifyErrorListeners("Missing 'end' at end of 'if' instruction")} ;
 if_cond : IF (WS | NL)+ cond (WS | NL)+ ;
 then : THEN (WS | NL)+ ( (atom_instr (WS|NL)* ';' (WS|NL)* | atom_instr (WS* NL WS*)+ | block_instr (WS | NL)+)*
+       (atom_instr (WS|NL)* (';' | (WS | NL)+) | block_instr (WS | NL)+) )? 
+       |
+       DO {self.notifyErrorListeners("Should be 'then' instead of 'do'")} (WS | NL)+ ( (atom_instr (WS|NL)* ';' (WS|NL)* | atom_instr (WS* NL WS*)+ | block_instr (WS | NL)+)*
        (atom_instr (WS|NL)* (';' | (WS | NL)+) | block_instr (WS | NL)+) )? ;
+
 else_if : ELSE (WS | NL)+ if_cond then ;
 else_block : ELSE (WS | NL)+ ( (atom_instr (WS|NL)* ';' (WS|NL)* | atom_instr (WS* NL WS*)+ | block_instr (WS | NL)+)*
              (atom_instr (WS|NL)* (';' | (WS | NL)+) | block_instr (WS | NL)+) )? ;
@@ -44,30 +70,122 @@ array_append : ID (WS|NL)* APPEND  (WS|NL)* expr (WS|NL)* ;
 array_elem : (ID|args) '[' (WS|NL)* expr (WS|NL)* ']' ;
 
 import_call: IMPORT (WS|NL)* ID;
-own_fn_call : ID (WS|NL)* '(' (WS|NL)* ( expr (WS|NL)* (',' (WS|NL)* expr (WS|NL)*)* )? ')' ;
-exist : EXIST (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' ;
-is_file : IS_FILE (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' ;
-is_dir : IS_DIR (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' ;
-print_instr : PRINT (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' ;
+own_fn_call : ID (WS|NL)* '(' (WS|NL)* ( expr (WS|NL)* (',' (WS|NL)* expr (WS|NL)*)* )? ')'
+              |
+              ID (WS|NL)* {self.notifyErrorListeners("Missing opening paranthesis")} (WS|NL)* ( expr (WS|NL)* (',' (WS|NL)* expr (WS|NL)*)* )? ')' 
+              |
+              ID (WS|NL)* '(' (WS|NL)* ( expr (WS|NL)* (',' (WS|NL)* expr (WS|NL)*)* )? {self.notifyErrorListeners("Missing closing paranthesis")} ;
+exist : EXIST (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' 
+        |
+        EXIST (WS|NL)* {self.notifyErrorListeners("Missing opening paranthesis")} (WS|NL)* expr (WS|NL)* ')'
+        |
+        EXIST (WS|NL)* '(' (WS|NL)* expr {self.notifyErrorListeners("Missing closing paranthesis")} 
+        |
+        EXIST (WS|NL)* {self.notifyErrorListeners("Missing paranthesis")} (WS|NL)* expr (WS|NL)* ;
+is_file : IS_FILE (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' 
+        |
+        IS_FILE (WS|NL)* {self.notifyErrorListeners("Missing opening paranthesis")} (WS|NL)* expr (WS|NL)* ')'
+        |
+        IS_FILE (WS|NL)* '(' (WS|NL)* expr {self.notifyErrorListeners("Missing closing paranthesis")} 
+        |
+        IS_FILE (WS|NL)* {self.notifyErrorListeners("Missing paranthesis")} (WS|NL)* expr (WS|NL)* ;
+is_dir : IS_DIR (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' 
+        |
+        IS_DIR (WS|NL)* {self.notifyErrorListeners("Missing opening paranthesis")} (WS|NL)* expr (WS|NL)* ')'
+        |
+        IS_DIR (WS|NL)* '(' (WS|NL)* expr {self.notifyErrorListeners("Missing closing paranthesis")} 
+        |
+        IS_DIR (WS|NL)* {self.notifyErrorListeners("Missing paranthesis")} (WS|NL)* expr (WS|NL)* ;
+print_instr : PRINT (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' 
+        |
+        PRINT (WS|NL)* {self.notifyErrorListeners("Missing opening paranthesis")} (WS|NL)* expr (WS|NL)* ')'
+        |
+        PRINT (WS|NL)* '(' (WS|NL)* expr {self.notifyErrorListeners("Missing closing paranthesis")} 
+        |
+        PRINT (WS|NL)* {self.notifyErrorListeners("Print: Missing paranthesis")} (WS|NL)* expr (WS|NL)* ;
 rename : RENAME (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ',' (WS|NL)* expr (WS|NL)* ')';
-remove : REMOVE (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' ;
+remove : REMOVE (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' 
+        |
+        REMOVE (WS|NL)* {self.notifyErrorListeners("Missing opening paranthesis")} (WS|NL)* expr (WS|NL)* ')'
+        |
+        REMOVE (WS|NL)* '(' (WS|NL)* expr {self.notifyErrorListeners("Missing closing paranthesis")} 
+        |
+        REMOVE (WS|NL)* {self.notifyErrorListeners("Missing paranthesis")} (WS|NL)* expr (WS|NL)* ;
 move : MOVE (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ',' (WS|NL)* expr (WS|NL)* ')';
 copy : COPY (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ',' (WS|NL)* expr (WS|NL)* ')';
 download : DOWNLOAD (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ',' (WS|NL)* expr (WS|NL)* ')';
 write : WRITE (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ',' (WS|NL)* expr (WS|NL)* ')';
-read : READ (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' ;
-wait_instr : WAIT (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' ;
+read : READ (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' 
+        |
+        READ (WS|NL)* {self.notifyErrorListeners("Missing opening paranthesis")} (WS|NL)* expr (WS|NL)* ')'
+        |
+        READ (WS|NL)* '(' (WS|NL)* expr {self.notifyErrorListeners("Missing closing paranthesis")} 
+        |
+        READ (WS|NL)* {self.notifyErrorListeners("Missing paranthesis")} (WS|NL)* expr (WS|NL)* ;
+wait_instr : WAIT (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' 
+        |
+        WAIT (WS|NL)* {self.notifyErrorListeners("Missing opening paranthesis")} (WS|NL)* expr (WS|NL)* ')'
+        |
+        WAIT (WS|NL)* '(' (WS|NL)* expr {self.notifyErrorListeners("Missing closing paranthesis")} 
+        |
+        WAIT (WS|NL)* {self.notifyErrorListeners("Missing paranthesis")} (WS|NL)* expr (WS|NL)* ;
 execute : EXECUTE (WS|NL)* '(' (WS|NL)* (expr (WS|NL)* ',' (WS|NL)*)* expr (WS|NL)* ')' ;
-get_files : GET_FILES (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' ;
-date_modified : DATE_MODIFIED (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' ;
-size : SIZE (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' ;
-exit : EXIT (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' ;
-create : CREATE (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' ;
-length : LENGTH (WS|NL)* '(' (WS|NL)* (ID|array|args) (WS|NL)* ')' ;
-basename: BASENAME (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' ;
+get_files : GET_FILES (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' 
+        |
+        GET_FILES (WS|NL)* {self.notifyErrorListeners("Missing opening paranthesis")} (WS|NL)* expr (WS|NL)* ')'
+        |
+        GET_FILES (WS|NL)* '(' (WS|NL)* expr {self.notifyErrorListeners("Missing closing paranthesis")} 
+        |
+        GET_FILES (WS|NL)* {self.notifyErrorListeners("Missing paranthesis")} (WS|NL)* expr (WS|NL)* ;
+date_modified : DATE_MODIFIED (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' 
+        |
+        DATE_MODIFIED (WS|NL)* {self.notifyErrorListeners("Missing opening paranthesis")} (WS|NL)* expr (WS|NL)* ')'
+        |
+        DATE_MODIFIED (WS|NL)* '(' (WS|NL)* expr {self.notifyErrorListeners("Missing closing paranthesis")} 
+        |
+        DATE_MODIFIED (WS|NL)* {self.notifyErrorListeners("Missing paranthesis")} (WS|NL)* expr (WS|NL)* ;
+size : SIZE (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' 
+        |
+        SIZE (WS|NL)* {self.notifyErrorListeners("Missing opening paranthesis")} (WS|NL)* expr (WS|NL)* ')'
+        |
+        SIZE (WS|NL)* '(' (WS|NL)* expr {self.notifyErrorListeners("Missing closing paranthesis")} 
+        |
+        SIZE (WS|NL)* {self.notifyErrorListeners("Missing paranthesis")} (WS|NL)* expr (WS|NL)* ;
+exit : EXIT (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' 
+        |
+        EXIT (WS|NL)* {self.notifyErrorListeners("Missing opening paranthesis")} (WS|NL)* expr (WS|NL)* ')'
+        |
+        EXIT (WS|NL)* '(' (WS|NL)* expr {self.notifyErrorListeners("Missing closing paranthesis")} 
+        |
+        EXIT (WS|NL)* {self.notifyErrorListeners("Missing paranthesis")} (WS|NL)* expr (WS|NL)* ;
+create : CREATE (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' 
+        |
+        CREATE (WS|NL)* {self.notifyErrorListeners("Missing opening paranthesis")} (WS|NL)* expr (WS|NL)* ')'
+        |
+        CREATE (WS|NL)* '(' (WS|NL)* expr {self.notifyErrorListeners("Missing closing paranthesis")} 
+        |
+        CREATE (WS|NL)* {self.notifyErrorListeners("Missing paranthesis")} (WS|NL)* expr (WS|NL)* ;
+length : LENGTH (WS|NL)* '(' (WS|NL)* (ID|array|args) (WS|NL)* ')' 
+        |
+        LENGTH (WS|NL)* {self.notifyErrorListeners("Missing opening paranthesis")} (WS|NL)* (ID|array|args) (WS|NL)* ')'
+        |
+        LENGTH (WS|NL)* '(' (WS|NL)* (ID|array|args) {self.notifyErrorListeners("Missing closing paranthesis")} 
+        |
+        LENGTH (WS|NL)* {self.notifyErrorListeners("Missing paranthesis")} (WS|NL)* (ID|array|args) (WS|NL)* ;
+basename : BASENAME (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' 
+        |
+        BASENAME (WS|NL)* {self.notifyErrorListeners("Missing opening paranthesis")} (WS|NL)* expr (WS|NL)* ')'
+        |
+        BASENAME (WS|NL)* '(' (WS|NL)* expr {self.notifyErrorListeners("Missing closing paranthesis")} 
+        |
+        BASENAME (WS|NL)* {self.notifyErrorListeners("Missing paranthesis")} (WS|NL)* expr (WS|NL)* ;
 args : ARGS ;
 
-array : '[' (WS|NL)* (value_or_id ( (WS|NL)* ',' (WS|NL)* value_or_id )* (WS|NL)*)? ']' ;
+array : '[' (WS|NL)* (value_or_id ( (WS|NL)* ',' (WS|NL)* value_or_id )* (WS|NL)*)? ']'
+       |
+       {self.notifyErrorListeners("Missing opening square paranthesis")} (value_or_id ( (WS|NL)* ',' (WS|NL)* value_or_id )* (WS|NL)*)? ']' 
+       |
+       '[' (WS|NL)* (value_or_id ( (WS|NL)* ',' (WS|NL)* value_or_id )* (WS|NL)*)? {self.notifyErrorListeners("Missing closing square paranthesis")} ;
 value_or_id: NUM|STR|ID|BOOL;
 
 /* Lexer rules: */
