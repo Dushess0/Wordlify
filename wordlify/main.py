@@ -12,39 +12,39 @@ import io
 import subprocess
 
 
-# def process_error(content):
-#     full_content= "".join(content)
-#     brackets={"[":0,"]":0,"(":0,")":0,"'":0, '"':0}
-#     for char in full_content:
-#         if char.lower() in brackets.keys():
-#                 brackets[char]+=1
+def process_error(content):
+    full_content= "".join(content)
+    brackets={"[":0,"]":0,"(":0,")":0,"'":0, '"':0}
+    for char in full_content:
+        if char.lower() in brackets.keys():
+                brackets[char]+=1
 
-#     for item in brackets.keys():
-#         if item=="[" and brackets["["]!=brackets["]"]:
-#             print("Possible cause: unpaired bracket")
-#         if item=="(" and brackets["("]!=brackets[")"]:
-#             print("Possible cause: unpaired bracket")
-#         if item =="'" and brackets["'"]%2 !=0:
-#             print("Possible cause: unpaired ' ")
-#         if item =='"' and brackets['"']%2 !=0:
-#             print('Possible cause: unpaired " ')
+    for item in brackets.keys():
+        if item=="[" and brackets["["]!=brackets["]"]:
+            print("Possible cause: unpaired bracket")
+        if item=="(" and brackets["("]!=brackets[")"]:
+            print("Possible cause: unpaired bracket")
+        if item =="'" and brackets["'"]%2 !=0:
+            print("Possible cause: unpaired ' ")
+        if item =='"' and brackets['"']%2 !=0:
+            print('Possible cause: unpaired " ')
         
 
 
 
-#     keywords={"while":0,"foreach":0,"for":0,"do":0,"end":0,"in":0,"if":0,"else":0,"then":0,"begin":0}
+    keywords={"while":0,"foreach":0,"for":0,"do":0,"end":0,"in":0,"if":0,"else":0,"then":0,"begin":0}
     
-#     for word in full_content.split():
-#         if word.lower() in keywords.keys():
-#                 keywords[word.lower()]+=1
-#     if keywords["foreach"] + keywords["while"] > keywords["do"]:
-#         print("There is missing 'do' in foreach/while statement")
-#     if keywords["foreach"] + keywords["while"] < keywords["do"]:
-#         print("'do' used without foreach/while statement")
-#     if keywords["if"] > keywords["then"]:
-#         print("There is missing 'then' after 'if' statement")
-#     if keywords["if"] < keywords["then"]:
-#         print("'then' used without 'if' statement")
+    for word in full_content.split():
+        if word.lower() in keywords.keys():
+                keywords[word.lower()]+=1
+    if keywords["foreach"] + keywords["while"] > keywords["do"]:
+        print("There is missing 'do' in foreach/while statement")
+    if keywords["foreach"] + keywords["while"] < keywords["do"]:
+        print("'do' used without foreach/while statement")
+    if keywords["if"] > keywords["then"]:
+        print("There is missing 'then' after 'if' statement")
+    if keywords["if"] < keywords["then"]:
+        print("'then' used without 'if' statement")
 
 def main(argv):
     if len(argv) != 2 or argv[1][-3:] != ".wl":
@@ -74,7 +74,7 @@ def main(argv):
                 line = src_lines[int(errorDetails[0])-1].lstrip()
 
             print("Line {}, column {}: {}\n    {}".format(errorDetails[0], errorDetails[1], errorDetails[2], line))
-            # process_error(src_lines)
+            process_error(src_lines)
             quit()
         
         destFileName = argv[1][:-2] + "py"
