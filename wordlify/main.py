@@ -69,9 +69,8 @@ def main(argv):
             errorDetails = msg.split(",")
 
             if int(errorDetails[0]) == len(src_lines) + 1:
-                line = ""
-            else:
-                line = src_lines[int(errorDetails[0])-1].lstrip()
+                errorDetails[0] = len(src_lines)
+            line = src_lines[errorDetails[0]-1].lstrip()
 
             print("Line {}, column {}: {}\n    {}".format(errorDetails[0], errorDetails[1], errorDetails[2], line))
             process_error(src_lines)
