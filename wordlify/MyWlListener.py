@@ -296,9 +296,9 @@ class MyWlListener(WordlifyListener):
 
     # Exit a parse tree produced by WordlifyParser#cond.
     def exitCond(self, ctx:WordlifyParser.CondContext):
-        ctx.text = ctx.single_cond()[0].text
-        for i in range(1, len(ctx.single_cond())):
-            ctx.text += " {} {}".format(ctx.BIN_LOG_OP()[i-1].getText(), ctx.single_cond()[i].text)
+        ctx.text = ctx.cond1().text
+        if ctx.BIN_LOG_OP() != None:
+            ctx.text += " {} {}".format(ctx.BIN_LOG_OP().getText(), ctx.cond().text)
 
     # Enter a parse tree produced by WordlifyParser#single_cond.
     def enterSingle_cond(self, ctx:WordlifyParser.Single_condContext):
@@ -307,8 +307,6 @@ class MyWlListener(WordlifyListener):
     # Exit a parse tree produced by WordlifyParser#single_cond.
     def exitSingle_cond(self, ctx:WordlifyParser.Single_condContext):
         ctx.text = ""
-        if ctx.NOT() != None:
-            ctx.text += "not "
         if ctx.BOOL() != None:
             if ctx.BOOL().getText() == "true":
                 ctx.text += "True"
@@ -587,6 +585,20 @@ class MyWlListener(WordlifyListener):
     def exitArgs(self, ctx:WordlifyParser.ArgsContext):
         self.add_imps(["import sys"])
         ctx.parentCtx.lines = ["sys.argv"]
+
+
+    # Enter a parse tree produced by WordlifyParser#cond1.
+    def enterCond1(self, ctx:WordlifyParser.Cond1Context):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#cond1.
+    def exitCond1(self, ctx:WordlifyParser.Cond1Context):
+        if ctx.NOT() != None:
+            ctx.text = "not {}".format(ctx.cond1().text)
+        elif ctx.L_PAREN() != None:
+            ctx.text = "({})".format(ctx.cond().text)
+        else:
+            ctx.text = ctx.single_cond().text
 
     # Enter a parse tree produced by WordlifyParser#print_instr.
     def enterPrint_instr(self, ctx:WordlifyParser.Print_instrContext):

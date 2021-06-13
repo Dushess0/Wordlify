@@ -107,6 +107,15 @@ class WordlifyListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by WordlifyParser#cond1.
+    def enterCond1(self, ctx:WordlifyParser.Cond1Context):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#cond1.
+    def exitCond1(self, ctx:WordlifyParser.Cond1Context):
+        pass
+
+
     # Enter a parse tree produced by WordlifyParser#single_cond.
     def enterSingle_cond(self, ctx:WordlifyParser.Single_condContext):
         pass

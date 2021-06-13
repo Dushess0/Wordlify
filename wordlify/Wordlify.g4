@@ -11,12 +11,12 @@ program : (WS|NL)*
        (atom_instr (WS|NL)* ';'? | (block_instr | fn_def | import_call)) )?
        (WS|NL)* END_COMMENT? EOF ;
 
-fn_def : FN (WS | NL)+ ID (WS|NL)* '(' (WS|NL)* ( ID (WS|NL)* (',' (WS|NL)* ID (WS|NL)*)* )? ')' (WS|NL)* BEGIN (WS | NL)+
+fn_def : FN (WS | NL)+ ID (WS|NL)* L_PAREN (WS|NL)* ( ID (WS|NL)* (',' (WS|NL)* ID (WS|NL)*)* )? R_PAREN (WS|NL)* BEGIN (WS | NL)+
          ( (atom_instr (WS|NL)* ';' (WS|NL)* | atom_instr (WS* NL WS*)+ | block_instr (WS | NL)+)*
          (atom_instr (WS|NL)* ';'? | block_instr) (WS | NL)+ )?
          END 
          |
-         FN (WS | NL)+ ID (WS|NL)* '(' (WS|NL)* ( ID (WS|NL)* (',' (WS|NL)* ID (WS|NL)*)* )? ')' (WS|NL)* BEGIN (WS | NL)+
+         FN (WS | NL)+ ID (WS|NL)* L_PAREN (WS|NL)* ( ID (WS|NL)* (',' (WS|NL)* ID (WS|NL)*)* )? R_PAREN (WS|NL)* BEGIN (WS | NL)+
          ( (atom_instr (WS|NL)* ';'? {self.notifyErrorListeners("Missing semicolon in function")} (WS|NL)* | atom_instr (WS* NL WS*)+ | block_instr (WS | NL)+)*
          (atom_instr (WS|NL)* ';'? | block_instr) (WS | NL)+ )?
          END ;
@@ -53,8 +53,9 @@ else_if : ELSE (WS | NL)+ if_cond then ;
 else_block : ELSE (WS | NL)+ ( (atom_instr (WS|NL)* ';' (WS|NL)* | atom_instr (WS* NL WS*)+ | block_instr (WS | NL)+)*
              (atom_instr (WS|NL)* (';' | (WS | NL)+) | block_instr (WS | NL)+) )? ;
 
-cond : single_cond ( (WS|NL)+ BIN_LOG_OP (WS|NL)+ single_cond )* ;
-single_cond : (NOT (WS|NL)+ )? ( fn_call | BOOL | comparison );
+cond : cond1 ( (WS|NL)+ BIN_LOG_OP (WS|NL)+ cond)? ;
+cond1 : NOT (WS|NL)+ cond1 | L_PAREN (WS|NL)* cond (WS|NL)* R_PAREN | single_cond ;
+single_cond : ( fn_call | BOOL | comparison );
 comparison : expr (WS|NL)* CMP_OP (WS|NL)* expr;
 
 expr : fn_call | STR | NUM | ID | BOOL | arith_expr | array | array_elem | concat ;
@@ -70,27 +71,27 @@ array_append : ID (WS|NL)* APPEND  (WS|NL)* expr (WS|NL)* ;
 array_elem : (ID|args) '[' (WS|NL)* expr (WS|NL)* ']' ;
 
 import_call: IMPORT (WS|NL)* ID;
-own_fn_call : ID (WS|NL)* '(' (WS|NL)* ( expr (WS|NL)* (',' (WS|NL)* expr (WS|NL)*)* )? ')' ;
-exist : EXIST (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' ;
-is_file : IS_FILE (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' ;
-is_dir : IS_DIR (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')';
-print_instr : PRINT (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' ;
-rename : RENAME (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ',' (WS|NL)* expr (WS|NL)* ')';
-remove : REMOVE (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' ;
-move : MOVE (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ',' (WS|NL)* expr (WS|NL)* ')';
-copy : COPY (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ',' (WS|NL)* expr (WS|NL)* ')';
-download : DOWNLOAD (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ',' (WS|NL)* expr (WS|NL)* ')';
-write : WRITE (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ',' (WS|NL)* expr (WS|NL)* ')';
-read : READ (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' ;
-wait_instr : WAIT (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' ;
-execute : EXECUTE (WS|NL)* '(' (WS|NL)* (expr (WS|NL)* ',' (WS|NL)*)* expr (WS|NL)* ')' ;
-get_files : GET_FILES (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' ;
-date_modified : DATE_MODIFIED (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' ;
-size : SIZE (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' ;
-exit : EXIT (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' ;
-create : CREATE (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' ;
-length : LENGTH (WS|NL)* '(' (WS|NL)* (ID|array|args) (WS|NL)* ')' ;
-basename : BASENAME (WS|NL)* '(' (WS|NL)* expr (WS|NL)* ')' ;
+own_fn_call : ID (WS|NL)* L_PAREN (WS|NL)* ( expr (WS|NL)* (',' (WS|NL)* expr (WS|NL)*)* )? R_PAREN ;
+exist : EXIST (WS|NL)* L_PAREN (WS|NL)* expr (WS|NL)* R_PAREN ;
+is_file : IS_FILE (WS|NL)* L_PAREN (WS|NL)* expr (WS|NL)* R_PAREN ;
+is_dir : IS_DIR (WS|NL)* L_PAREN (WS|NL)* expr (WS|NL)* R_PAREN;
+print_instr : PRINT (WS|NL)* L_PAREN (WS|NL)* expr (WS|NL)* R_PAREN ;
+rename : RENAME (WS|NL)* L_PAREN (WS|NL)* expr (WS|NL)* ',' (WS|NL)* expr (WS|NL)* R_PAREN;
+remove : REMOVE (WS|NL)* L_PAREN (WS|NL)* expr (WS|NL)* R_PAREN ;
+move : MOVE (WS|NL)* L_PAREN (WS|NL)* expr (WS|NL)* ',' (WS|NL)* expr (WS|NL)* R_PAREN;
+copy : COPY (WS|NL)* L_PAREN (WS|NL)* expr (WS|NL)* ',' (WS|NL)* expr (WS|NL)* R_PAREN;
+download : DOWNLOAD (WS|NL)* L_PAREN (WS|NL)* expr (WS|NL)* ',' (WS|NL)* expr (WS|NL)* R_PAREN;
+write : WRITE (WS|NL)* L_PAREN (WS|NL)* expr (WS|NL)* ',' (WS|NL)* expr (WS|NL)* R_PAREN;
+read : READ (WS|NL)* L_PAREN (WS|NL)* expr (WS|NL)* R_PAREN ;
+wait_instr : WAIT (WS|NL)* L_PAREN (WS|NL)* expr (WS|NL)* R_PAREN ;
+execute : EXECUTE (WS|NL)* L_PAREN (WS|NL)* (expr (WS|NL)* ',' (WS|NL)*)* expr (WS|NL)* R_PAREN ;
+get_files : GET_FILES (WS|NL)* L_PAREN (WS|NL)* expr (WS|NL)* R_PAREN ;
+date_modified : DATE_MODIFIED (WS|NL)* L_PAREN (WS|NL)* expr (WS|NL)* R_PAREN ;
+size : SIZE (WS|NL)* L_PAREN (WS|NL)* expr (WS|NL)* R_PAREN ;
+exit : EXIT (WS|NL)* L_PAREN (WS|NL)* expr (WS|NL)* R_PAREN ;
+create : CREATE (WS|NL)* L_PAREN (WS|NL)* expr (WS|NL)* R_PAREN ;
+length : LENGTH (WS|NL)* L_PAREN (WS|NL)* (ID|array|args) (WS|NL)* R_PAREN ;
+basename : BASENAME (WS|NL)* L_PAREN (WS|NL)* expr (WS|NL)* R_PAREN ;
 args : ARGS ;
 
 array : '[' (WS|NL)* (value_or_id ( (WS|NL)* ',' (WS|NL)* value_or_id )* (WS|NL)*)? ']' ;
@@ -134,6 +135,8 @@ READ : 'read' ;
 CREATE : 'create' ;
 LENGTH : 'length' ;
 
+L_PAREN : '(' ;
+R_PAREN : ')' ;
 APPEND : '<-' ;
 CMP_OP : '!=' | '<' | '>' | '==' | '<=' | '>=' ;
 ARITH_OP : '+' | '-' | '*' | '/' ;
