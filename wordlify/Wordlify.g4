@@ -4,26 +4,39 @@ grammar Wordlify;
 program : (WS|NL)*
           ( (atom_instr (WS|NL)* ';' (WS|NL)* | atom_instr (WS* NL WS*)+ | (block_instr | fn_def | import_call) (WS | NL)+)*
           (atom_instr (WS|NL)* ';'? | (block_instr | fn_def | import_call)) )?
-          (WS|NL)* END_COMMENT? EOF ;
-       //    |
-       //    (WS|NL)*
-       //    ( (atom_instr (WS|NL)* ';' (WS|NL)* | atom_instr (WS* NL WS*)+ | (block_instr | fn_def | import_call) (WS | NL)+)*
-       //    (atom_instr (WS|NL)* ';'? | (block_instr | fn_def | import_call)) )?
-       //    (WS|NL)* END_COMMENT? EOF;
+          (WS|NL)* END_COMMENT? EOF
+          |
+          (WS|NL)*
+       ( (atom_instr (WS|NL)* ';'? {self.notifyErrorListeners("Missing semicolon")} (WS|NL)* | atom_instr (WS* NL WS*)+ | (block_instr | fn_def | import_call) (WS | NL)+)*
+       (atom_instr (WS|NL)* ';'? | (block_instr | fn_def | import_call)) )?
+       (WS|NL)* END_COMMENT? EOF ;
 
 fn_def : FN (WS | NL)+ ID (WS|NL)* '(' (WS|NL)* ( ID (WS|NL)* (',' (WS|NL)* ID (WS|NL)*)* )? ')' (WS|NL)* BEGIN (WS | NL)+
          ( (atom_instr (WS|NL)* ';' (WS|NL)* | atom_instr (WS* NL WS*)+ | block_instr (WS | NL)+)*
+         (atom_instr (WS|NL)* ';'? | block_instr) (WS | NL)+ )?
+         END 
+         |
+         FN (WS | NL)+ ID (WS|NL)* '(' (WS|NL)* ( ID (WS|NL)* (',' (WS|NL)* ID (WS|NL)*)* )? ')' (WS|NL)* BEGIN (WS | NL)+
+         ( (atom_instr (WS|NL)* ';'? {self.notifyErrorListeners("Missing semicolon in function")} (WS|NL)* | atom_instr (WS* NL WS*)+ | block_instr (WS | NL)+)*
          (atom_instr (WS|NL)* ';'? | block_instr) (WS | NL)+ )?
          END ;
 
 block_instr : if_instr | while_instr | foreach ;
 
-foreach : FOREACH (WS | NL)+ ID (WS | NL)+ IN (WS | NL)+ ID (WS | NL)+ DO (WS | NL)+
+foreach : FOREACH (WS | NL)+ ID (WS | NL)+ IN (WS | NL)+ (ID|args|array) (WS | NL)+ DO (WS | NL)+
        ( (atom_instr (WS|NL)* ';' (WS|NL)* | atom_instr (WS* NL WS*)+ | block_instr (WS | NL)+)*
        (atom_instr (WS|NL)* (';' | (WS | NL)+) | block_instr (WS | NL)+) )?
-       END ;
+       END
+       |
+        FOREACH (WS | NL)+ ID (WS | NL)+ IN (WS | NL)+ (ID|args|array) (WS | NL)+ DO (WS | NL)+
+       ( (atom_instr (WS|NL)* ';'? {self.notifyErrorListeners("Missing semicolon in foreach loop")} (WS|NL)* | atom_instr (WS* NL WS*)+ | block_instr (WS | NL)+)*
+       (atom_instr (WS|NL)* (';' | (WS | NL)+) | block_instr (WS | NL)+) )?
+       END;
 
 while_instr : WHILE (WS | NL)+ cond (WS | NL)+ DO (WS | NL)+ ( (atom_instr (WS|NL)* ';' (WS|NL)* | atom_instr (WS* NL WS*)+ | block_instr (WS | NL)+)*
+       (atom_instr (WS|NL)* (';' | (WS | NL)+) | block_instr (WS | NL)+) )? END 
+       |
+       WHILE (WS | NL)+ cond (WS | NL)+ DO (WS | NL)+ ( (atom_instr (WS|NL)* ';'? {self.notifyErrorListeners("Missing semicolon in while loop")} (WS|NL)* | atom_instr (WS* NL WS*)+ | block_instr (WS | NL)+)*
        (atom_instr (WS|NL)* (';' | (WS | NL)+) | block_instr (WS | NL)+) )? END ;
 
 if_instr : if_cond then else_if* else_block? END
@@ -31,9 +44,9 @@ if_instr : if_cond then else_if* else_block? END
            if_cond then else_if* else_block? {self.notifyErrorListeners("Missing 'end' at end of 'if' instruction")} ;
 if_cond : IF (WS | NL)+ cond (WS | NL)+ ;
 then : THEN (WS | NL)+ ( (atom_instr (WS|NL)* ';' (WS|NL)* | atom_instr (WS* NL WS*)+ | block_instr (WS | NL)+)*
-       (atom_instr (WS|NL)* (';' | (WS | NL)+) | block_instr (WS | NL)+) )? 
+       (atom_instr (WS|NL)* (';' | (WS | NL)+) | block_instr (WS | NL)+) )?
        |
-       DO {self.notifyErrorListeners("Should be 'then' instead of 'do'")} (WS | NL)+ ( (atom_instr (WS|NL)* ';' (WS|NL)* | atom_instr (WS* NL WS*)+ | block_instr (WS | NL)+)*
+       THEN (WS | NL)+ ( (atom_instr (WS|NL)* ';'? {self.notifyErrorListeners("Missing semicolon in if-instruction")} (WS|NL)* | atom_instr (WS* NL WS*)+ | block_instr (WS | NL)+)*
        (atom_instr (WS|NL)* (';' | (WS | NL)+) | block_instr (WS | NL)+) )? ;
 
 else_if : ELSE (WS | NL)+ if_cond then ;
@@ -50,7 +63,9 @@ concat : value_or_id ( (WS|NL)* CONCAT_OP (WS|NL)* value_or_id )+ ;
 
 fn_call : own_fn_call  | exist | print_instr | rename | basename | remove | move | copy | download | write | read | wait_instr | execute | get_files | date_modified | size | exit | create | length | is_dir | is_file | TIME | FILE | FOLDER | args ;
 atom_instr : own_fn_call |exist | print_instr | rename | basename | remove | move | copy | download | write | read | wait_instr | execute | get_files | date_modified | size | exit | create | array_append | assign | is_dir | is_file | TIME | FILE | FOLDER | args ;
-assign : (ID| array_elem) (WS|NL)* '=' (WS|NL)* expr ;
+assign : (ID| array_elem) (WS|NL)* '=' (WS|NL)* expr
+       |
+       (ID| array_elem) (WS|NL)* '=' {self.notifyErrorListeners("Missing value to assign to variable")};
 array_append : ID (WS|NL)* APPEND  (WS|NL)* expr (WS|NL)* ;
 array_elem : (ID|args) '[' (WS|NL)* expr (WS|NL)* ']' ;
 

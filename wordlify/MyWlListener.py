@@ -36,7 +36,7 @@ class MyWlListener(WordlifyListener):
     # Exit a parse tree produced by WordlifyParser#import_call.
     def exitImport_call(self, ctx:WordlifyParser.Import_callContext):
         module=os.path.join(self.dest_path,str(ctx.ID()))
-        compiler_path='"'+os.path.join(self.compiler_path,"compiler.py")+'"'
+        compiler_path='"'+os.path.join(self.compiler_path,"main.py")+'"'
         if os.path.isfile(module+".wl"):
             if os.name == "nt":
                 os.system("python "+compiler_path+" "+module+".wl")           
@@ -133,19 +133,7 @@ class MyWlListener(WordlifyListener):
 
     # Enter a parse tree produced by WordlifyParser#foreach.
     def enterForeach(self, ctx:WordlifyParser.ForeachContext):
-        if ctx.ID()[1].getText() not in self.vars:
-            line_nr = ctx.ID()[1].getSymbol().line
-            line = self.src_lines[line_nr-1].lstrip()
-            col_nr = ctx.ID()[1].getSymbol().column
-            raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, ctx.ID()[1].getText(), line))
-        if self.vars[ctx.ID()[1].getText()] not in ["array", "any"]:
-            line_nr = ctx.ID()[1].getSymbol().line
-            line = self.src_lines[line_nr-1].lstrip()
-            col_nr = ctx.ID()[1].getSymbol().column
-            raise Exception("Line {}, column {}: variable '{}' must be of type 'array':\n    {}".format(line_nr, col_nr, ctx.ID()[1].getText(), line))
-
-        ctx.lines = [" "*self.indent + "for " + ctx.ID()[0].getText() + " in " + ctx.ID()[1].getText() + ":"]
-
+        ctx.lines = []
         if ctx.ID()[0].getText() not in self.vars_owners:
             self.vars_owners[ctx.ID()[0].getText()] = ctx
         self.vars[ctx.ID()[0].getText()] = "any"
@@ -154,6 +142,24 @@ class MyWlListener(WordlifyListener):
 
     # Exit a parse tree produced by WordlifyParser#foreach.
     def exitForeach(self, ctx:WordlifyParser.ForeachContext):
+        if len(ctx.ID()) > 1:
+            if ctx.ID()[1].getText() not in self.vars:
+                line_nr = ctx.ID()[1].getSymbol().line
+                line = self.src_lines[line_nr-1].lstrip()
+                col_nr = ctx.ID()[1].getSymbol().column
+                raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, ctx.ID()[1].getText(), line))
+            if self.vars[ctx.ID()[1].getText()] not in ["array", "any"]:
+                line_nr = ctx.ID()[1].getSymbol().line
+                line = self.src_lines[line_nr-1].lstrip()
+                col_nr = ctx.ID()[1].getSymbol().column
+                raise Exception("Line {}, column {}: variable '{}' must be of type 'array':\n    {}".format(line_nr, col_nr, ctx.ID()[1].getText(), line))
+            iterText = ctx.ID()[1].getText()
+        elif ctx.args() != None:
+            iterText = ctx.args().getText()
+        else:
+            iterText = ctx.array().text
+            
+        ctx.lines.insert(0, " "*(self.indent-4) + "for " + ctx.ID()[0].getText() + " in " + iterText + ":")
         if len(ctx.lines) == 1:
             ctx.lines.append(" "*self.indent + "pass")
         ctx.parentCtx.parentCtx.lines += ctx.lines
