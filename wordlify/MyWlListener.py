@@ -397,6 +397,9 @@ class MyWlListener(WordlifyListener):
         elif ctx.concat() != None:
             ctx.text = ctx.concat().text
             ctx.type = "str"
+        elif ctx.BOOL() !=None:
+            ctx.text =  ctx.BOOL().getText().capitalize()
+            ctx.type = "bool"
 
       # Enter a parse tree produced by WordlifyParser#arith_expr.
     def enterArith_expr(self, ctx:WordlifyParser.Arith_exprContext):
