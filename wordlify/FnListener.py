@@ -21,6 +21,15 @@ class FnListener(WordlifyListener):
         pass
 
 
+    # Enter a parse tree produced by WordlifyParser#cond1.
+    def enterCond1(self, ctx:WordlifyParser.Cond1Context):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#cond1.
+    def exitCond1(self, ctx:WordlifyParser.Cond1Context):
+        pass
+
+
     # Enter a parse tree produced by WordlifyParser#fn_def.
     def enterFn_def(self, ctx:WordlifyParser.Fn_defContext):
         pass

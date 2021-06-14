@@ -20,8 +20,12 @@ end
 
 i = 0
 j = 2
-while i < 5 and not j > 5 do
+while i < 5 and not j > 5 or false do
     print(i)
     i = i+1
     j = j+1
 end
+
+array = [1, 2, 3]
+array <- 4
+print(array)

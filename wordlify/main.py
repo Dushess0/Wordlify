@@ -11,7 +11,8 @@ import subprocess
 
 
 def process_error(content):
-    full_content= "".join(content)
+    handled = False
+    full_content= " ".join(content)
     brackets={"[":0,"]":0,"(":0,")":0,"'":0, '"':0}
     for char in full_content:
         if char.lower() in brackets.keys():
@@ -19,27 +20,39 @@ def process_error(content):
 
     for item in brackets.keys():
         if item=="[" and brackets["["]!=brackets["]"]:
-            print("Possible cause: unpaired bracket")
+            print("Error: possible cause: unpaired bracket")
+            handled = True
         if item=="(" and brackets["("]!=brackets[")"]:
-            print("Possible cause: unpaired bracket")
+            print("Error: possible cause: unpaired bracket")
+            handled = True
         if item =="'" and brackets["'"]%2 !=0:
-            print("Possible cause: unpaired ' ")
+            print("Error: possible cause: unpaired ' ")
+            handled = True
         if item =='"' and brackets['"']%2 !=0:
-            print('Possible cause: unpaired " ')
+            print('Error: possible cause: unpaired " ')
+            handled = True
 
-    keywords={"while":0,"foreach":0,"for":0,"do":0,"end":0,"in":0,"if":0,"else":0,"then":0,"begin":0}
+    keywords={"while":0,"foreach":0,"for":0,"do":0,"end":0,"in":0,"if":0,"else":0,"then":0,"begin":0,"fn":0}
     
     for word in full_content.split():
         if word.lower() in keywords.keys():
                 keywords[word.lower()]+=1
     if keywords["foreach"] + keywords["while"] > keywords["do"]:
         print("There is missing 'do' in foreach/while statement")
+        handled = True
     if keywords["foreach"] + keywords["while"] < keywords["do"]:
         print("'do' used without foreach/while statement")
+        handled = True
     if keywords["if"] > keywords["then"]:
         print("There is missing 'then' after 'if' statement")
+        handled = True
     if keywords["if"] < keywords["then"]:
         print("'then' used without 'if' statement")
+        handled = True
+    if keywords["fn"] > keywords["begin"]:
+        print("Missing 'begin' in function definition")
+        handled = True
+    return handled
 
 def main(argv):
     if len(argv) < 2 or argv[1][-3:] != ".wl":
@@ -61,6 +74,7 @@ def main(argv):
             src_lines = text_file.read().splitlines()
 
         if msg != "":
+            handled = process_error(src_lines)
             errorDetails = msg.split(",")
 
             errorDetails[0] = int(errorDetails[0])
@@ -68,8 +82,10 @@ def main(argv):
                 errorDetails[0] -= 1
             line = src_lines[errorDetails[0]-1].lstrip()
 
+            if handled:
+                errorDetails[2] = ""
+
             print("Line {}, column {}: {}\n    {}".format(errorDetails[0], errorDetails[1], errorDetails[2], line))
-            process_error(src_lines)
             quit()
         
         destFileName = argv[1][:-2] + "py"
@@ -94,7 +110,7 @@ def main(argv):
             print(e)
             output.write(out_lines)
             success = False
-            # raise e
+            raise e
         output.close()   
 
         if success:

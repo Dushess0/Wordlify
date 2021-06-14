@@ -10,11 +10,10 @@ class WlErrListener(ErrorListener):
         self.output = output        
         self._symbol = ''
     
-    def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e): 
-        if msg[:9] == "no viable":
-            print(msg)
-            msg = ""
-        self.output.write("{},{},{}".format(line, column, msg))
+    def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
+        if msg[:13] not in ["Missing semic", "Missing 'end'", "Missing value"]:
+            msg = "Word '{}' is disallowed here".format(offendingSymbol.text)
+        self.output.write("{},{},{},".format(line, column, msg))
         self._symbol = offendingSymbol.text
         
     @property        
