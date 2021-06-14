@@ -20,16 +20,16 @@ def process_error(content):
 
     for item in brackets.keys():
         if item=="[" and brackets["["]!=brackets["]"]:
-            print("Possible cause: unpaired bracket")
+            print("Error: possible cause: unpaired bracket")
             handled = True
         if item=="(" and brackets["("]!=brackets[")"]:
-            print("Possible cause: unpaired bracket")
+            print("Error: possible cause: unpaired bracket")
             handled = True
         if item =="'" and brackets["'"]%2 !=0:
-            print("Possible cause: unpaired ' ")
+            print("Error: possible cause: unpaired ' ")
             handled = True
         if item =='"' and brackets['"']%2 !=0:
-            print('Possible cause: unpaired " ')
+            print('Error: possible cause: unpaired " ')
             handled = True
 
     keywords={"while":0,"foreach":0,"for":0,"do":0,"end":0,"in":0,"if":0,"else":0,"then":0,"begin":0,"fn":0}
