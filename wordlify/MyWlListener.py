@@ -603,13 +603,6 @@ class MyWlListener(WordlifyListener):
         else:
             ctx.text = ctx.single_cond().text
 
-    def enterFolder(self, ctx:WordlifyParser.FolderContext):
-        pass
-
-    # Exit a parse tree produced by WordlifyParser#folder.
-    def exitFolder(self, ctx:WordlifyParser.FolderContext):
-        pass
-
     # Enter a parse tree produced by WordlifyParser#print_instr.
     def enterPrint_instr(self, ctx:WordlifyParser.Print_instrContext):
         pass
