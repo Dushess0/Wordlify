@@ -52,6 +52,12 @@ def process_error(content):
     if keywords["fn"] > keywords["begin"]:
         print("Missing 'begin' in function definition")
         handled = True
+    if keywords["end"] < keywords["foreach"] + keywords["while"] + keywords["do"]:
+        print("There is missing 'end' after statement")
+        handled = True
+    if keywords["end"] > keywords["foreach"] + keywords["while"] + keywords["do"]:
+        print(" Keyword 'end' used without foreach/while/do statement ")
+        handled = True
     return handled
 
 def main(argv):
