@@ -1,3 +1,5 @@
+#!/bin/python3
+
 from WlErrListener import WlErrListener
 import sys
 from antlr4 import *
