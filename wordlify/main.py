@@ -11,7 +11,21 @@ import os
 import io
 import subprocess
 
-
+def process_line(line):
+    splitted = line.split()
+    keywords = ["foreach", "while","do","begin"]
+    for s in splitted:
+        similar=0
+        for word in keywords:
+            for char in s:
+                if char in word:
+                    similar += 1
+                else:
+                    similar -=0.2
+            c =  (similar / len(word) )
+            if c> 0.8  and c< 2 and word!=s: 
+                print(f"Unknow word '{s}'' may be you mean '{word}' ")
+                break
 def process_error(content):
     handled = False
     full_content= " ".join(content)
@@ -91,6 +105,7 @@ def main(argv):
                 errorDetails[2] = ""
 
             print("Line {}, column {}: {}\n    {}".format(errorDetails[0], errorDetails[1], errorDetails[2], line))
+            process_line(line)
             quit()
         
         destFileName = argv[1][:-2] + "py"
