@@ -24,7 +24,7 @@ def process_line(line):
                     similar -=0.2
             c =  (similar / len(word) )
             if c> 0.8  and c< 2 and word!=s and s not in keywords: 
-                print(f"Unknow word '{s}' may be you mean '{word}' ")
+                print(f"'{s}': may be you mean '{word}' ")
                 break
 def process_error(content):
     handled = False
