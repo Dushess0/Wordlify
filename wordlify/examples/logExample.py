@@ -1,4 +1,5 @@
 import os
+import os.path
 
 import os.path
 
@@ -107,8 +108,20 @@ def getFiles(dir):
         print("Error: Permission denied to list directory '%s'" % dir)
         quit()
 
-original_files = getFiles(".")
-message = ""
-for f in original_files:
+def isDir(dir_name):
+    return os.path.isdir(dir_name)
+
+def get_all_files(dir_name):
+    filenames = getFiles(dir_name)
+    for name in filenames:
+        if isDir(name):
+            get_all_files(name)
+        else:
+            all_files.append(name)
+
+all_files = []
+get_all_files(".")
+message = "Current files in folder:\n"
+for f in all_files:
     message = str(message) + str(f) + str("\n")
-log(str("current files in system: \n ") + str(message))
+log(message)
