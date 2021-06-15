@@ -58,9 +58,12 @@ cond1 : NOT (WS|NL)+ cond1 | L_PAREN (WS|NL)* cond (WS|NL)* R_PAREN | single_con
 single_cond : ( fn_call | BOOL | comparison );
 comparison : expr (WS|NL)* CMP_OP (WS|NL)* expr;
 
-expr : fn_call | STR | NUM | ID | BOOL | arith_expr | array | array_elem | concat ;
-arith_expr : value_or_id ( (WS|NL)* ARITH_OP (WS|NL)* value_or_id )+ ;
-concat : value_or_id ( (WS|NL)* CONCAT_OP (WS|NL)* value_or_id )+ ;
+expr : fn_call | STR | NUM | ID | BOOL | array | array_elem | concat | arith_expr ;
+arith_expr : arith_expr1 ( (WS|NL)* ARITH_OP (WS|NL)* arith_expr)? ;
+arith_expr1 : L_PAREN (WS|NL)* arith_expr (WS|NL)* R_PAREN | arith_elem ;
+arith_elem : fn_call | STR | NUM | ID | BOOL | array | array_elem ;
+concat : concat_elem ( (WS|NL)* CONCAT_OP (WS|NL)* concat_elem )+ ;
+concat_elem : fn_call | STR | NUM | ID | BOOL | arith_expr | array | array_elem ;
 
 fn_call : own_fn_call  | exist | print_instr | rename | basename | remove | move | copy | download | write | read | wait_instr | execute | get_files | date_modified | size | exit | create | length | is_dir | is_file | TIME | FILE | FOLDER | args ;
 atom_instr : own_fn_call |exist | print_instr | rename | basename | remove | move | copy | download | write | read | wait_instr | execute | get_files | date_modified | size | exit | create | array_append | assign | is_dir | is_file | TIME | FILE | FOLDER | args ;

@@ -152,12 +152,39 @@ class WordlifyListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by WordlifyParser#arith_expr1.
+    def enterArith_expr1(self, ctx:WordlifyParser.Arith_expr1Context):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#arith_expr1.
+    def exitArith_expr1(self, ctx:WordlifyParser.Arith_expr1Context):
+        pass
+
+
+    # Enter a parse tree produced by WordlifyParser#arith_elem.
+    def enterArith_elem(self, ctx:WordlifyParser.Arith_elemContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#arith_elem.
+    def exitArith_elem(self, ctx:WordlifyParser.Arith_elemContext):
+        pass
+
+
     # Enter a parse tree produced by WordlifyParser#concat.
     def enterConcat(self, ctx:WordlifyParser.ConcatContext):
         pass
 
     # Exit a parse tree produced by WordlifyParser#concat.
     def exitConcat(self, ctx:WordlifyParser.ConcatContext):
+        pass
+
+
+    # Enter a parse tree produced by WordlifyParser#concat_elem.
+    def enterConcat_elem(self, ctx:WordlifyParser.Concat_elemContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#concat_elem.
+    def exitConcat_elem(self, ctx:WordlifyParser.Concat_elemContext):
         pass
 
 

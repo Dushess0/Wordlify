@@ -318,6 +318,94 @@ class MyWlListener(WordlifyListener):
             if hasattr(ctx.fn_call(),'lines') != None:
                 ctx.text += ctx.fn_call().lines[0]
 
+
+
+    # Enter a parse tree produced by WordlifyParser#arith_expr1.
+    def enterArith_expr1(self, ctx:WordlifyParser.Arith_expr1Context):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#arith_expr1.
+    def exitArith_expr1(self, ctx:WordlifyParser.Arith_expr1Context):
+        if ctx.L_PAREN() != None:
+            ctx.text = "({})".format(ctx.arith_expr().text)
+        else:
+            ctx.text = ctx.arith_elem().text
+
+
+    # Enter a parse tree produced by WordlifyParser#arith_elem.
+    def enterArith_elem(self, ctx:WordlifyParser.Arith_elemContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#arith_elem.
+    def exitArith_elem(self, ctx:WordlifyParser.Arith_elemContext):
+        if ctx.fn_call() != None:
+            ctx.text = ctx.fn_call().lines[0]
+        elif ctx.STR() != None:
+            line_nr = ctx.STR().getSymbol().line
+            line = self.src_lines[line_nr-1].lstrip()
+            col_nr = ctx.STR().getSymbol().column
+            raise Exception("Line {}, column {}: string {} cannot be part of arithmetic expression:\n    {}".format(line_nr, col_nr, ctx.STR().getText(), line))
+        elif ctx.NUM() != None:
+            ctx.text = ctx.NUM().getText()
+        elif ctx.ID() != None:
+            id = ctx.ID().getText()
+            if id not in self.vars:
+                line_nr = ctx.ID().getSymbol().line
+                line = self.src_lines[line_nr-1].lstrip()
+                col_nr = ctx.ID().getSymbol().column
+                raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, id, line))
+            if self.vars[id] not in ["num", "any"]:
+                line_nr = ctx.ID().getSymbol().line
+                line = self.src_lines[line_nr-1].lstrip()
+                col_nr = ctx.ID().getSymbol().column
+                raise Exception("Line {}, column {}: variable '{}' should be a 'num', but is '{}':\n    {}".format(line_nr, col_nr, id, self.vars[id], line))
+            ctx.text = id
+        elif ctx.BOOL() != None:
+            line_nr = ctx.BOOL().getSymbol().line
+            line = self.src_lines[line_nr-1].lstrip()
+            col_nr = ctx.BOOL().getSymbol().column
+            raise Exception("Line {}, column {}: boolean '{}' cannot be part of arithmetic expression:\n    {}".format(line_nr, col_nr, ctx.BOOL().getText(), line))
+        elif ctx.array() != None:
+            line_nr = ctx.start.line
+            line = self.src_lines[line_nr-1].lstrip()
+            col_nr = ctx.start.column
+            raise Exception("Line {}, column {}: array cannot be part of arithmetic expression:\n    {}".format(line_nr, col_nr, line))
+        elif ctx.array_elem() != None:
+            ctx.text = ctx.array_elem().text
+
+
+    # Enter a parse tree produced by WordlifyParser#concat_elem.
+    def enterConcat_elem(self, ctx:WordlifyParser.Concat_elemContext):
+        pass
+
+    # Exit a parse tree produced by WordlifyParser#concat_elem.
+    def exitConcat_elem(self, ctx:WordlifyParser.Concat_elemContext):
+        if ctx.STR() != None:
+            ctx.text = ctx.getText()
+        elif ctx.NUM() != None:
+            ctx.text = ctx.getText()
+        elif ctx.array() != None:
+            ctx.text = ctx.array().text
+        elif ctx.ID() != None:
+            id = ctx.ID().getText()
+            if id not in self.vars:
+                line_nr = ctx.ID().getSymbol().line
+                line = self.src_lines[line_nr-1].lstrip()
+                col_nr = ctx.ID().getSymbol().column
+                raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, id, line))
+            ctx.text = ctx.getText()
+        elif ctx.arith_expr() != None:
+            ctx.text = ctx.arith_expr().text
+        elif ctx.fn_call() != None:
+            ctx.text = ""
+            call= ctx.fn_call()
+            if hasattr(ctx.fn_call(),'lines'):
+                ctx.text = ctx.fn_call().lines[0]
+        elif ctx.array_elem() != None:
+            ctx.text = ctx.array_elem().text
+        elif ctx.BOOL() !=None:
+            ctx.text =  ctx.BOOL().getText().capitalize()
+
     # Enter a parse tree produced by WordlifyParser#comparison.
     def enterComparison(self, ctx:WordlifyParser.ComparisonContext):
         pass
@@ -411,29 +499,9 @@ class MyWlListener(WordlifyListener):
 
     # Exit a parse tree produced by WordlifyParser#arith_expr.
     def exitArith_expr(self, ctx:WordlifyParser.Arith_exprContext):
-        for voi in ctx.value_or_id():
-            id = voi.ID()
-            if id != None:
-                if id.getText() not in self.vars:
-                    line_nr = id.getSymbol().line
-                    line = self.src_lines[line_nr-1].lstrip()
-                    col_nr = id.getSymbol().column
-                    raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, id.getText(), line))
-                if self.vars[id.getText()] not in ["num", "any"]:
-                    line_nr = id.getSymbol().line
-                    line = self.src_lines[line_nr-1].lstrip()
-                    col_nr = id.getSymbol().column
-                    raise Exception("Line {}, column {}: variable '{}' should be a 'num', but is '{}':\n    {}".format(line_nr, col_nr, id.getText(), self.vars[id.getText()], line))
-            if voi.NUM() == None and voi.ID() == None:
-                line_nr = voi.children[0].getSymbol().line
-                line = self.src_lines[line_nr-1].lstrip()
-                col_nr = voi.children[0].getSymbol().column
-                raise Exception("Line {}, column {}: an arithmetic expression should consist of only nums:\n    {}".format(line_nr, col_nr, line))                
-
-        ctx.text = ctx.value_or_id()[0].getText()
-        for i in range(1, len(ctx.value_or_id())):
-            ctx.text += " {} {}".format(ctx.ARITH_OP()[i-1].getText(), ctx.value_or_id()[i].getText())
-
+        ctx.text = ctx.arith_expr1().text
+        if ctx.ARITH_OP() != None:
+            ctx.text += " {} {}".format(ctx.ARITH_OP().getText(), ctx.arith_expr().text)
 
     # Enter a parse tree produced by WordlifyParser#concat.
     def enterConcat(self, ctx:WordlifyParser.ConcatContext):
@@ -441,17 +509,9 @@ class MyWlListener(WordlifyListener):
 
     # Exit a parse tree produced by WordlifyParser#concat.
     def exitConcat(self, ctx:WordlifyParser.ConcatContext):
-        for voi in ctx.value_or_id():
-            if voi.ID() != None:
-                line_nr = voi.ID().getSymbol().line
-                line = self.src_lines[line_nr-1].lstrip()
-                col_nr = voi.ID().getSymbol().column
-                if voi.ID().getText() not in self.vars:
-                    raise Exception("Line {}, column {}: variable '{}' doesn't exist:\n    {}".format(line_nr, col_nr, voi.ID().getText(), line))
-
-        ctx.text = "str(" +  ctx.value_or_id()[0].getText() + ")"
-        for i in range(1, len(ctx.value_or_id())):
-            ctx.text += " + " + "str(" + ctx.value_or_id()[i].getText() + ")"
+        ctx.text = "str(" +  ctx.concat_elem()[0].text + ")"
+        for i in range(1, len(ctx.concat_elem())):
+            ctx.text += " + str(" + ctx.concat_elem()[i].text + ")"
 
     # Enter a parse tree produced by WordlifyParser#fn_call.
     def enterFn_call(self, ctx:WordlifyParser.Fn_callContext):

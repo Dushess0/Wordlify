@@ -115,7 +115,7 @@ def main(argv):
             print(e)
             output.write(out_lines)
             success = False
-            raise e
+            # raise e
         output.close()   
 
         if success:
