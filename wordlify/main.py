@@ -13,18 +13,18 @@ import subprocess
 
 def process_line(line):
     splitted = line.split()
-    keywords = ["foreach", "while","do","begin"]
+    keywords = ["foreach", "while","do","begin","then","if"]
     for s in splitted:
-        similar=0
         for word in keywords:
+            similar=0
             for char in s:
                 if char in word:
                     similar += 1
                 else:
                     similar -=0.2
             c =  (similar / len(word) )
-            if c> 0.8  and c< 2 and word!=s: 
-                print(f"Unknow word '{s}'' may be you mean '{word}' ")
+            if c> 0.8  and c< 2 and word!=s and s not in keywords: 
+                print(f"Unknow word '{s}' may be you mean '{word}' ")
                 break
 def process_error(content):
     handled = False
