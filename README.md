@@ -9,6 +9,10 @@ Aby uruchomić skrypt w języku Wordlify (np. `script.wl`) należy wykonać:
 
 Linux:
 ```
+./main.py script.wl
+```
+lub
+```
 python3 main.py script.wl
 ```
 
